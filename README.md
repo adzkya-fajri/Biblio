@@ -1,1 +1,1 @@
-"# Biblio" 
+Akses seluruh koleksi perpustakaan langsung dari ponsel Android Anda. Baca e-book, baca jurnal terbaru, atau dengankan audiobook kapan pun Anda punya waktu, baik online maupun offline. Aplikasi ini dirancang untuk membuat pengalaman membaca Anda menjadi lebih mudah, personal, dan efisien.
