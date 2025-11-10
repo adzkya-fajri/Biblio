@@ -4,12 +4,12 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
-import com.example.biblio.BookAdapter
+import com.example.biblio.R
 
 data class Book(val title: String, val author: String, val coverResId: Int)
 
 class Search_BookAdapter(private val books: List<Book>) :
-    RecyclerView.Adapter<BookAdapter.ViewHolder>() {
+    RecyclerView.Adapter<Search_BookAdapter.ViewHolder>() {
 
     inner class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val cover: ImageView = view.findViewById(R.id.bookCover)
