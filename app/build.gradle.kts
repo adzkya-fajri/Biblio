@@ -37,12 +37,24 @@ android {
 
 dependencies {
 
-    implementation("com.google.android.material:material:1.12.0")
+    // Material - HAPUS duplikasi, pakai versi terbaru saja
+    implementation("com.google.android.material:material:1.13.0")
+
+    // Splash Screen - Update ke versi terbaru
+    implementation("androidx.core:core-splashscreen:1.0.1")
+
+    // Fragment untuk FirstFragment
+    implementation("androidx.fragment:fragment-ktx:1.8.5")
+
+    // Lifecycle untuk lifecycleScope
+    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.8.7")
+
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
-    implementation(libs.material)
+    // implementation(libs.material) // HAPUS ini karena sudah ada di atas
     implementation(libs.androidx.activity)
     implementation(libs.androidx.constraintlayout)
+
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

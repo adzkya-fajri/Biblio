@@ -2,12 +2,17 @@
     <!-- Base application theme. -->
     <style name="Base.Theme.Biblio" parent="Theme.Material3.DayNight.NoActionBar">
         <!-- Customize your light theme here. -->
-
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
     </style>
 
     <style name="Theme.Biblio" parent="Base.Theme.Biblio" />
+
+    <style name="Theme.App.Starting" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenBackground">@color/colorPrimary</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/ic_launcher_foreground</item>
+        <item name="postSplashScreenTheme">@style/Theme.Biblio</item>
+    </style>
 
 </resources>
