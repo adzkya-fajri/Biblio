@@ -1,12 +1,11 @@
 package com.example.biblio
 
 import android.os.Bundle
+import androidx.fragment.app.Fragment
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-
-data class Book(val imageRes: Int)
-data class Section(val title: String, val books: List<Book>)
+import com.google.android.material.bottomnavigation.BottomNavigationView
 
 class MainActivity : AppCompatActivity() {
 
@@ -14,17 +13,26 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        val sectionRecyclerView = findViewById<RecyclerView>(R.id.sectionRecyclerView)
-        sectionRecyclerView.layoutManager = LinearLayoutManager(this)
-        sectionRecyclerView.adapter = SectionAdapter(generateData())
-    }
+        val firstFragment = FirstFragment()
+//        val secondFragment = SecondFragment()
+//        val thirdFragment = ThirdFragment()
 
-    private fun generateData(): List<Section> {
-        val sampleBooks = List(5) { Book(R.drawable.sample_cover) }
-        return listOf(
-            Section("novel", sampleBooks),
-            Section("sains & teknologi", sampleBooks),
-            Section("bisnis", sampleBooks)
-        )
+        val bottomNavigationView: BottomNavigationView = findViewById(R.id.bottomNavigationView)
+
+        setCurrentFragment(firstFragment)
+
+        bottomNavigationView.setOnNavigationItemSelectedListener {
+            when (it.itemId) {
+                R.id.home -> setCurrentFragment(firstFragment)
+//                R.id.profile -> setCurrentFragment(secondFragment)
+//                R.id.settings -> setCurrentFragment(thirdFragment)
+            }
+            true
+        }
     }
+    private fun setCurrentFragment(fragment: Fragment) =
+        supportFragmentManager.beginTransaction().apply {
+            replace(R.id.flFragment, fragment)
+            commit()
+        }
 }
