@@ -61,6 +61,7 @@ dependencies {
     implementation(libs.androidx.constraintlayout)
 
     implementation("com.google.accompanist:accompanist-systemuicontroller:0.34.0")
+    implementation(libs.androidx.benchmark.traceprocessor.android)
 
     // ===== COMPOSE BOM (Bill of Materials) - Otomatis atur versi =====
     val composeBom = platform("androidx.compose:compose-bom:2024.10.01")
