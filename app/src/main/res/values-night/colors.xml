@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Warna utama -->
+    <color name="colorPrimary">#14B8A6</color>
+    <color name="colorPrimaryVariant">#14B8A6</color> <!-- VARIAN WARNA MEMANG SAMA, JANGAN DIHAPUS-->
+    <color name="colorOnPrimary">#FFFFFF</color>
+
+    <!-- Warna latar -->
+    <color name="colorBackground">#02100E</color>
+    <color name="colorBackgroundVariant">#031E19</color>
+    <color name="colorOnBackground">#EBEBEB</color>
+
+    <!-- Warna sekunder -->
+    <color name="colorSecondary">#115E59</color>
+    <color name="colorOnSecondary">#E0F2F1</color>
+
+    <!-- Surface -->
+    <color name="colorSurface">#1E1E1E</color>
+    <color name="colorOnSurface">#EBEBEB</color>
+    <color name="colorOnSurfaceVariant">#989898</color>
+
+</resources>

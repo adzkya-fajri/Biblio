@@ -1,8 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="black">#FF000000</color>
-    <color name="white">#FFFFFFFF</color>
+    <!-- Warna utama -->
     <color name="colorPrimary">#14B8A6</color>
-    <color name="colorPrimaryDark">#002120</color>
-    <color name="colorAccent">#0AFF8E</color>
+    <color name="colorPrimaryVariant">#119284</color>
+    <color name="colorOnPrimary">#FFFFFF</color>
+
+    <!-- Warna latar -->
+    <color name="colorBackground">#FFFFFF</color>
+    <color name="colorBackgroundVariant">#F6F6F6</color>
+    <color name="colorOnBackground">#171717</color>
+
+    <!-- Warna sekunder (optional, lebih lembut) -->
+    <color name="colorSecondary">#8DEFCE</color>
+    <color name="colorOnSecondary">#00332D</color>
+
+    <!-- Surface (misal untuk Card, BottomBar, dll) -->
+    <color name="colorSurface">#FFFFFF</color>
+    <color name="colorOnSurface">#171717</color>
+    <color name="colorOnSurfaceVariant">#505050</color>
 </resources>
