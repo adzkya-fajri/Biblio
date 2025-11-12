@@ -18,10 +18,12 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.biblio.Book
 import com.example.biblio.Section
+import com.example.biblio.R
 @Composable
 fun BookCard(
-    book: com.example.biblio.Book,
+    book: Book,
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -36,7 +38,7 @@ fun BookCard(
             elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
         ) {
             Image(
-                painter = painterResource(id = book.coverResId),
+                painter = painterResource(id = R.drawable.sample_cover),
                 contentDescription = book.title,
                 contentScale = ContentScale.Crop,
                 modifier = Modifier.fillMaxSize()

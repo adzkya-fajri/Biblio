@@ -1,16 +1,11 @@
 package com.example.biblio.ui.components
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.foundation.layout.Row
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -32,14 +27,25 @@ fun BigSectionItem(section: Section) {
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        LazyRow(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
-            contentPadding = PaddingValues(horizontal = 16.dp)
-        ) {
-            items(section.books) { book ->
-                BookItem(book = book, coverHeight = 225.dp, coverWidth = 150.dp)
+            Column(modifier = Modifier.padding(horizontal = 16.dp)) {
+                section.books.chunked(3).forEach { rowBooks ->
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        rowBooks.forEach { book ->
+                            BookCard(
+                                book = book,
+                                modifier = Modifier.weight(1f)
+                            )
+                        }
+                        // Tambah spacer jika tidak penuh 3 kolom
+                        repeat(3 - rowBooks.size) {
+                            Spacer(modifier = Modifier.weight(1f))
+                        }
+                    }
+                    Spacer(modifier = Modifier.height(12.dp))
+                }
             }
-        }
     }
 }

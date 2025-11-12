@@ -29,10 +29,16 @@ fun SearchBar(
             Icon(Icons.Default.Search, contentDescription = "Search")
         },
         shape = RoundedCornerShape(12.dp),
-        colors = TextFieldDefaults.outlinedTextFieldColors(
-            containerColor = Color(0xFFF5F5F5),
+        colors = OutlinedTextFieldDefaults.colors(
+            // CARA BARU untuk Material3
+            focusedContainerColor = Color(0xFFF5F5F5),
+            unfocusedContainerColor = Color(0xFFF5F5F5),
+            disabledContainerColor = Color(0xFFF5F5F5),
+
+            focusedBorderColor = Color(0xFF1976D2),
             unfocusedBorderColor = Color.Transparent,
-            focusedBorderColor = Color(0xFF1976D2)
+
+            cursorColor = Color(0xFF1976D2),
         ),
         singleLine = true
     )
