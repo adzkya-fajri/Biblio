@@ -33,6 +33,8 @@ import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
 
 import com.example.biblio.ui.MainScreen
+import com.example.biblio.ui.navigation.NavHost
+import com.example.biblio.ui.screens.LoginScreen
 import com.example.biblio.ui.theme.BiblioTheme
 
 // LAYOUT-LAYOUT
@@ -50,20 +52,29 @@ val fraunces = FontFamily(
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge(
-            statusBarStyle = SystemBarStyle.auto(
-                lightScrim = Color.White.toArgb(),   // warna terang
-                darkScrim = Color.Black.toArgb()     // warna gelap
-            ),
-            navigationBarStyle = SystemBarStyle.auto(
-                lightScrim = Color.White.toArgb(),
-                darkScrim = Color.Black.toArgb()
-            )
-        )
+//        enableEdgeToEdge(
+////            statusBarStyle = SystemBarStyle.auto(
+////                lightScrim = Color.White.toArgb(),   // warna terang
+////                darkScrim = Color.Black.toArgb()     // warna gelap
+////            ),
+//            navigationBarStyle = SystemBarStyle.auto(
+//                lightScrim = Color.Transparent,
+//                darkScrim = Color.Transparent
+//            )
+//        )
+
+        enableEdgeToEdge()
         actionBar?.hide()
         setContent {
             BiblioTheme {
-                MainScreen(fontFamily = ibmplexsans)
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(MaterialTheme.colorScheme.background)
+                        .safeDrawingPadding()
+                ) {
+                    NavHost()
+                }
             }
         }
     }
