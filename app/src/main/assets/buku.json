@@ -1,0 +1,209 @@
+{
+  "sections": [
+    {
+      "id": 1,
+      "title": "Fiksi Indonesia",
+      "books": [
+        {
+          "id": "laskar_pelangi",
+          "isbn": "978-979-22-3280-0",
+          "judul": "Laskar Pelangi",
+          "penulis": "Andrea Hirata",
+          "cover": "https://picsum.photos/seed/laskar/300/450"
+        },
+        {
+          "id": "bumi_manusia",
+          "isbn": "978-979-461-226-8",
+          "judul": "Bumi Manusia",
+          "penulis": "Pramoedya Ananta Toer",
+          "cover": "https://picsum.photos/seed/bumi/300/450"
+        },
+        {
+          "id": "cantik_itu_luka",
+          "isbn": "978-602-291-103-7",
+          "judul": "Cantik Itu Luka",
+          "penulis": "Eka Kurniawan",
+          "cover": "https://picsum.photos/seed/cantik/300/450"
+        },
+        {
+          "id": "perahu_kertas",
+          "isbn": "978-979-22-3889-5",
+          "judul": "Perahu Kertas",
+          "penulis": "Dee Lestari",
+          "cover": "https://picsum.photos/seed/perahu/300/450"
+        },
+        {
+          "id": "dilan_1990",
+          "isbn": "978-979-22-7262-2",
+          "judul": "Dilan 1990",
+          "penulis": "Pidi Baiq",
+          "cover": "https://picsum.photos/seed/dilan/300/450"
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "title": "Fiksi Internasional",
+      "books": [
+        {
+          "id": "mockingbird",
+          "isbn": "978-0-06-112008-4",
+          "judul": "To Kill a Mockingbird",
+          "penulis": "Harper Lee",
+          "cover": "https://picsum.photos/seed/mockingbird/300/450"
+        },
+        {
+          "id": "1984",
+          "isbn": "978-0-7432-7356-5",
+          "judul": "1984",
+          "penulis": "George Orwell",
+          "cover": "https://picsum.photos/seed/1984/300/450"
+        },
+        {
+          "id": "gatsby",
+          "isbn": "978-0-452-28423-4",
+          "judul": "The Great Gatsby",
+          "penulis": "F. Scott Fitzgerald",
+          "cover": "https://picsum.photos/seed/gatsby/300/450"
+        },
+        {
+          "id": "catcher",
+          "isbn": "978-0-316-76948-0",
+          "judul": "The Catcher in the Rye",
+          "penulis": "J.D. Salinger",
+          "cover": "https://picsum.photos/seed/catcher/300/450"
+        },
+        {
+          "id": "solitude",
+          "isbn": "978-0-06-093546-7",
+          "judul": "One Hundred Years of Solitude",
+          "penulis": "Gabriel García Márquez",
+          "cover": "https://picsum.photos/seed/solitude/300/450"
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "title": "Non-Fiksi",
+      "books": [
+        {
+          "id": "sapiens",
+          "isbn": "978-0-06-231609-7",
+          "judul": "Sapiens: A Brief History of Humankind",
+          "penulis": "Yuval Noah Harari",
+          "cover": "https://picsum.photos/seed/sapiens/300/450"
+        },
+        {
+          "id": "educated",
+          "isbn": "978-1-5011-2702-2",
+          "judul": "Educated",
+          "penulis": "Tara Westover",
+          "cover": "https://picsum.photos/seed/educated/300/450"
+        },
+        {
+          "id": "outliers",
+          "isbn": "978-0-06-085052-4",
+          "judul": "Outliers: The Story of Success",
+          "penulis": "Malcolm Gladwell",
+          "cover": "https://picsum.photos/seed/outliers/300/450"
+        },
+        {
+          "id": "henrietta",
+          "isbn": "978-1-59420-280-4",
+          "judul": "The Immortal Life of Henrietta Lacks",
+          "penulis": "Rebecca Skloot",
+          "cover": "https://picsum.photos/seed/henrietta/300/450"
+        },
+        {
+          "id": "thinking",
+          "isbn": "978-0-316-01792-2",
+          "judul": "Thinking, Fast and Slow",
+          "penulis": "Daniel Kahneman",
+          "cover": "https://picsum.photos/seed/thinking/300/450"
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "title": "Sains & Teknologi",
+      "books": [
+        {
+          "id": "brief_time",
+          "isbn": "978-0-553-38016-3",
+          "judul": "A Brief History of Time",
+          "penulis": "Stephen Hawking",
+          "cover": "https://picsum.photos/seed/time/300/450"
+        },
+        {
+          "id": "innovators",
+          "isbn": "978-0-8129-7373-5",
+          "judul": "The Innovators",
+          "penulis": "Walter Isaacson",
+          "cover": "https://picsum.photos/seed/innovators/300/450"
+        },
+        {
+          "id": "cosmos",
+          "isbn": "978-0-7432-7357-2",
+          "judul": "Cosmos",
+          "penulis": "Carl Sagan",
+          "cover": "https://picsum.photos/seed/cosmos/300/450"
+        },
+        {
+          "id": "astrophysics",
+          "isbn": "978-0-06-256812-4",
+          "judul": "Astrophysics for People in a Hurry",
+          "penulis": "Neil deGrasse Tyson",
+          "cover": "https://picsum.photos/seed/astro/300/450"
+        },
+        {
+          "id": "codebook",
+          "isbn": "978-1-59184-407-1",
+          "judul": "The Code Book",
+          "penulis": "Simon Singh",
+          "cover": "https://picsum.photos/seed/code/300/450"
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "title": "Bisnis & Self-Help",
+      "books": [
+        {
+          "id": "4hour",
+          "isbn": "978-1-59184-021-9",
+          "judul": "The 4-Hour Workweek",
+          "penulis": "Timothy Ferriss",
+          "cover": "https://picsum.photos/seed/4hour/300/450"
+        },
+        {
+          "id": "win_friends",
+          "isbn": "978-1-4516-3983-2",
+          "judul": "How to Win Friends and Influence People",
+          "penulis": "Dale Carnegie",
+          "cover": "https://picsum.photos/seed/friends/300/450"
+        },
+        {
+          "id": "richdad",
+          "isbn": "978-0-7432-5639-1",
+          "judul": "Rich Dad Poor Dad",
+          "penulis": "Robert Kiyosaki",
+          "cover": "https://picsum.photos/seed/richdad/300/450"
+        },
+        {
+          "id": "start_why",
+          "isbn": "978-1-59184-763-8",
+          "judul": "Start with Why",
+          "penulis": "Simon Sinek",
+          "cover": "https://picsum.photos/seed/why/300/450"
+        },
+        {
+          "id": "atomic",
+          "isbn": "978-0-06-256541-3",
+          "judul": "Atomic Habits",
+          "penulis": "James Clear",
+          "cover": "https://picsum.photos/seed/atomic/300/450"
+        }
+      ]
+    }
+  ]
+}
