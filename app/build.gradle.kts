@@ -2,6 +2,7 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.compose.compiler)
+    kotlin("plugin.serialization") version "1.9.20"
 }
 
 android {
@@ -60,8 +61,16 @@ dependencies {
     implementation(libs.androidx.activity)
     implementation(libs.androidx.constraintlayout)
 
+    // ViewModel
+    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.7.0")
+
+    // Serialization
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.0")
+
+    // Image Loading
+    implementation("io.coil-kt:coil-compose:2.5.0")
+
     implementation("com.google.accompanist:accompanist-systemuicontroller:0.34.0")
-    implementation(libs.androidx.benchmark.traceprocessor.android)
 
     // ===== COMPOSE BOM (Bill of Materials) - Otomatis atur versi =====
     val composeBom = platform("androidx.compose:compose-bom:2024.10.01")
