@@ -3,80 +3,97 @@ package com.example.biblio.ui.screens
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.biblio.Book
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.biblio.R
-import com.example.biblio.Section
+import com.example.biblio.data.model.Section
+import com.example.biblio.data.repository.BukuRepository
 import com.example.biblio.fraunces
 import com.example.biblio.ui.components.*
 import com.example.biblio.ui.components.SearchBar
-import com.example.biblio.ui.components.SearchHeader
+//import com.example.biblio.ui.components.SearchHeader
 import com.example.biblio.ui.components.CategoryChips
+import com.example.biblio.viewmodel.BukuViewModel
+import com.example.biblio.viewmodel.BukuViewModelFactory
 
 @Composable
-fun CariScreen() {
+fun CariScreen(
+    viewModel: BukuViewModel = viewModel(
+        factory = BukuViewModelFactory (
+            BukuRepository(LocalContext.current)
+        )
+    )
+) {
     var searchQuery by remember { mutableStateOf("") }
     var selectedCategory by remember { mutableStateOf("Semua") }
 
-    val allBooks = remember {
-        listOf(
-            Book(R.drawable.sample_cover, "The Subtle Art", "Mark Manson", "Motivasi"),
-            Book(R.drawable.sample_cover, "Jasad Heiir", "Nadya Hashem", "Fiksi"),
-            Book(R.drawable.sample_cover, "Sapiens", "Yuval Noah Harari", "Non-fiksi"),
-            Book(R.drawable.sample_cover, "Atomic Habits", "James Clear", "Motivasi"),
-            Book(R.drawable.sample_cover, "The Alchemist", "Paulo Coelho", "Fiksi"),
-            Book(R.drawable.sample_cover, "Becoming", "Michelle Obama", "Biografi"),
-            Book(R.drawable.sample_cover, "Educated", "Tara Westover", "Non-fiksi"),
-            Book(R.drawable.sample_cover, "1984", "George Orwell", "Fiksi"),
-        )
+    val bookDatabase by viewModel.bookDatabase.collectAsState()
+    val isLoading by viewModel.isLoading.collectAsState()
+
+    // Ambil semua buku dari semua section
+    val allBooks = remember(bookDatabase) {
+        bookDatabase?.sections?.flatMap { it.books } ?: emptyList()
     }
 
-    val filteredBooks = remember(searchQuery, selectedCategory, allBooks) {
-        allBooks.filter { book ->
-            val matchesSearch = searchQuery.isEmpty() ||
-                    book.title.contains(searchQuery, ignoreCase = true) ||
-                    book.author.contains(searchQuery, ignoreCase = true)
-            val matchesCategory = selectedCategory == "Semua" ||
-                    book.category == selectedCategory
-            matchesSearch && matchesCategory
+    // Filter berdasarkan search query (kategori hanya dekorasi)
+    val filteredBooks = remember(searchQuery, allBooks) {
+        if (searchQuery.isEmpty()) {
+            allBooks
+        } else {
+            allBooks.filter { book ->
+                book.judul.contains(searchQuery, ignoreCase = true) ||
+                        book.penulis.contains(searchQuery, ignoreCase = true) ||
+                        book.isbn.contains(searchQuery, ignoreCase = true)
+            }
         }
     }
 
+    // Section populer (take 6)
     val bigSection = remember(filteredBooks) {
-        listOf(Section("📈 Populer", filteredBooks.take(6)))
+        if (filteredBooks.isNotEmpty()) {
+            listOf(Section(id = 0, title = "Populer", books = filteredBooks.take(6)))
+        } else {
+            emptyList()
+        }
     }
 
-    val sections = remember(filteredBooks) {
-        listOf(
-            Section("Buku ini kamu banget!", filteredBooks.take(5)),
-            Section("Non-fiksi", filteredBooks.filter { it.category == "Non-fiksi" }),
-            Section("Novel Fiksi", filteredBooks.filter { it.category == "Fiksi" }),
-            Section("Motivasi & Self-Help", filteredBooks.filter { it.category == "Motivasi" })
-        ).filter { it.books.isNotEmpty() }
+    // Sections berdasarkan data asli (tapi filtered)
+    val sections = remember(filteredBooks, bookDatabase) {
+        bookDatabase?.sections?.mapNotNull { section ->
+            val sectionBooks = section.books.filter { book ->
+                filteredBooks.contains(book)
+            }
+            if (sectionBooks.isNotEmpty()) {
+                section.copy(books = sectionBooks.take(5))
+            } else {
+                null
+            }
+        } ?: emptyList()
     }
 
-    // PERBAIKAN: LazyColumn SELALU TAMPIL, placeholder di dalam item
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
         contentPadding = PaddingValues(top = 16.dp, bottom = 24.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         // HEADER
-        item {
-            SearchHeader(modifier = Modifier.padding(horizontal = 16.dp))
-        }
+//        item {
+//            SearchHeader(modifier = Modifier.padding(horizontal = 16.dp))
+//        }
 
-        // SEARCH BAR - SELALU TAMPIL
+        // SEARCH BAR
         item {
             SearchBar(
                 query = searchQuery,
@@ -85,7 +102,7 @@ fun CariScreen() {
             )
         }
 
-        // CATEGORY CHIPS - SELALU TAMPIL
+        // CATEGORY CHIPS (Dekorasi saja)
         item {
             CategoryChips(
                 selectedCategory = selectedCategory,
@@ -93,8 +110,21 @@ fun CariScreen() {
             )
         }
 
+        // LOADING STATE
+        if (isLoading) {
+            item {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 48.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator()
+                }
+            }
+        }
         // KONDISI: Belum ada input DAN kategori "Semua"
-        if (searchQuery.isEmpty() && selectedCategory == "Semua") {
+        else if (searchQuery.isEmpty() && selectedCategory == "Semua") {
             item {
                 Box(
                     modifier = Modifier
@@ -114,7 +144,7 @@ fun CariScreen() {
                             "Cari buku favoritmu",
                             fontSize = 24.sp,
                             fontWeight = FontWeight.Bold,
-                            fontFamily = fraunces,
+                            // fontFamily = fraunces,  // Uncomment kalau ada custom font
                             color = colorResource(id = R.color.colorOnBackground)
                         )
                         Spacer(modifier = Modifier.height(8.dp))
@@ -162,13 +192,21 @@ fun CariScreen() {
         }
         // KONDISI: Ada hasil pencarian - TAMPILKAN BUKU
         else {
-            // SECTION POPULER (GRID)
-            items(bigSection) { section ->
-                BigSectionItem(section = section)
+            // SECTION POPULER (GRID) - kalau kamu ada BigSectionItem
+            if (bigSection.isNotEmpty()) {
+                items(
+                    items = bigSection,
+                    key = { section -> section.id }
+                ) { section ->
+                    BigSectionItem(section = section)
+                }
             }
 
             // SECTION LAINNYA (HORIZONTAL)
-            items(sections) { section ->
+            items(
+                items = sections,
+                key = { section -> section.id }
+            ) { section ->
                 SectionItem(section = section)
             }
         }

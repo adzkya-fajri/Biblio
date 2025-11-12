@@ -16,8 +16,8 @@ fun BottomBar(
     fontFamily: FontFamily
 ) {
     NavigationBar(
-        containerColor = colorResource(id = R.color.colorBackgroundVariant),
-        contentColor = colorResource(id = R.color.colorBackgroundVariant)
+        containerColor = colorResource(id = R.color.colorBackground),
+        contentColor = colorResource(id = R.color.colorBackground)
     ) {
         val tabs = listOf(
             Triple("Beranda", R.drawable.ic_biblio, 0),
