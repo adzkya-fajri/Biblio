@@ -15,11 +15,17 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import com.example.biblio.data.model.Section
 import com.example.biblio.fraunces
+import com.example.biblio.viewmodel.BukuViewModel
 
 @Composable
-fun BigSectionItem(section: Section) {
+fun BigSectionItem(
+    section: Section,
+    navController: NavController? = null,
+    viewModel: BukuViewModel
+) {
     Column(modifier = Modifier.fillMaxWidth()) {
         // Section Title
         Text(
@@ -38,7 +44,7 @@ fun BigSectionItem(section: Section) {
             contentPadding = PaddingValues(horizontal = 16.dp)
         ) {
             items(section.books) { book ->
-                BookItem(book = book, coverHeight = 225.dp, coverWidth = 150.dp)
+                BookItem(book = book, viewModel = viewModel, coverHeight = 225.dp, coverWidth = 150.dp)
             }
         }
     }

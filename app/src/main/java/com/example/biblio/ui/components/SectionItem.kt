@@ -16,13 +16,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.biblio.data.model.Section
 import com.example.biblio.fraunces
+import com.example.biblio.viewmodel.BukuViewModel
 
 @Composable
 fun SectionItem(section: Section,
-                navController: NavController? = null  // ← Tambah parameter
+                navController: NavController? = null,  // ← Tambah parameter
+                viewModel: BukuViewModel  // ← TAMBAHAN
                 ) {
     Column(modifier = Modifier.fillMaxWidth()) {
         // Section Title
@@ -48,8 +51,9 @@ fun SectionItem(section: Section,
             ) { book ->
                 BookItem(
                     book = book,
-                    navController = navController  // ← Pass navController
-                    )
+                    navController = navController,  // ← Pass navController
+                    viewModel = viewModel // ✅ PASS BOTH!
+                )
             }
         }
     }

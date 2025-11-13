@@ -19,6 +19,7 @@ import androidx.navigation.navArgument
 import com.example.biblio.ibmplexsans
 import com.example.biblio.ui.MainScreen
 import com.example.biblio.ui.screens.BukuScreen
+import com.example.biblio.ui.screens.KoleksiScreen
 import com.example.biblio.ui.screens.LoginScreen
 
 @Composable
@@ -83,6 +84,9 @@ fun NavHost() {
         }
         composable("main") {
             MainScreen(navController = navController)
+        }
+        composable("koleksi") {
+            KoleksiScreen()
         }
     }
 }
