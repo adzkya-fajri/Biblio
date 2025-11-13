@@ -13,26 +13,28 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.biblio.R
 import com.example.biblio.data.model.Section
 import com.example.biblio.data.repository.BukuRepository
-import com.example.biblio.fraunces
+import com.example.biblio.data.repository.FavoriteRepository
 import com.example.biblio.ui.components.*
 import com.example.biblio.ui.components.SearchBar
 //import com.example.biblio.ui.components.SearchHeader
 import com.example.biblio.ui.components.CategoryChips
 import com.example.biblio.viewmodel.BukuViewModel
 import com.example.biblio.viewmodel.BukuViewModelFactory
+import androidx.navigation.NavController
 
 @Composable
 fun CariScreen(
+    navController: NavController? = null,
     viewModel: BukuViewModel = viewModel(
         factory = BukuViewModelFactory (
-            BukuRepository(LocalContext.current)
+            BukuRepository(LocalContext.current),
+            FavoriteRepository(LocalContext.current)  // ← TAMBAHAN
         )
     )
 ) {
@@ -88,12 +90,7 @@ fun CariScreen(
         contentPadding = PaddingValues(top = 16.dp, bottom = 24.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        // HEADER
-//        item {
-//            SearchHeader(modifier = Modifier.padding(horizontal = 16.dp))
-//        }
-
-        // SEARCH BAR
+        // HEADER ITEMS - gunakan `item` bukan `items`
         item {
             SearchBar(
                 query = searchQuery,
@@ -102,7 +99,6 @@ fun CariScreen(
             )
         }
 
-        // CATEGORY CHIPS (Dekorasi saja)
         item {
             CategoryChips(
                 selectedCategory = selectedCategory,
@@ -144,7 +140,6 @@ fun CariScreen(
                             "Cari buku favoritmu",
                             fontSize = 24.sp,
                             fontWeight = FontWeight.Bold,
-                            // fontFamily = fraunces,  // Uncomment kalau ada custom font
                             color = colorResource(id = R.color.colorOnBackground)
                         )
                         Spacer(modifier = Modifier.height(8.dp))
@@ -190,24 +185,32 @@ fun CariScreen(
                 }
             }
         }
-        // KONDISI: Ada hasil pencarian - TAMPILKAN BUKU
+        // ✅ PERBAIKAN: Kondisi final yang bersih (ada hasil)
         else {
-            // SECTION POPULER (GRID) - kalau kamu ada BigSectionItem
+            // SECTION POPULER
             if (bigSection.isNotEmpty()) {
                 items(
                     items = bigSection,
                     key = { section -> section.id }
                 ) { section ->
-                    BigSectionItem(section = section)
+                    BigSectionItem(
+                        section = section,
+                        navController = navController,  // ✅ TAMBAHAN
+                        viewModel = viewModel           // ✅ TAMBAHAN
+                    )
                 }
             }
 
-            // SECTION LAINNYA (HORIZONTAL)
+            // SECTION LAINNYA
             items(
                 items = sections,
                 key = { section -> section.id }
             ) { section ->
-                SectionItem(section = section)
+                SectionItem(
+                    section = section,
+                    navController = navController,  // ✅ TAMBAHAN
+                    viewModel = viewModel           // ✅ TAMBAHAN
+                )
             }
         }
     }

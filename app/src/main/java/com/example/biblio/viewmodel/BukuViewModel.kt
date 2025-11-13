@@ -6,19 +6,46 @@ import com.example.biblio.data.model.Buku
 import com.example.biblio.data.model.BukuDatabase
 import com.example.biblio.data.model.Section
 import com.example.biblio.data.repository.BukuRepository
+import com.example.biblio.data.repository.FavoriteRepository
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlin.collections.filter
 
-class BukuViewModel(private val repository: BukuRepository) : ViewModel() {
+class BukuViewModel(
+    private val repository: BukuRepository,
+    private val favoriteRepository: FavoriteRepository  // ✅ TAMBAHAN: Parameter wajib
+) : ViewModel() {
     private val _bookDatabase = MutableStateFlow<BukuDatabase?>(null)
     val bookDatabase: StateFlow<BukuDatabase?> = _bookDatabase.asStateFlow()
 
     private val _isLoading = MutableStateFlow(true)
     val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
+
+    val favoriteIds: StateFlow<Set<String>> = favoriteRepository.favoriteIds
+
+    val favoriteBooks: StateFlow<List<Buku>> = combine(
+        bookDatabase,
+        favoriteIds
+    ) { database, favIds ->
+        database?.sections
+            ?.flatMap { it.books }
+            ?.filter { book -> favIds.contains(book.id) }
+            ?: emptyList()
+    }.stateIn(
+        scope = viewModelScope,          // ✅ TAMBAHAN
+        started = SharingStarted.WhileSubscribed(5000),  // ✅ TAMBAHAN
+        initialValue = emptyList()       // ✅ TAMBAHAN
+    )
+
+    fun toggleFavorite(bookId: String) {
+        favoriteRepository.toggleFavorite(bookId)
+    }
 
     init {
         loadBooks()

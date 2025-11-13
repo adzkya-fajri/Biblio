@@ -34,6 +34,7 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import coil.compose.AsyncImage
 import com.example.biblio.data.repository.BukuRepository
+import com.example.biblio.data.repository.FavoriteRepository
 import com.example.biblio.viewmodel.BukuViewModel
 import com.example.biblio.viewmodel.BukuViewModelFactory
 import kotlinx.coroutines.delay
@@ -44,7 +45,8 @@ fun BukuScreen(
     navController: NavController,
     viewModel: BukuViewModel = viewModel(
         factory = BukuViewModelFactory(
-            BukuRepository(LocalContext.current)
+            BukuRepository(LocalContext.current),
+            FavoriteRepository(LocalContext.current)
         )
     )
 ) {
@@ -65,7 +67,7 @@ fun BukuScreen(
     val book = remember(bookId, bookDatabase) {
         bookDatabase?.sections
             ?.flatMap { it.books }
-            ?.find { it.id == bookId }
+            ?.find { it.id.toString() == bookId }
     }
 
     when {
