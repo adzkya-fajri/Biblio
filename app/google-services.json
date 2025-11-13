@@ -1,0 +1,69 @@
+{
+  "project_info": {
+    "project_number": "320690116531",
+    "firebase_url": "https://blas-33047-default-rtdb.asia-southeast1.firebasedatabase.app",
+    "project_id": "blas-33047",
+    "storage_bucket": "blas-33047.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:320690116531:android:7c7f3447bdf4658bedddc6",
+        "android_client_info": {
+          "package_name": "biblio.com"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "320690116531-9e9ldhuar8eeai58g9mkf7md4ubtti42.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA-zYdKifviOL4_3joDl8xIW_tBOFL6xYI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "320690116531-9e9ldhuar8eeai58g9mkf7md4ubtti42.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:320690116531:android:b7d8c2f863720452edddc6",
+        "android_client_info": {
+          "package_name": "com.example.biblio.debug"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "320690116531-9e9ldhuar8eeai58g9mkf7md4ubtti42.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA-zYdKifviOL4_3joDl8xIW_tBOFL6xYI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "320690116531-9e9ldhuar8eeai58g9mkf7md4ubtti42.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
