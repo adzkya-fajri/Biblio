@@ -24,7 +24,7 @@ class BukuViewModel(private val repository: BukuRepository) : ViewModel() {
         loadBooks()
     }
 
-    private fun loadBooks() {
+    fun loadBooks(forceRefresh: Boolean = false) {
         viewModelScope.launch {
             _isLoading.value = true
             delay(300)

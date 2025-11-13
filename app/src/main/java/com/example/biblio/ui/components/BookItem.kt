@@ -1,6 +1,8 @@
 package com.example.biblio.ui.components
 
-import androidx.compose.foundation.Image
+import androidx.compose.foundation.LocalIndication
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -12,28 +14,37 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import coil.compose.AsyncImage
-import com.example.biblio.R
-import com.example.biblio.ibmplexsans
 import com.example.biblio.data.model.Buku
+import com.example.biblio.ibmplexsans
 
 @Composable
 fun BookItem(
     book: Buku,
+    navController: NavController? = null,  // ← Tambah parameter
     coverHeight: Dp = 180.dp,
-    coverWidth: Dp = 120.dp
+    coverWidth: Dp = 120.dp,
 ) {
     Column(
-        modifier = Modifier.width(coverWidth)
+        modifier = Modifier
+            .width(coverWidth)
+            .clickable(
+                interactionSource = remember { MutableInteractionSource() },
+                indication = LocalIndication.current
+            ) {
+                navController?.navigate("buku/${book.id}")  // ← Pass book ID
+                println("Buku diklik: ${book.judul}")
+            }
     ) {
         // Card untuk cover
         Card(

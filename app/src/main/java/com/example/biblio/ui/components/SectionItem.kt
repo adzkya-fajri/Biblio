@@ -1,5 +1,6 @@
 package com.example.biblio.ui.components
 
+//import com.example.biblio.Section
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -15,12 +16,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-//import com.example.biblio.Section
-import com.example.biblio.fraunces
+import androidx.navigation.NavController
 import com.example.biblio.data.model.Section
+import com.example.biblio.fraunces
 
 @Composable
-fun SectionItem(section: Section) {
+fun SectionItem(section: Section,
+                navController: NavController? = null  // ← Tambah parameter
+                ) {
     Column(modifier = Modifier.fillMaxWidth()) {
         // Section Title
         Text(
@@ -43,7 +46,10 @@ fun SectionItem(section: Section) {
                 items = section.books,
                 key = { book -> book.id } // ← Ganti 'isbn' jadi 'id' untuk key
             ) { book ->
-                BookItem(book = book)
+                BookItem(
+                    book = book,
+                    navController = navController  // ← Pass navController
+                    )
             }
         }
     }
