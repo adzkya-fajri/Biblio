@@ -1,9 +1,11 @@
-package com.example.biblio.ui.screens
+package com.example.biblio.ui.auth
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -16,28 +18,39 @@ import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.biblio.R
 import com.example.biblio.fraunces
 import com.example.biblio.ibmplexsans
+import com.example.biblio.viewmodel.AuthState
+import com.example.biblio.viewmodel.AuthViewModel
 
 @Composable
 fun LoginScreen(
-    onLoginSuccess: () -> Unit
+    onLoginSuccess: () -> Unit,
+    viewModel: AuthViewModel = viewModel()
 ) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var passwordVisible by remember { mutableStateOf(false) }
+
+    val authState by viewModel.authState.collectAsState()
+
+    // Handle login success
+    LaunchedEffect(authState) {
+        if (authState is AuthState.Success) {
+            onLoginSuccess()
+        }
+    }
 
     Box(
         modifier = Modifier
             .fillMaxSize()
             .padding(24.dp)
     ) {
-        // Logo + Heading di atas kiri
         Column(
             horizontalAlignment = Alignment.Start,
             verticalArrangement = Arrangement.Top,
@@ -59,7 +72,6 @@ fun LoginScreen(
             )
         }
 
-        // Form login di tengah layar
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center,
@@ -70,6 +82,7 @@ fun LoginScreen(
                 onValueChange = { email = it },
                 label = { Text("Email", fontFamily = ibmplexsans) },
                 singleLine = true,
+                enabled = authState !is AuthState.Loading,
                 modifier = Modifier.fillMaxWidth()
             )
 
@@ -80,6 +93,7 @@ fun LoginScreen(
                 onValueChange = { password = it },
                 label = { Text("Password", fontFamily = ibmplexsans) },
                 singleLine = true,
+                enabled = authState !is AuthState.Loading,
                 visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
                 trailingIcon = {
                     val icon = if (passwordVisible) R.drawable.visibility_off_24px else R.drawable.visibility_24px
@@ -90,15 +104,36 @@ fun LoginScreen(
                 modifier = Modifier.fillMaxWidth()
             )
 
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(8.dp))
+
+            // Error message
+            if (authState is AuthState.Error) {
+                Text(
+                    text = (authState as AuthState.Error).message,
+                    color = MaterialTheme.colorScheme.error,
+                    fontFamily = ibmplexsans,
+                    fontSize = 14.sp
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
 
             Button(
-                onClick = { onLoginSuccess() },
+                onClick = { viewModel.login(email, password) },
+                enabled = authState !is AuthState.Loading && email.isNotBlank() && password.isNotBlank(),
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(50.dp)
             ) {
-                Text("Login", fontFamily = ibmplexsans)
+                if (authState is AuthState.Loading) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(24.dp),
+                        color = MaterialTheme.colorScheme.onPrimary
+                    )
+                } else {
+                    Text("Login", fontFamily = ibmplexsans)
+                }
             }
 
             Spacer(modifier = Modifier.height(16.dp))
