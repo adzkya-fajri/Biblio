@@ -73,12 +73,7 @@ fun BookItem(
         // ========================================
         // BOX UNTUK OVERLAY COVER DAN TOMBOL
         // ========================================
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(coverHeight)
-        )
-        // Card untuk cover
+
         Box(
             modifier = Modifier
                 .fillMaxWidth()
