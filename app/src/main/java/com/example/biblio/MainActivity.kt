@@ -11,8 +11,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
-
-import com.example.biblio.ui.navigation.NavHost
+import com.example.biblio.ui.navigation.AppNavHost
 import com.example.biblio.ui.theme.BiblioTheme
 import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
@@ -30,6 +29,8 @@ val fraunces = FontFamily(
     Font(R.font.fraunces, FontWeight.Normal),
 )
 
+private lateinit var auth: FirebaseAuth
+
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -44,6 +45,9 @@ class MainActivity : ComponentActivity() {
 //            )
 //        )
 
+        // Inisialisasi Firebase auth
+        auth = Firebase.auth
+
         enableEdgeToEdge()
         actionBar?.hide()
         setContent {
@@ -54,7 +58,7 @@ class MainActivity : ComponentActivity() {
                         .background(MaterialTheme.colorScheme.background)
                         .safeDrawingPadding()
                 ) {
-                    NavHost()
+                    AppNavHost()
                 }
             }
         }
