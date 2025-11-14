@@ -64,7 +64,7 @@ fun LoginScreen(
             )
             Spacer(modifier = Modifier.height(32.dp))
             Text(
-                text = "Selamat Datang di Biblio!",
+                text = "Masuk ke Biblio",
                 fontFamily = fraunces,
                 fontSize = 32.sp,
                 lineHeight = 1.2.em,

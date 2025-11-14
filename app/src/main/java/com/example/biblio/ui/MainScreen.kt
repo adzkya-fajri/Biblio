@@ -33,6 +33,7 @@ import com.example.biblio.ui.screens.BerandaScreen
 import com.example.biblio.ui.screens.BukuScreen
 import com.example.biblio.ui.screens.CariScreen
 import com.example.biblio.ui.screens.KoleksiScreen
+import com.example.biblio.ui.screens.SettingsScreen
 
 @Composable
 fun MainScreen(navController: NavController) {
@@ -140,6 +141,7 @@ fun MainScreen(navController: NavController) {
                     navController = navController
                 )
             }
+            composable("settings") { SettingsScreen() }
         }
     }
 }
