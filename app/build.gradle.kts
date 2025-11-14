@@ -118,7 +118,13 @@ dependencies {
     // ===== SPLASH SCREEN =====
     implementation("androidx.core:core-splashscreen:1.0.1")
 
-    // ===== TESTING =====
+    // ViewModel Compose
+    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.7.0")
+
+    // StateFlow
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
+
+       // ===== TESTING =====
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

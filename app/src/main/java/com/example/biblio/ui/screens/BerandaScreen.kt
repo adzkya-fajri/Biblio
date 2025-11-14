@@ -35,6 +35,7 @@ import com.example.biblio.viewmodel.BukuViewModelFactory
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BerandaScreen(
+    onNavigateToProfile: () -> Unit = {},  // ← TAMBAHAN
     navController: NavController,
     viewModel: BukuViewModel = viewModel(
         factory = BukuViewModelFactory(
@@ -76,12 +77,12 @@ fun BerandaScreen(
         ) {
             LazyColumn(
                 modifier = Modifier.fillMaxSize(),
-                contentPadding = PaddingValues(top = 16.dp, bottom = 24.dp),
-                verticalArrangement = Arrangement.spacedBy(24.dp)
+                contentPadding = PaddingValues(top = 16.dp, bottom = 24.dp)
             ) {
                 item {
                     Profile(
                         name = "Andi",
+                        navController = navController,
                         modifier = Modifier.padding(horizontal = 16.dp)
                     )
                 }

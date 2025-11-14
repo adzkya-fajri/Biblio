@@ -10,6 +10,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -18,6 +19,7 @@ import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.TextUnitType
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.biblio.viewmodel.AuthState
 import com.example.biblio.viewmodel.AuthViewModel
 import java.time.format.TextStyle
 
@@ -46,12 +48,17 @@ fun SettingsScreen() {
 
         // lazy column for displaying listview.
         LazyColumn {
+            // ✅ FIXED: Button di item terpisah
             item {
-                Button(onClick = { viewModel.logout() }) {
+                Button(
+                    onClick = { viewModel.logout() },
+                    modifier = Modifier.padding(16.dp)
+                ) {
                     Text("Logout")
                 }
             }
-            // populating items for listview.
+
+            // ✅ FIXED: items() di luar item()
             items(list) { language ->
                 Column(
                     modifier = Modifier.clickable { /* action */ }
