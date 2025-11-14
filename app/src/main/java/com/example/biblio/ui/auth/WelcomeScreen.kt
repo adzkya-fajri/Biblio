@@ -103,7 +103,7 @@ fun WelcomeScreen(
             ) {
                 Icon(
                     painter = painterResource(id = R.drawable.mail_24px),
-                    contentDescription = "Favorite"
+                    contentDescription = "mail"
                 )
 
                 Spacer(Modifier.width(8.dp))
@@ -142,10 +142,10 @@ fun WelcomeScreen(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 modifier = Modifier.fillMaxWidth()
             ) {
-                TextButton(onClick = { /* Lupa password */ }) {
-                    Text("Lupa password?", fontFamily = ibmplexsans, color = colorResource(id = R.color.colorPrimaryVariant))
+                TextButton(onClick = {  }) {
+                    Text("Syarat & Ketentuan", fontFamily = ibmplexsans, color = colorResource(id = R.color.colorPrimaryVariant))
                 }
-                TextButton(onClick = { /* Daftar */ }) {
+                TextButton(onClick = { navController?.navigate("register") }) {
                     Text("Daftar", fontFamily = ibmplexsans, color = colorResource(id = R.color.colorPrimaryVariant))
                 }
             }

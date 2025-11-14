@@ -22,6 +22,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
 import com.example.biblio.R
 import com.example.biblio.fraunces
 import com.example.biblio.ibmplexsans
@@ -31,7 +32,8 @@ import com.example.biblio.viewmodel.AuthViewModel
 @Composable
 fun LoginScreen(
     onLoginSuccess: () -> Unit,
-    viewModel: AuthViewModel = viewModel()
+    viewModel: AuthViewModel = viewModel(),
+    navController: NavController? = null,
 ) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
