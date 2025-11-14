@@ -85,6 +85,7 @@ dependencies {
     implementation("androidx.compose.ui:ui-tooling-preview")
     debugImplementation("androidx.compose.ui:ui-tooling")
     debugImplementation("androidx.compose.ui:ui-test-manifest")
+    implementation("androidx.palette:palette-ktx:1.0.0")
 
     // ===== MATERIAL DESIGN =====
     // PILIH SALAH SATU:
