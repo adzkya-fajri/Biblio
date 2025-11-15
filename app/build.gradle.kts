@@ -124,6 +124,10 @@ dependencies {
     // StateFlow
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
 
+    //profile
+    implementation("io.coil-kt:coil-compose:2.5.0")
+//    implementation("io.coil-kt:coil-gif:2.5.0") // Jika perlu GIF
+
        // ===== TESTING =====
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

@@ -125,7 +125,13 @@ fun MainScreen(navController: NavController) {
             }
 
         ) {
-            composable("beranda") { BerandaScreen(navController = innerNavController) }
+            // ✅ FIXED: Tambahkan onNavigateToProfile
+            composable("beranda") {
+               BerandaScreen(
+               onNavigateToProfile = { navController.navigate("settings") }, // ← INI
+               navController = innerNavController
+               )
+            }
             composable("cari") { CariScreen() }
             composable("koleksi") { KoleksiScreen() }
 

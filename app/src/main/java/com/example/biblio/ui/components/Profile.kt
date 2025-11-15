@@ -33,6 +33,7 @@ import com.example.biblio.viewmodel.UserViewModel
 @Composable
 fun Profile(
     name: String,
+    photoUrl: String? = null,
     modifier: Modifier = Modifier,
     onProfileClick: () -> Unit = {} // ✅ HANYA CALLBACK
 ) {
@@ -67,13 +68,24 @@ fun Profile(
                 .clickable { onProfileClick() },
             contentAlignment = Alignment.Center
         ) {
-            Text(
-                text = name.firstOrNull()?.uppercase() ?: "?",
-                fontSize = 24.sp,
-                fontWeight = androidx.compose.ui.text.font.FontWeight.Bold,
-                color = Color.White,
-                fontFamily = ibmplexsans
-            )
+            if (!photoUrl.isNullOrEmpty() && photoUrl.startsWith("http")) {
+                // ✅ VALIDASI URL sebelum load
+                AsyncImage(
+                    model = photoUrl,
+                    contentDescription = "Profile Photo",
+                    contentScale = androidx.compose.ui.layout.ContentScale.Crop,
+                    modifier = Modifier.fillMaxSize()
+                )
+            } else {
+                // ✅ FALLBACK jika URL kosong
+                Text(
+                    text = name.firstOrNull()?.uppercase() ?: "?",
+                    fontSize = 24.sp,
+                    fontWeight = androidx.compose.ui.text.font.FontWeight.Bold,
+                    color = Color.White,
+                    fontFamily = ibmplexsans
+                )
+            }
         }
     }
 }

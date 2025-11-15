@@ -8,9 +8,14 @@ import androidx.navigation.compose.*
 import com.example.biblio.ui.MainScreen
 import com.example.biblio.ui.auth.LoginScreen
 import com.example.biblio.ui.auth.WelcomeScreen
+import com.example.biblio.ui.screens.AboutBiblioScreen
 import com.example.biblio.ui.screens.BerandaScreen
+import com.example.biblio.ui.screens.EditNameScreen
 import com.example.biblio.ui.screens.KoleksiScreen
+import com.example.biblio.ui.screens.ManageProfileScreen
+import com.example.biblio.ui.screens.ProfileScreen
 import com.example.biblio.ui.screens.SettingsScreen
+import com.example.biblio.ui.screens.StyleTextScreen
 import com.example.biblio.viewmodel.AuthState
 import com.example.biblio.viewmodel.AuthViewModel
 import com.google.firebase.auth.FirebaseAuth
@@ -63,17 +68,67 @@ fun AppNavigation() { // ✅ PASTIKAN NAMA INI
         // ✅ PASTIKAN ADA INI
         composable("beranda") {
             BerandaScreen(
-                onNavigateToProfile = { navController.navigate("settings") },
+                onNavigateToProfile = {
+                    println("DEBUG: Navigating to profile screen")
+                    navController.navigate("profile")
+                },
                 navController = navController
             )
         }
 
-        composable("settings") {
-            SettingsScreen(onLogoutSuccess = {
-                navController.navigate("welcome") {
-                    popUpTo(0) { inclusive = true }
+        // ===== PROFILE ROUTES (TAMBAHAN BARU) =====
+        composable("profile") {
+            ProfileScreen(
+                onNavigateBack = {
+                    navController.popBackStack()
+                },
+                onNavigateToEditName = {
+                    navController.navigate("editName")
+                },
+                onNavigateToManageProfile = {
+                    navController.navigate("manageProfile")
+                },
+                onNavigateToStyleText = {
+                    navController.navigate("styleText")
+                },
+                onNavigateToAbout = {
+                    navController.navigate("about")
                 }
-            })
+            )
+        }
+
+        composable("editName") {
+            EditNameScreen(
+                onNavigateBack = { navController.popBackStack() }
+            )
+        }
+
+        composable("manageProfile") {
+            ManageProfileScreen(
+                onNavigateBack = { navController.popBackStack() }
+            )
+        }
+
+        composable("styleText") {
+            StyleTextScreen(
+                onNavigateBack = { navController.popBackStack() }
+            )
+        }
+
+        composable("about") {
+            AboutBiblioScreen(
+                onNavigateBack = { navController.popBackStack() }
+            )
+        }
+
+        composable("settings") {
+            SettingsScreen(
+                onLogoutSuccess = {
+                    navController.navigate("welcome") {
+                        popUpTo(0) { inclusive = true }
+                    }
+                }
+            )
         }
     }
 }
