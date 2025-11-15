@@ -1,5 +1,9 @@
 package com.example.biblio.ui.screens
 
+import android.net.Uri
+import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -15,39 +19,60 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
 import coil.compose.AsyncImage
+import com.example.biblio.R
 //import com.example.biblio.data.repository.UserRepository
 import com.example.biblio.fraunces
+import com.example.biblio.ui.components.Profile
+import com.example.biblio.viewmodel.AuthViewModel
+import com.example.biblio.viewmodel.UpdateState
+import com.google.firebase.Firebase
+import com.google.firebase.auth.auth
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProfileScreen(
-    onNavigateBack: () -> Unit = {},
-    onNavigateToEditName: () -> Unit = {},
-    onNavigateToManageProfile: () -> Unit = {},
-    onNavigateToStyleText: () -> Unit = {},
-    onNavigateToAbout: () -> Unit = {},
-//    userViewModel: UserViewModel = viewModel(
-//        factory = UserViewModelFactory(UserRepository(LocalContext.current))
-//    )
+    viewModel: AuthViewModel = viewModel(),
+    navController: NavController
 ) {
-//    val userProfile by userViewModel.userProfile.collectAsState()
-    var showPhotoDialog by remember { mutableStateOf(false) }
+
+    var openNameDialog by remember { mutableStateOf(false) }
+    var nameInput by remember { mutableStateOf("") }
+    val openLogoutDialog = remember { mutableStateOf(false) }
+    val updateState by viewModel.updateState.collectAsState()
+
+    LaunchedEffect(updateState) {
+        when (updateState) {
+            is UpdateState.Success -> {
+                openNameDialog = false
+                viewModel.resetState()
+            }
+            else -> {}
+        }
+    }
 
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Profile") },
+                title = { Text("Profil") },
                 navigationIcon = {
-                    IconButton(onClick = onNavigateBack) {
-                        Icon(Icons.Default.ArrowBack, "Back")
+                    IconButton(onClick = { navController.navigateUp() }) {
+                        Icon(
+                            painter = painterResource(R.drawable.arrow_back_24px),
+                            contentDescription = "Back",
+                            tint = colorResource(R.color.colorOnSurfaceVariant)
+                        )
                     }
                 }
             )
@@ -66,137 +91,131 @@ fun ProfileScreen(
                     .padding(vertical = 32.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                // Foto Profil Besar
-                Box(
-                    modifier = Modifier
-                        .size(120.dp)
-                        .clip(CircleShape)
-                        .background(Color(0xFF1976D2))
-                        .border(4.dp, Color.White, CircleShape)
-                        .clickable { showPhotoDialog = true },
-                    contentAlignment = Alignment.Center
-                ) {
-//                    if (userProfile.photoUrl.isNotEmpty()) {
-//                        AsyncImage(
-//                            model = userProfile.photoUrl,
-//                            contentDescription = "Profile Photo",
-//                            contentScale = ContentScale.Crop,
-//                            modifier = Modifier.fillMaxSize()
-//                        )
-//                    } else {
-//                        Text(
-//                            text = userProfile.name.first().uppercase(),
-//                            fontSize = 48.sp,
-//                            fontWeight = FontWeight.Bold,
-//                            color = Color.White
-//                        )
-//                    }
 
-                    // Icon Camera
-                    Box(
-                        modifier = Modifier
-                            .align(Alignment.BottomEnd)
-                            .size(36.dp)
-                            .clip(CircleShape)
-                            .background(Color.White)
-                            .border(2.dp, Color(0xFF1976D2), CircleShape),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.CameraAlt,
-                            contentDescription = "Change Photo",
-                            tint = Color(0xFF1976D2),
-                            modifier = Modifier.size(20.dp)
-                        )
-                    }
+                val user = Firebase.auth.currentUser
+                user?.let {
+                    Profile(
+                        name = it.displayName ?: "Unknown",
+                        fontSize = 48.sp,
+                        modifier = Modifier.padding(horizontal = 16.dp),
+                        navController = navController,
+                        size = 96.dp
+                    )
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Text(
+                        text = it.displayName ?: "Unknown",
+                        fontSize = 28.sp,
+                        fontWeight = FontWeight.Bold,
+                        fontFamily = fraunces,
+                        modifier = Modifier.padding(horizontal = 16.dp)
+                    )
                 }
 
                 Spacer(modifier = Modifier.height(16.dp))
-
-//                Text(
-//                    text = userProfile.name,
-//                    fontSize = 24.sp,
-//                    fontWeight = FontWeight.Bold,
-//                    fontFamily = fraunces
-//                )
-//
-//                Text(
-//                    text = userProfile.email,
-//                    fontSize = 14.sp,
-//                    color = Color.Gray
-//                )
             }
 
-            Divider()
-
-            // MENU LIST
-            ProfileMenuItem(
-                icon = Icons.Default.Person,
-                title = "Custom Profile",
-                subtitle = "Lihat dan edit profil",
-                onClick = { /* Already in profile screen */ }
-            )
-
-            ProfileMenuItem(
-                icon = Icons.Default.Edit,
-                title = "Custom Name",
-                subtitle = "Ubah nama tampilan",
-                onClick = onNavigateToEditName
-            )
-
-            ProfileMenuItem(
-                icon = Icons.Default.TextFields,
+            MenuItem(
+                painter = painterResource(R.drawable.text_fields_24px),
                 title = "Style Text",
                 subtitle = "Ubah gaya font aplikasi",
-                onClick = onNavigateToStyleText
+                onClick = {  }
             )
 
-            ProfileMenuItem(
-                icon = Icons.Default.Lock,
+            HorizontalDivider(thickness = 1.dp, color = MaterialTheme.colorScheme.outline)
+
+            // MENU LIST
+            MenuItem(
+                painter = painterResource(R.drawable.edit_24px),
+                title = "Ubah Nama",
+                subtitle = "Ubah nama tampilan",
+                onClick = { openNameDialog = true }
+            )
+
+            MenuItem(
+                painter = painterResource(R.drawable.manage_accounts_24px),
                 title = "Manage Profile",
                 subtitle = "Ubah password dan keamanan",
-                onClick = onNavigateToManageProfile
+                onClick = {  }
             )
 
-            ProfileMenuItem(
-                icon = Icons.Default.Info,
+            MenuItem(
+                painter = painterResource(R.drawable.logout_24px),
+                title = "Keluar",
+                subtitle = "Keluar sebagai pengguna",
+                iconColor = MaterialTheme.colorScheme.error,
+                onClick = { openLogoutDialog.value = true }
+            )
+
+            HorizontalDivider(thickness = 1.dp, color = MaterialTheme.colorScheme.outline)
+
+            MenuItem(
+                painter = painterResource(R.drawable.info_24px),
                 title = "About Biblio",
                 subtitle = "Informasi aplikasi",
-                onClick = onNavigateToAbout
+                onClick = {  }
             )
         }
     }
 
-//    // Dialog untuk ganti foto
-//    if (showPhotoDialog) {
-//        PhotoPickerDialog(
-//            onDismiss = { showPhotoDialog = false },
-//            onPhotoSelected = { url ->
-//                userViewModel.updatePhoto(url)
-//                showPhotoDialog = false
-//            }
-//        )
-//    }
+    if (openNameDialog) {
+        dialogInput(
+            title = "Update Name",
+            value = nameInput,
+            onValueChange = { nameInput = it },
+            onConfirm = {
+                viewModel.updateName(
+                    newName = nameInput,
+                    onSuccess = {
+                        openNameDialog = false  // Ganti jadi openNameDialog
+                    },
+                    onError = { error ->
+                        // Tampilkan error
+                    }
+                )
+            },
+            onDismiss = { openNameDialog = false },  // Ganti jadi openNameDialog
+            isLoading = updateState is UpdateState.Loading  // Tambahkan ini
+        )
+    }
+
+    if (openLogoutDialog.value) {
+        dialogAlert(
+            onDismissRequest = { openLogoutDialog.value = false },
+            onConfirmation = {
+                openLogoutDialog.value = false
+                viewModel.logout()
+
+                navController.navigate("welcome") {
+                    popUpTo("home") { inclusive = true }
+                    launchSingleTop = true
+                }
+            },
+            dialogTitle = "Keluar",
+            dialogText = "Yakin ingin Keluar?",
+            icon = Icons.Default.Info
+        )
+    }
 }
 @Composable
-fun ProfileMenuItem(
-    icon: ImageVector,
+fun MenuItem(
+    painter: Painter,
     title: String,
     subtitle: String,
+    iconColor: Color = colorResource(R.color.colorOnSurfaceVariant),
     onClick: () -> Unit
 ) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .clickable(onClick = onClick)
-            .padding(horizontal = 16.dp, vertical = 16.dp),
+            .padding(horizontal = 16.dp, vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Icon(
-            imageVector = icon,
+            painter = painter,
             contentDescription = title,
             modifier = Modifier.size(24.dp),
-            tint = Color(0xFF1976D2)
+            tint = iconColor
         )
 
         Spacer(modifier = Modifier.width(16.dp))
@@ -223,43 +242,96 @@ fun ProfileMenuItem(
 }
 
 @Composable
-fun PhotoPickerDialog(
+fun dialogInput(
+    title: String,
+    value: String,
+    onValueChange: (String) -> Unit,
+    onConfirm: () -> Unit,
     onDismiss: () -> Unit,
-    onPhotoSelected: (String) -> Unit
+    isLoading: Boolean = false
 ) {
-    var photoUrl by remember { mutableStateOf("") }
-
     AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text("Ubah Foto Profil") },
+
+        containerColor = colorResource(com.example.biblio.R.color.colorBackground),      // warna background dialog
+        titleContentColor = colorResource(com.example.biblio.R.color.colorOnBackground),         // warna judul
+        textContentColor = colorResource(R.color.colorOnBackground),
+
+        onDismissRequest = { if (!isLoading) onDismiss() },
+        title = { Text(title) },
         text = {
             Column {
-                Text("Masukkan URL foto profil:")
-                Spacer(modifier = Modifier.height(8.dp))
                 OutlinedTextField(
-                    value = photoUrl,
-                    onValueChange = { photoUrl = it },
-                    placeholder = { Text("https://example.com/photo.jpg") },
-                    modifier = Modifier.fillMaxWidth()
+                    value = value,
+                    onValueChange = onValueChange,
+                    singleLine = true,
+                    enabled = !isLoading
                 )
-                Spacer(modifier = Modifier.height(8.dp))
-                Text(
-                    text = "Atau gunakan foto default",
-                    fontSize = 12.sp,
-                    color = Color.Gray
-                )
+                if (isLoading) {
+                    Spacer(modifier = Modifier.height(8.dp))
+                    CircularProgressIndicator(modifier = Modifier.size(24.dp))
+                }
             }
         },
         confirmButton = {
             TextButton(
-                onClick = { onPhotoSelected(photoUrl) },
-                enabled = photoUrl.isNotEmpty()
+                onClick = onConfirm,
+                enabled = !isLoading
             ) {
-                Text("Simpan")
+                Text("OK")
             }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) {
+            TextButton(
+                onClick = onDismiss,
+                enabled = !isLoading
+            ) {
+                Text("Batal")
+            }
+        }
+    )
+}
+
+@Composable
+fun dialogAlert(
+    onDismissRequest: () -> Unit,
+    onConfirmation: () -> Unit,
+    dialogTitle: String,
+    dialogText: String,
+    icon: ImageVector,
+) {
+    AlertDialog(
+
+        containerColor = colorResource(com.example.biblio.R.color.colorBackground),      // warna background dialog
+        titleContentColor = colorResource(com.example.biblio.R.color.colorOnBackground),         // warna judul
+        textContentColor = colorResource(R.color.colorOnBackground),
+
+        icon = {
+            Icon(icon, contentDescription = "Example Icon")
+        },
+        title = {
+            Text(text = dialogTitle)
+        },
+        text = {
+            Text(text = dialogText)
+        },
+        onDismissRequest = {
+            onDismissRequest()
+        },
+        confirmButton = {
+            TextButton(
+                onClick = {
+                    onConfirmation()
+                }
+            ) {
+                Text("Logout")
+            }
+        },
+        dismissButton = {
+            TextButton(
+                onClick = {
+                    onDismissRequest()
+                }
+            ) {
                 Text("Batal")
             }
         }
