@@ -22,6 +22,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
@@ -32,59 +33,27 @@ import com.example.biblio.ibmplexsans
 @Composable
 fun Profile(
     name: String,
-    photoUrl: String? = null,
+    backgroundColor: Color = colorResource(id = R.color.colorPrimaryVariant),
+    textColor: Color = Color.White,
+    size: Dp = 48.dp,
+    fontSize: TextUnit = 20.sp,
     modifier: Modifier = Modifier,
-    onProfileClick: () -> Unit = {} // ✅ HANYA CALLBACK
+    navController: NavController? = null,
 ) {
-    Row(
-        modifier = modifier.fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceBetween
+    Box(
+        modifier = modifier
+            .size(size)
+            .clip(CircleShape)
+            .background(backgroundColor, shape = CircleShape)
+            .clickable { navController?.navigate("profile") },
+        contentAlignment = Alignment.Center
     ) {
-        Column {
-            Text(
-                text = "Hi, $name! 👋",
-                fontSize = 28.sp,
-                fontWeight = androidx.compose.ui.text.font.FontWeight.Bold,
-                fontFamily = fraunces,
-                color = Color.Black
-            )
-            Text(
-                text = "Mau baca apa hari ini?",
-                fontSize = 14.sp,
-                color = Color.Gray,
-                fontFamily = ibmplexsans
-            )
-        }
-
-        // FOTO PROFIL
-        Box(
-            modifier = Modifier
-                .size(56.dp)
-                .clip(CircleShape)
-                .background(Color(0xFF1976D2))
-                .border(2.dp, Color.White, CircleShape)
-                .clickable { onProfileClick() },
-            contentAlignment = Alignment.Center
-        ) {
-            if (!photoUrl.isNullOrEmpty() && photoUrl.startsWith("http")) {
-                // ✅ VALIDASI URL sebelum load
-                AsyncImage(
-                    model = photoUrl,
-                    contentDescription = "Profile Photo",
-                    contentScale = androidx.compose.ui.layout.ContentScale.Crop,
-                    modifier = Modifier.fillMaxSize()
-                )
-            } else {
-                // ✅ FALLBACK jika URL kosong
-                Text(
-                    text = name.firstOrNull()?.uppercase() ?: "?",
-                    fontSize = 24.sp,
-                    fontWeight = androidx.compose.ui.text.font.FontWeight.Bold,
-                    color = Color.White,
-                    fontFamily = ibmplexsans
-                )
-            }
-        }
+        Text(
+            text = name.firstOrNull()?.uppercase() ?: "?",
+            color = textColor,
+            fontFamily = ibmplexsans,
+            fontSize = fontSize,
+            fontWeight = FontWeight.Bold
+        )
     }
 }

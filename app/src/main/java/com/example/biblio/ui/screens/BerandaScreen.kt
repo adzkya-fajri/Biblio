@@ -41,12 +41,13 @@ import com.example.biblio.ui.components.Profile
 import com.example.biblio.ui.components.SectionItem
 import com.example.biblio.viewmodel.BukuViewModel
 import com.example.biblio.viewmodel.BukuViewModelFactory
+import com.google.firebase.Firebase
+import com.google.firebase.auth.auth
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BerandaScreen(
-    onNavigateToProfile: () -> Unit,
     navController: NavController,
     viewModel: BukuViewModel = viewModel(
         factory = BukuViewModelFactory(
@@ -54,20 +55,10 @@ fun BerandaScreen(
             FavoriteRepository(LocalContext.current)
         )
     ),
-//    userViewModel: UserViewModel = viewModel(
-//        factory = UserViewModelFactory(
-//            UserRepository(LocalContext.current)
-//        )
-//    ) // ✅ INJECT UserViewModel
 ) {
     val bookDatabase by viewModel.bookDatabase.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
     val state = rememberPullToRefreshState()
-
-    // ✅ GET USER DATA
-//    val userProfile by userViewModel.userProfile.collectAsState()
-//    val displayName = userProfile.name
-//    val photoUrl = userProfile.photoUrl
 
     PullToRefreshBox(
         isRefreshing = isLoading,
@@ -100,14 +91,18 @@ fun BerandaScreen(
                 modifier = Modifier.fillMaxSize(),
                 contentPadding = androidx.compose.foundation.layout.PaddingValues(top = 16.dp, bottom = 24.dp)
             ) {
-//                item {
-//                    Profile(
-//                        name = displayName,
-//                        photoUrl = photoUrl, // ✅ PASS DATA
-//                        modifier = Modifier.padding(horizontal = 16.dp),
-//                        onProfileClick = onNavigateToProfile
-//                    )
-//                }
+                item {
+                    val user = Firebase.auth.currentUser
+                    user?.let {
+                        Profile(
+                            name = it.displayName ?: "Unknown",
+//                            photoUrl = it.photoUrl, // ✅ PASS DATA
+                            modifier = Modifier.padding(horizontal = 16.dp),
+                            navController = navController
+                        )
+                        Spacer(modifier = Modifier.height(16.dp))
+                    }
+                }
 
                 val sections = bookDatabase?.sections ?: emptyList()
                 if (sections.isNotEmpty()) {

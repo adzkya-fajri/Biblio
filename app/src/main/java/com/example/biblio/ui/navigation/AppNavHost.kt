@@ -37,108 +37,65 @@ import com.google.firebase.auth.auth
 
 
 @Composable
-fun AppNavHost() { // ✅ PASTIKAN NAMA INI
+fun AppNavHost() {
     val navController = rememberNavController()
 
     // Lemparkan user ke welcome kalau belum login
-    val auth = FirebaseAuth.getInstance()
-    val viewModel: AuthViewModel = viewModel()
-    val authState by viewModel.authState.collectAsState()
-
-    // Auth state handler
-    LaunchedEffect(authState) {
-        when (authState) {
-            is AuthState.Success -> {
-                navController.navigate("main") {
-                    popUpTo(0) { inclusive = true }
-                }
-            }
-            is AuthState.Idle -> {
-                if (auth.currentUser == null) {
-                    navController.navigate("welcome") {
-                        popUpTo(0) { inclusive = true }
-                    }
-                }
-            }
-            else -> {}
-        }
-    }
-
-    val startDestination = if (auth.currentUser != null) "main" else "welcome"
+    val startDestination = if (Firebase.auth.currentUser != null) "main" else "welcome"
 
     NavHost(
         navController = navController,
         startDestination = startDestination,
         enterTransition = {
-            slideInHorizontally(initialOffsetX = { it / 2 }, animationSpec = tween(300, easing = FastOutSlowInEasing)) +
-                    fadeIn(animationSpec = tween(200, easing = FastOutSlowInEasing))
+            slideInHorizontally(
+                initialOffsetX = { it / 2 },
+                animationSpec = tween(
+                    durationMillis = 300,
+                    easing = FastOutSlowInEasing
+                )
+            ) + fadeIn(
+                animationSpec = tween(
+                    durationMillis = 200,
+                    easing = FastOutSlowInEasing
+                )
+            )
         },
+
         exitTransition = {
-            slideOutHorizontally(targetOffsetX = { -it / 3 }, animationSpec = tween(200, easing = FastOutLinearInEasing)) +
-                    fadeOut(animationSpec = tween(100, easing = FastOutLinearInEasing))
+            slideOutHorizontally(
+                targetOffsetX = { -it / 3 },
+                animationSpec = tween(
+                    durationMillis = 200,
+                    easing = FastOutLinearInEasing
+                )
+            ) + fadeOut(
+                animationSpec = tween(
+                    durationMillis = 100,
+                    easing = FastOutLinearInEasing
+                )
+            )
+        },
+
+        popEnterTransition = {
+            slideInHorizontally(
+                initialOffsetX = { -it / 3 },
+                animationSpec = tween(
+                    durationMillis = 200,
+                    easing = FastOutSlowInEasing
+                )
+            ) + fadeIn(tween(400, easing = FastOutSlowInEasing))
+        },
+
+        popExitTransition = {
+            slideOutHorizontally(
+                targetOffsetX = { it / 3 },
+                animationSpec = tween(
+                    durationMillis = 200,
+                    easing = FastOutLinearInEasing
+                )
+            ) + fadeOut(tween(100, easing = FastOutLinearInEasing))
         }
     ) {
-        composable("welcome") { WelcomeScreen(navController = navController) }
-        composable("login") { LoginScreen(onLoginSuccess = { navController.navigate("main") }) }
-        composable("main") { MainScreen(navController = navController) }
-        composable("koleksi") { KoleksiScreen() }
-
-        // ✅ PASTIKAN ADA INI
-        composable("beranda") {
-            BerandaScreen(
-                onNavigateToProfile = {
-                    println("DEBUG: Navigating to profile screen")
-                    navController.navigate("profile")
-                },
-                navController = navController
-            )
-        }
-
-        // ===== PROFILE ROUTES (TAMBAHAN BARU) =====
-        composable("profile") {
-            ProfileScreen(
-                onNavigateBack = {
-                    navController.popBackStack()
-                },
-                onNavigateToEditName = {
-                    navController.navigate("editName")
-                },
-                onNavigateToManageProfile = {
-                    navController.navigate("manageProfile")
-                },
-                onNavigateToStyleText = {
-                    navController.navigate("styleText")
-                },
-                onNavigateToAbout = {
-                    navController.navigate("about")
-                }
-            )
-        }
-
-        composable("editName") {
-            EditNameScreen(
-                onNavigateBack = { navController.popBackStack() }
-            )
-        }
-
-        composable("manageProfile") {
-            ManageProfileScreen(
-                onNavigateBack = { navController.popBackStack() }
-            )
-        }
-
-        composable("styleText") {
-            StyleTextScreen(
-                onNavigateBack = { navController.popBackStack() }
-            )
-        }
-
-        composable("about") {
-            AboutBiblioScreen(
-                onNavigateBack = { navController.popBackStack() }
-            )
-        }
-
         composable("login") {
             LoginScreen(
                 onLoginSuccess = {
@@ -158,6 +115,15 @@ fun AppNavHost() { // ✅ PASTIKAN NAMA INI
                 },
                 navController = navController
             )
+        }
+        composable("welcome") {
+            WelcomeScreen(navController = navController)
+        }
+        composable("main") {
+            MainScreen(navController = navController)
+        }
+        composable("koleksi") {
+            KoleksiScreen()
         }
     }
 }

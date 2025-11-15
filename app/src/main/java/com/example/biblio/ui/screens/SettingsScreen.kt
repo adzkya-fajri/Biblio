@@ -38,21 +38,10 @@ import com.example.biblio.viewmodel.AuthViewModel
 import java.time.format.TextStyle
 
 @Composable
-fun SettingsScreen(
-    onLogoutSuccess: () -> Unit,
-    navController: NavController
-) {
+fun SettingsScreen(navController: NavController) {
 
     val viewModel: AuthViewModel = viewModel()
     val openLogoutDialog = remember { mutableStateOf(false) }
-    val authState by viewModel.authState.collectAsState()
-
-    // Navigasi otomatis setelah logout
-    LaunchedEffect(authState) {
-        if (authState == AuthState.Idle) {
-            onLogoutSuccess()
-        }
-    }
 
     val list = listOf(
         "C++", "C", "C#", "Java", "Kotlin", "Dart", "Python", "Javascript", "SpringBoot",
@@ -74,7 +63,6 @@ fun SettingsScreen(
 
         // lazy column for displaying listview.
         LazyColumn {
-            // ✅ FIXED: Button di item terpisah
             item {
                 Button(
                     onClick = {
@@ -83,27 +71,8 @@ fun SettingsScreen(
                 ) {
                     Text("Logout")
                 }
-
-                if (openLogoutDialog.value) {
-                    AlertDialogLogout(
-                        onDismissRequest = { openLogoutDialog.value = false },
-                        onConfirmation = {
-                            openLogoutDialog.value = false
-                            viewModel.logout()
-
-                            navController.navigate("welcome") {
-                                popUpTo("home") { inclusive = true }
-                                launchSingleTop = true
-                            }
-                        },
-                        dialogTitle = "Keluar",
-                        dialogText = "Yakin ingin Keluar?",
-                        icon = Icons.Default.Info
-                    )
-                }
             }
-
-            // ✅ FIXED: items() di luar item()
+            // populating items for listview.
             items(list) { language ->
                 Column(
                     modifier = Modifier.clickable { /* action */ }
@@ -114,51 +83,4 @@ fun SettingsScreen(
             }
         }
     }
-}
-
-@Composable
-fun AlertDialogLogout(
-    onDismissRequest: () -> Unit,
-    onConfirmation: () -> Unit,
-    dialogTitle: String,
-    dialogText: String,
-    icon: ImageVector,
-) {
-    AlertDialog(
-
-        containerColor = colorResource(R.color.colorBackground),      // warna background dialog
-        titleContentColor = colorResource(R.color.colorOnBackground),         // warna judul
-        textContentColor = colorResource(R.color.colorOnBackground),
-
-        icon = {
-            Icon(icon, contentDescription = "Example Icon")
-        },
-        title = {
-            Text(text = dialogTitle)
-        },
-        text = {
-            Text(text = dialogText)
-        },
-        onDismissRequest = {
-            onDismissRequest()
-        },
-        confirmButton = {
-            TextButton(
-                onClick = {
-                    onConfirmation()
-                }
-            ) {
-                Text("Logout")
-            }
-        },
-        dismissButton = {
-            TextButton(
-                onClick = {
-                    onDismissRequest()
-                }
-            ) {
-                Text("Batal")
-            }
-        }
-    )
 }

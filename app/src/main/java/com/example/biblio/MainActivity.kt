@@ -53,9 +53,11 @@ class MainActivity : ComponentActivity() {
         actionBar?.hide()
         setContent {
             BiblioTheme {
-                Surface(
-                    modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colorScheme.background
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(MaterialTheme.colorScheme.background)
+                        .safeDrawingPadding()
                 ) {
                     AppNavHost()
                 }

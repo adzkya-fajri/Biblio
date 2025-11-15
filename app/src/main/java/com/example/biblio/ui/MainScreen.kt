@@ -22,6 +22,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavType
@@ -31,11 +32,16 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.example.biblio.ibmplexsans
 import com.example.biblio.ui.components.BottomBar
+import com.example.biblio.ui.screens.AboutBiblioScreen
 import com.example.biblio.ui.screens.BerandaScreen
 import com.example.biblio.ui.screens.BukuScreen
 import com.example.biblio.ui.screens.CariScreen
+import com.example.biblio.ui.screens.EditNameScreen
 import com.example.biblio.ui.screens.KoleksiScreen
+import com.example.biblio.ui.screens.ManageProfileScreen
+import com.example.biblio.ui.screens.ProfileScreen
 import com.example.biblio.ui.screens.SettingsScreen
+import com.example.biblio.ui.screens.StyleTextScreen
 import com.example.biblio.viewmodel.AuthViewModel
 import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
@@ -140,13 +146,7 @@ fun MainScreen(navController: NavController) {
             }
 
         ) {
-            // ✅ FIXED: Tambahkan onNavigateToProfile
-            composable("beranda") {
-               BerandaScreen(
-               onNavigateToProfile = { navController.navigate("settings") }, // ← INI
-               navController = innerNavController
-               )
-            }
+            composable("beranda") { BerandaScreen(navController = innerNavController) }
             composable("cari") { CariScreen() }
             composable("koleksi") { KoleksiScreen() }
 
@@ -162,17 +162,9 @@ fun MainScreen(navController: NavController) {
                     navController = navController
                 )
             }
-            composable("settings") {
-                SettingsScreen(
-                    navController = navController,
-                    onLogoutSuccess = {
-                        // Logout = kembali ke welcome & hapus semua stack
-                        navController.navigate("welcome") {
-                            popUpTo(0) { inclusive = true }
-                        }
-                    }
-                )
-            }
+            composable("settings") { SettingsScreen(navController = navController) }
+//            composable("tentang") { AboutBiblioScreen(navController = navController) }
+            composable("profile") { ProfileScreen(navController = navController) }
         }
     }
 }
