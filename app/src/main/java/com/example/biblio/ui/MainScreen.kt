@@ -15,12 +15,14 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontFamily
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -34,6 +36,9 @@ import com.example.biblio.ui.screens.BukuScreen
 import com.example.biblio.ui.screens.CariScreen
 import com.example.biblio.ui.screens.KoleksiScreen
 import com.example.biblio.ui.screens.SettingsScreen
+import com.example.biblio.viewmodel.AuthViewModel
+import com.google.firebase.Firebase
+import com.google.firebase.auth.auth
 
 @Composable
 fun MainScreen(navController: NavController) {
@@ -42,6 +47,16 @@ fun MainScreen(navController: NavController) {
 
     var selectedTab by remember { mutableIntStateOf(0) }
     var previousTab by remember { mutableIntStateOf(0) }
+
+    // Ini biar si user engga nyasar ke beranda kalau belum login
+    val user = Firebase.auth.currentUser
+    LaunchedEffect(user) {
+        if (user == null) {
+            navController.navigate("welcome") {
+                popUpTo("main") { inclusive = true }
+            }
+        }
+    }
 
     val transitionSpec: AnimatedContentTransitionScope<Int>.() -> ContentTransform = {
         if (targetState > initialState) {
@@ -147,6 +162,7 @@ fun MainScreen(navController: NavController) {
                     navController = navController
                 )
             }
+            composable("settings") { SettingsScreen(navController = navController) }
             composable("settings") {
                 SettingsScreen(onLogoutSuccess = {
                     // Logout = kembali ke welcome & hapus semua stack

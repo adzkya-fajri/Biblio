@@ -1,31 +1,51 @@
 package com.example.biblio.viewmodel
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import kotlinx.coroutines.delay
+import com.example.biblio.data.model.User
+import com.example.biblio.data.repository.AuthRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
-class AuthViewModel : ViewModel() {
+sealed class AuthState {
+    object Idle : AuthState()
+    object Loading : AuthState()
+    data class Success(val user: User) : AuthState()
+    data class Error(val message: String) : AuthState()
+}
+
+class AuthViewModel(private val repository: AuthRepository = AuthRepository()) : ViewModel() {
     private val _authState = MutableStateFlow<AuthState>(AuthState.Idle)
-    val authState: StateFlow<AuthState> = _authState.asStateFlow()
+    val authState: StateFlow<AuthState> = _authState
 
     fun login(email: String, password: String) {
         viewModelScope.launch {
             _authState.value = AuthState.Loading
-            delay(1500) // Simulasi jaringan
-
-            // Logic sederhana (ganti dengan API call nyata)
-            if (email.isNotBlank() && password.length >= 6) {
-                _authState.value = AuthState.Success
-            } else {
-                _authState.value = AuthState.Error("Email atau password salah")
-            }
+            val result = repository.login(email, password)
+            _authState.value = result.fold(
+                onSuccess = { AuthState.Success(it) },
+                onFailure = { AuthState.Error(it.message ?: "Unknown error") }
+            )
         }
     }
+
+    fun register(email: String, password: String, displayName: String) {
+        viewModelScope.launch {
+            _authState.value = AuthState.Loading
+            val result = repository.register(email, password, displayName)
+            _authState.value = result.fold(
+                onSuccess = { AuthState.Success(it) },
+                onFailure = { AuthState.Error(it.message ?: "Unknown error") }
+            )
+        }
+    }
+
     fun logout() {
-        _authState.value = AuthState.Idle // Reset state
+        Log.d("AuthViewModel", "Logout called")
+        repository.logout()
+        _authState.value = AuthState.Idle
+        Log.d("AuthViewModel", "AuthState set to Idle")
     }
 }

@@ -12,6 +12,7 @@ import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import com.example.biblio.ui.navigation.AppNavigation
+import com.example.biblio.ui.navigation.AppNavHost
 import com.example.biblio.ui.theme.BiblioTheme
 import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
@@ -29,6 +30,8 @@ val fraunces = FontFamily(
     Font(R.font.fraunces, FontWeight.Normal),
 )
 
+private lateinit var auth: FirebaseAuth
+
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -42,6 +45,12 @@ class MainActivity : ComponentActivity() {
 //                darkScrim = Color.Transparent
 //            )
 //        )
+
+        // Inisialisasi Firebase auth
+        auth = Firebase.auth
+
+        enableEdgeToEdge()
+        actionBar?.hide()
         setContent {
             BiblioTheme {
                 Surface(
@@ -49,6 +58,7 @@ class MainActivity : ComponentActivity() {
                     color = MaterialTheme.colorScheme.background
                 ) {
                     AppNavigation() // ← PAKAI INI
+                    AppNavHost()
                 }
             }
         }

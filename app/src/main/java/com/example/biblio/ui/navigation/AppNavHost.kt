@@ -5,8 +5,21 @@ import androidx.compose.animation.core.*
 import androidx.compose.runtime.*
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.*
+import androidx.compose.animation.core.FastOutLinearInEasing
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
 import com.example.biblio.ui.MainScreen
 import com.example.biblio.ui.auth.LoginScreen
+import com.example.biblio.ui.auth.RegisterScreen
 import com.example.biblio.ui.auth.WelcomeScreen
 import com.example.biblio.ui.screens.AboutBiblioScreen
 import com.example.biblio.ui.screens.BerandaScreen
@@ -18,11 +31,18 @@ import com.example.biblio.ui.screens.SettingsScreen
 import com.example.biblio.ui.screens.StyleTextScreen
 import com.example.biblio.viewmodel.AuthState
 import com.example.biblio.viewmodel.AuthViewModel
+import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.auth
+
 
 @Composable
+fun AppNavHost() {
 fun AppNavigation() { // ✅ PASTIKAN NAMA INI
     val navController = rememberNavController()
+
+    // Lemparkan user ke welcome kalau belum login
+    val startDestination = if (Firebase.auth.currentUser != null) "main" else "welcome"
     val auth = FirebaseAuth.getInstance()
     val viewModel: AuthViewModel = viewModel()
     val authState by viewModel.authState.collectAsState()
@@ -118,6 +138,26 @@ fun AppNavigation() { // ✅ PASTIKAN NAMA INI
         composable("about") {
             AboutBiblioScreen(
                 onNavigateBack = { navController.popBackStack() }
+            )
+    ) {
+        composable("login") {
+            LoginScreen(
+                onLoginSuccess = {
+                    navController.navigate("main") {
+                        popUpTo("welcome") { inclusive = true }
+                    }
+                },
+                navController = navController
+            )
+        }
+        composable("register"){
+            RegisterScreen(
+                onLoginSuccess = {
+                    navController.navigate("main") {
+                        popUpTo("welcome") { inclusive = true }
+                    }
+                },
+                navController = navController
             )
         }
 
