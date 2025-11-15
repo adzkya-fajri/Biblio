@@ -18,21 +18,19 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.biblio.data.repository.UserRepository
+//import com.example.biblio.data.repository.UserRepository
 import com.example.biblio.fraunces
 import com.example.biblio.ibmplexsans
-import com.example.biblio.viewmodel.UserViewModel
-import com.example.biblio.viewmodel.UserViewModelFactory
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun StyleTextScreen(
     onNavigateBack: () -> Unit = {},
-    userViewModel: UserViewModel = viewModel(
-        factory = UserViewModelFactory(UserRepository(LocalContext.current))
-    )
+//    userViewModel: UserViewModel = viewModel(
+//        factory = UserViewModelFactory(UserRepository(LocalContext.current))
+//    )
 ) {
-    val userProfile by userViewModel.userProfile.collectAsState()
+//    val userProfile by userViewModel.userProfile.collectAsState()
 
     Scaffold(
         topBar = {
@@ -68,46 +66,46 @@ fun StyleTextScreen(
             Spacer(modifier = Modifier.height(24.dp))
 
             // Default Font
-            FontStyleOption(
-                title = "Default",
-                subtitle = "Font bawaan aplikasi",
-                fontFamily = ibmplexsans,
-                isSelected = userProfile.fontStyle == "default",
-                onClick = { userViewModel.updateFontStyle("default") }
-            )
+//            FontStyleOption(
+//                title = "Default",
+//                subtitle = "Font bawaan aplikasi",
+//                fontFamily = ibmplexsans,
+//                isSelected = userProfile.fontStyle == "default",
+//                onClick = { userViewModel.updateFontStyle("default") }
+//            )
 
             Spacer(modifier = Modifier.height(12.dp))
 
             // Serif Font
-            FontStyleOption(
-                title = "Serif",
-                subtitle = "Font klasik untuk membaca",
-                fontFamily = fraunces,
-                isSelected = userProfile.fontStyle == "serif",
-                onClick = { userViewModel.updateFontStyle("serif") }
-            )
+//            FontStyleOption(
+//                title = "Serif",
+//                subtitle = "Font klasik untuk membaca",
+//                fontFamily = fraunces,
+//                isSelected = userProfile.fontStyle == "serif",
+//                onClick = { userViewModel.updateFontStyle("serif") }
+//            )
 
             Spacer(modifier = Modifier.height(12.dp))
 
             // Sans Serif Font
-            FontStyleOption(
-                title = "Sans Serif",
-                subtitle = "Font modern dan bersih",
-                fontFamily = FontFamily.SansSerif,
-                isSelected = userProfile.fontStyle == "sans",
-                onClick = { userViewModel.updateFontStyle("sans") }
-            )
+//            FontStyleOption(
+//                title = "Sans Serif",
+//                subtitle = "Font modern dan bersih",
+//                fontFamily = FontFamily.SansSerif,
+//                isSelected = userProfile.fontStyle == "sans",
+//                onClick = { userViewModel.updateFontStyle("sans") }
+//            )
 
             Spacer(modifier = Modifier.height(12.dp))
 
             // Monospace Font
-            FontStyleOption(
-                title = "Monospace",
-                subtitle = "Font dengan lebar sama",
-                fontFamily = FontFamily.Monospace,
-                isSelected = userProfile.fontStyle == "monospace",
-                onClick = { userViewModel.updateFontStyle("monospace") }
-            )
+//            FontStyleOption(
+//                title = "Monospace",
+//                subtitle = "Font dengan lebar sama",
+//                fontFamily = FontFamily.Monospace,
+//                isSelected = userProfile.fontStyle == "monospace",
+//                onClick = { userViewModel.updateFontStyle("monospace") }
+//            )
         }
     }
 }

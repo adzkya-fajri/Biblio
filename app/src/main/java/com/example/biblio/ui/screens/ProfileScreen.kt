@@ -23,10 +23,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
-import com.example.biblio.data.repository.UserRepository
+//import com.example.biblio.data.repository.UserRepository
 import com.example.biblio.fraunces
-import com.example.biblio.viewmodel.UserViewModel
-import com.example.biblio.viewmodel.UserViewModelFactory
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -36,11 +34,11 @@ fun ProfileScreen(
     onNavigateToManageProfile: () -> Unit = {},
     onNavigateToStyleText: () -> Unit = {},
     onNavigateToAbout: () -> Unit = {},
-    userViewModel: UserViewModel = viewModel(
-        factory = UserViewModelFactory(UserRepository(LocalContext.current))
-    )
+//    userViewModel: UserViewModel = viewModel(
+//        factory = UserViewModelFactory(UserRepository(LocalContext.current))
+//    )
 ) {
-    val userProfile by userViewModel.userProfile.collectAsState()
+//    val userProfile by userViewModel.userProfile.collectAsState()
     var showPhotoDialog by remember { mutableStateOf(false) }
 
     Scaffold(
@@ -78,21 +76,21 @@ fun ProfileScreen(
                         .clickable { showPhotoDialog = true },
                     contentAlignment = Alignment.Center
                 ) {
-                    if (userProfile.photoUrl.isNotEmpty()) {
-                        AsyncImage(
-                            model = userProfile.photoUrl,
-                            contentDescription = "Profile Photo",
-                            contentScale = ContentScale.Crop,
-                            modifier = Modifier.fillMaxSize()
-                        )
-                    } else {
-                        Text(
-                            text = userProfile.name.first().uppercase(),
-                            fontSize = 48.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = Color.White
-                        )
-                    }
+//                    if (userProfile.photoUrl.isNotEmpty()) {
+//                        AsyncImage(
+//                            model = userProfile.photoUrl,
+//                            contentDescription = "Profile Photo",
+//                            contentScale = ContentScale.Crop,
+//                            modifier = Modifier.fillMaxSize()
+//                        )
+//                    } else {
+//                        Text(
+//                            text = userProfile.name.first().uppercase(),
+//                            fontSize = 48.sp,
+//                            fontWeight = FontWeight.Bold,
+//                            color = Color.White
+//                        )
+//                    }
 
                     // Icon Camera
                     Box(
@@ -115,18 +113,18 @@ fun ProfileScreen(
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                Text(
-                    text = userProfile.name,
-                    fontSize = 24.sp,
-                    fontWeight = FontWeight.Bold,
-                    fontFamily = fraunces
-                )
-
-                Text(
-                    text = userProfile.email,
-                    fontSize = 14.sp,
-                    color = Color.Gray
-                )
+//                Text(
+//                    text = userProfile.name,
+//                    fontSize = 24.sp,
+//                    fontWeight = FontWeight.Bold,
+//                    fontFamily = fraunces
+//                )
+//
+//                Text(
+//                    text = userProfile.email,
+//                    fontSize = 14.sp,
+//                    color = Color.Gray
+//                )
             }
 
             Divider()
@@ -169,16 +167,16 @@ fun ProfileScreen(
         }
     }
 
-    // Dialog untuk ganti foto
-    if (showPhotoDialog) {
-        PhotoPickerDialog(
-            onDismiss = { showPhotoDialog = false },
-            onPhotoSelected = { url ->
-                userViewModel.updatePhoto(url)
-                showPhotoDialog = false
-            }
-        )
-    }
+//    // Dialog untuk ganti foto
+//    if (showPhotoDialog) {
+//        PhotoPickerDialog(
+//            onDismiss = { showPhotoDialog = false },
+//            onPhotoSelected = { url ->
+//                userViewModel.updatePhoto(url)
+//                showPhotoDialog = false
+//            }
+//        )
+//    }
 }
 @Composable
 fun ProfileMenuItem(

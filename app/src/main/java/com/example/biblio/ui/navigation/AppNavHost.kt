@@ -37,12 +37,10 @@ import com.google.firebase.auth.auth
 
 
 @Composable
-fun AppNavHost() {
-fun AppNavigation() { // ✅ PASTIKAN NAMA INI
+fun AppNavHost() { // ✅ PASTIKAN NAMA INI
     val navController = rememberNavController()
 
     // Lemparkan user ke welcome kalau belum login
-    val startDestination = if (Firebase.auth.currentUser != null) "main" else "welcome"
     val auth = FirebaseAuth.getInstance()
     val viewModel: AuthViewModel = viewModel()
     val authState by viewModel.authState.collectAsState()
@@ -139,7 +137,8 @@ fun AppNavigation() { // ✅ PASTIKAN NAMA INI
             AboutBiblioScreen(
                 onNavigateBack = { navController.popBackStack() }
             )
-    ) {
+        }
+
         composable("login") {
             LoginScreen(
                 onLoginSuccess = {
@@ -158,16 +157,6 @@ fun AppNavigation() { // ✅ PASTIKAN NAMA INI
                     }
                 },
                 navController = navController
-            )
-        }
-
-        composable("settings") {
-            SettingsScreen(
-                onLogoutSuccess = {
-                    navController.navigate("welcome") {
-                        popUpTo(0) { inclusive = true }
-                    }
-                }
             )
         }
     }

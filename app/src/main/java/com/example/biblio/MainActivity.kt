@@ -11,7 +11,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
-import com.example.biblio.ui.navigation.AppNavigation
+import com.example.biblio.ui.navigation.AppNavHost
 import com.example.biblio.ui.navigation.AppNavHost
 import com.example.biblio.ui.theme.BiblioTheme
 import com.google.firebase.Firebase
@@ -57,7 +57,6 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    AppNavigation() // ← PAKAI INI
                     AppNavHost()
                 }
             }

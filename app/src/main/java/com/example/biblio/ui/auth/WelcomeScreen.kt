@@ -44,7 +44,6 @@ import androidx.navigation.NavController
 import com.example.biblio.R
 import com.example.biblio.fraunces
 import com.example.biblio.ibmplexsans
-import com.example.biblio.viewmodel.AuthState
 import com.example.biblio.viewmodel.AuthViewModel
 
 @Composable

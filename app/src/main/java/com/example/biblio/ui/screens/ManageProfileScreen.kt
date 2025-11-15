@@ -14,17 +14,15 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.biblio.data.repository.UserRepository
-import com.example.biblio.viewmodel.UserViewModel
-import com.example.biblio.viewmodel.UserViewModelFactory
+//import com.example.biblio.data.repository.UserRepository
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ManageProfileScreen(
     onNavigateBack: () -> Unit = {},
-    userViewModel: UserViewModel = viewModel(
-        factory = UserViewModelFactory(UserRepository(LocalContext.current))
-    )
+//    userViewModel: UserViewModel = viewModel(
+//        factory = UserViewModelFactory(UserRepository(LocalContext.current))
+//    )
 ) {
     val context = LocalContext.current
     var oldPassword by remember { mutableStateOf("") }
@@ -123,13 +121,13 @@ fun ManageProfileScreen(
                             Toast.makeText(context, "Password tidak cocok", Toast.LENGTH_SHORT).show()
                         }
                         else -> {
-                            val success = userViewModel.updatePassword(oldPassword, newPassword)
-                            if (success) {
-                                Toast.makeText(context, "Password berhasil diubah", Toast.LENGTH_SHORT).show()
-                                onNavigateBack()
-                            } else {
-                                Toast.makeText(context, "Password lama salah", Toast.LENGTH_SHORT).show()
-                            }
+//                            val success = userViewModel.updatePassword(oldPassword, newPassword)
+//                            if (success) {
+//                                Toast.makeText(context, "Password berhasil diubah", Toast.LENGTH_SHORT).show()
+//                                onNavigateBack()
+//                            } else {
+//                                Toast.makeText(context, "Password lama salah", Toast.LENGTH_SHORT).show()
+//                            }
                         }
                     }
                 },

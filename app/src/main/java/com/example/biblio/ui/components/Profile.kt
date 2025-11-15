@@ -28,7 +28,6 @@ import androidx.navigation.compose.rememberNavController
 import coil.compose.AsyncImage
 import com.example.biblio.fraunces
 import com.example.biblio.ibmplexsans
-import com.example.biblio.viewmodel.UserViewModel
 
 @Composable
 fun Profile(

@@ -162,14 +162,16 @@ fun MainScreen(navController: NavController) {
                     navController = navController
                 )
             }
-            composable("settings") { SettingsScreen(navController = navController) }
             composable("settings") {
-                SettingsScreen(onLogoutSuccess = {
-                    // Logout = kembali ke welcome & hapus semua stack
-                    navController.navigate("welcome") {
-                        popUpTo(0) { inclusive = true }
+                SettingsScreen(
+                    navController = navController,
+                    onLogoutSuccess = {
+                        // Logout = kembali ke welcome & hapus semua stack
+                        navController.navigate("welcome") {
+                            popUpTo(0) { inclusive = true }
+                        }
                     }
-                })
+                )
             }
         }
     }

@@ -33,13 +33,14 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.biblio.R
+import com.example.biblio.viewmodel.AuthState
 import com.example.biblio.viewmodel.AuthViewModel
 import java.time.format.TextStyle
 
 @Composable
-fun SettingsScreen(navController: NavController) {
 fun SettingsScreen(
-    onLogoutSuccess: () -> Unit
+    onLogoutSuccess: () -> Unit,
+    navController: NavController
 ) {
 
     val viewModel: AuthViewModel = viewModel()

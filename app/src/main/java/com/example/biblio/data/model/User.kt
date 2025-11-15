@@ -5,5 +5,5 @@ data class User(
     val email: String = "",
     val displayName: String? = null,
     val photoUrl: String? = null,
-    val fontStyle: String = "regular"
+//    val fontStyle: String = "regular"
 )
