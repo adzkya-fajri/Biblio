@@ -1,6 +1,7 @@
 package com.example.biblio.ui.screens
 
 import android.R.attr.name
+import android.annotation.SuppressLint
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
@@ -32,6 +33,7 @@ import coil.compose.AsyncImage
 import com.example.biblio.R
 import com.example.biblio.data.repository.BukuRepository
 import com.example.biblio.data.repository.FavoriteRepository
+import com.example.biblio.data.repository.UserRepository
 import com.example.biblio.fraunces
 import com.example.biblio.ibmplexsans
 import com.example.biblio.ui.components.BigSectionItem
@@ -39,22 +41,35 @@ import com.example.biblio.ui.components.Profile
 import com.example.biblio.ui.components.SectionItem
 import com.example.biblio.viewmodel.BukuViewModel
 import com.example.biblio.viewmodel.BukuViewModelFactory
+import com.example.biblio.viewmodel.UserViewModel
+import com.example.biblio.viewmodel.UserViewModelFactory
 
+@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BerandaScreen(
-    onNavigateToProfile: () -> Unit = {},  // ← TAMBAHAN
+    onNavigateToProfile: () -> Unit,
     navController: NavController,
     viewModel: BukuViewModel = viewModel(
         factory = BukuViewModelFactory(
             BukuRepository(LocalContext.current),
-            FavoriteRepository(LocalContext.current)  // ← TAMBAHAN
+            FavoriteRepository(LocalContext.current)
         )
-    )
+    ),
+    userViewModel: UserViewModel = viewModel(
+        factory = UserViewModelFactory(
+            UserRepository(LocalContext.current)
+        )
+    ) // ✅ INJECT UserViewModel
 ) {
     val bookDatabase by viewModel.bookDatabase.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
     val state = rememberPullToRefreshState()
+
+    // ✅ GET USER DATA
+    val userProfile by userViewModel.userProfile.collectAsState()
+    val displayName = userProfile.name
+    val photoUrl = userProfile.photoUrl
 
     PullToRefreshBox(
         isRefreshing = isLoading,
@@ -89,9 +104,10 @@ fun BerandaScreen(
             ) {
                 item {
                     Profile(
-                        name = "Andi",
+                        name = displayName,
+                        photoUrl = photoUrl, // ✅ PASS DATA
                         modifier = Modifier.padding(horizontal = 16.dp),
-                        onProfileClick = onNavigateToProfile // ✅ CALLBACK
+                        onProfileClick = onNavigateToProfile
                     )
                 }
 
