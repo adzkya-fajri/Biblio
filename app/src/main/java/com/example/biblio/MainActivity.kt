@@ -11,8 +11,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
-
-import com.example.biblio.ui.navigation.NavHost
+import com.example.biblio.ui.navigation.AppNavigation
 import com.example.biblio.ui.theme.BiblioTheme
 import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
@@ -43,18 +42,13 @@ class MainActivity : ComponentActivity() {
 //                darkScrim = Color.Transparent
 //            )
 //        )
-
-        enableEdgeToEdge()
-        actionBar?.hide()
         setContent {
             BiblioTheme {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(MaterialTheme.colorScheme.background)
-                        .safeDrawingPadding()
+                Surface(
+                    modifier = Modifier.fillMaxSize(),
+                    color = MaterialTheme.colorScheme.background
                 ) {
-                    NavHost()
+                    AppNavigation() // ← PAKAI INI
                 }
             }
         }
