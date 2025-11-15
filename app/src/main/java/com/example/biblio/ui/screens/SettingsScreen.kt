@@ -11,6 +11,8 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -24,9 +26,19 @@ import com.example.biblio.viewmodel.AuthViewModel
 import java.time.format.TextStyle
 
 @Composable
-fun SettingsScreen() {
+fun SettingsScreen(
+    onLogoutSuccess: () -> Unit
+) {
 
     val viewModel: AuthViewModel = viewModel()
+    val authState by viewModel.authState.collectAsState()
+
+    // Navigasi otomatis setelah logout
+    LaunchedEffect(authState) {
+        if (authState == AuthState.Idle) {
+            onLogoutSuccess()
+        }
+    }
 
     val list = listOf(
         "C++", "C", "C#", "Java", "Kotlin", "Dart", "Python", "Javascript", "SpringBoot",
