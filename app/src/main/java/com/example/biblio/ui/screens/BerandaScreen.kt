@@ -25,6 +25,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -49,6 +50,7 @@ import com.google.firebase.auth.auth
 @Composable
 fun BerandaScreen(
     navController: NavController,
+    bottomPadding: Dp,
     viewModel: BukuViewModel = viewModel(
         factory = BukuViewModelFactory(
             BukuRepository(LocalContext.current),
@@ -88,8 +90,9 @@ fun BerandaScreen(
                 )
         ) {
             LazyColumn(
-                modifier = Modifier.fillMaxSize(),
-                contentPadding = androidx.compose.foundation.layout.PaddingValues(top = 16.dp, bottom = 24.dp)
+                modifier = Modifier
+                    .fillMaxSize(),
+                contentPadding = PaddingValues(bottom = bottomPadding)
             ) {
                 item {
                     val user = Firebase.auth.currentUser

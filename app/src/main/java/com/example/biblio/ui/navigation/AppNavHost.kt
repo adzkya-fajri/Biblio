@@ -122,8 +122,5 @@ fun AppNavHost() {
         composable("main") {
             MainScreen(navController = navController)
         }
-        composable("koleksi") {
-            KoleksiScreen()
-        }
     }
 }

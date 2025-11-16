@@ -2,6 +2,7 @@ package com.example.biblio
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
+import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.background
@@ -39,16 +40,12 @@ private lateinit var auth: FirebaseAuth
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-//        enableEdgeToEdge(
-////            statusBarStyle = SystemBarStyle.auto(
-////                lightScrim = Color.White.toArgb(),   // warna terang
-////                darkScrim = Color.Black.toArgb()     // warna gelap
-////            ),
+        enableEdgeToEdge(
 //            navigationBarStyle = SystemBarStyle.auto(
-//                lightScrim = Color.Transparent,
-//                darkScrim = Color.Transparent
+//                lightScrim = getColor(R.color.colorBackground), // warna navbar
+//                darkScrim = getColor(R.color.colorBackground)
 //            )
-//        )
+        )
 
         // Inisialisasi Firebase auth
         auth = Firebase.auth

@@ -13,6 +13,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -31,6 +32,7 @@ import androidx.navigation.NavController
 @Composable
 fun CariScreen(
     navController: NavController? = null,
+    bottomPadding: Dp,
     viewModel: BukuViewModel = viewModel(
         factory = BukuViewModelFactory (
             BukuRepository(LocalContext.current),
@@ -87,8 +89,8 @@ fun CariScreen(
 
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
-        contentPadding = PaddingValues(top = 16.dp, bottom = 24.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
+        contentPadding = PaddingValues(bottom = bottomPadding),
+        verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
         // HEADER ITEMS - gunakan `item` bukan `items`
         item {

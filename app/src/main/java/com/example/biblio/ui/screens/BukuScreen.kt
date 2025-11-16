@@ -2,6 +2,7 @@ package com.example.biblio.ui.screens
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
@@ -59,6 +60,7 @@ import kotlinx.coroutines.delay
 @Composable
 fun BukuScreen(
     bookId: String?,
+    bottomPadding: Dp,
     navController: NavController,
     coverHeight: Dp = 225.dp,
     coverWidth: Dp = 150.dp,
@@ -127,7 +129,8 @@ fun BukuScreen(
                 LazyColumn(
                     modifier = Modifier
                         .fillMaxSize(),
-                    horizontalAlignment = Alignment.CenterHorizontally
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    contentPadding = PaddingValues(bottom = bottomPadding)
                 ) {
                     item {
                         // Back button

@@ -13,13 +13,16 @@ import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.biblio.R
 import com.example.biblio.fraunces
 
-@Composable @Preview
-fun KoleksiScreen() {
+@Composable
+fun KoleksiScreen(
+    bottomPadding: Dp,
+) {
     Box(
         modifier = Modifier.fillMaxSize(),  // ambil seluruh layar
         contentAlignment = Alignment.Center  // semua content di tengah
