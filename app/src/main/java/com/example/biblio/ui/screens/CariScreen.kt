@@ -89,7 +89,7 @@ fun CariScreen(
 
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
-        contentPadding = PaddingValues(bottom = bottomPadding),
+        contentPadding = PaddingValues(bottom = bottomPadding, top = 10.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
         // HEADER ITEMS - gunakan `item` bukan `items`

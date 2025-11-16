@@ -92,7 +92,7 @@ fun BerandaScreen(
             LazyColumn(
                 modifier = Modifier
                     .fillMaxSize(),
-                contentPadding = PaddingValues(bottom = bottomPadding)
+                contentPadding = PaddingValues(bottom = bottomPadding, top = 10.dp)
             ) {
                 item {
                     val user = Firebase.auth.currentUser

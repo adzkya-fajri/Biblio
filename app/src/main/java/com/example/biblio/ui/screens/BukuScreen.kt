@@ -130,7 +130,7 @@ fun BukuScreen(
                     modifier = Modifier
                         .fillMaxSize(),
                     horizontalAlignment = Alignment.CenterHorizontally,
-                    contentPadding = PaddingValues(bottom = bottomPadding)
+                    contentPadding = PaddingValues(bottom = bottomPadding, top = 10.dp)
                 ) {
                     item {
                         // Back button
