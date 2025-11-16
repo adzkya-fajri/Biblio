@@ -102,7 +102,7 @@ fun NowReadingBar(
         ) {
             Column {
                 Row(
-                    modifier = Modifier.padding(12.dp),
+                    modifier = Modifier.padding(10.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     AsyncImage(
