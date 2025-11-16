@@ -166,6 +166,8 @@ fun BukuScreen(
                     item {
                         // Info buku
                         Text(
+                            modifier = Modifier
+                                .padding(horizontal = 16.dp),
                             color = colorResource(id = R.color.colorOnBackground),
                             text = book?.judul ?: "",
                             fontSize = 24.sp,
@@ -179,6 +181,8 @@ fun BukuScreen(
                     item {
                         Text(
                             text = book?.penulis ?: "",
+                            modifier = Modifier
+                                .padding(horizontal = 16.dp),
                             fontSize = 14.sp,
                             fontFamily = ibmplexsans,
                             color = Color.Gray,
