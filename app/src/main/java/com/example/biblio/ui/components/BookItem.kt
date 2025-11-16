@@ -24,10 +24,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.*
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
+import com.example.biblio.R
 import com.example.biblio.data.model.Buku
 import com.example.biblio.ibmplexsans
 import com.example.biblio.viewmodel.BukuViewModel
@@ -121,6 +123,7 @@ fun BookItem(
 
     // Judul buku
     Text(
+        color = colorResource(id = R.color.colorOnBackground),
         text = book.judul,
         lineHeight = 1.25.em,
         fontSize = 14.sp,

@@ -166,6 +166,7 @@ fun BukuScreen(
                     item {
                         // Info buku
                         Text(
+                            color = colorResource(id = R.color.colorOnBackground),
                             text = book?.judul ?: "",
                             fontSize = 24.sp,
                             fontFamily = fraunces,
@@ -213,7 +214,7 @@ fun BukuScreen(
                                 Spacer(modifier = Modifier.width(8.dp))
                                 Column {
                                     Text("Ulasan", fontSize = 12.sp, color = Color.Gray, fontFamily = ibmplexsans, lineHeight = 1.25.em)
-                                    Text("4.5", fontSize = 14.sp, fontFamily = ibmplexsans, fontWeight = FontWeight.Bold)
+                                    Text("4.5", color = colorResource(id = R.color.colorOnBackground), fontSize = 14.sp, fontFamily = ibmplexsans, fontWeight = FontWeight.Bold)
                                 }
                             }
 
@@ -228,7 +229,7 @@ fun BukuScreen(
                                 Spacer(modifier = Modifier.width(8.dp))
                                 Column {
                                     Text("Halaman", fontSize = 12.sp, color = Color.Gray, fontFamily = ibmplexsans, lineHeight = 1.25.em)
-                                    Text("350", fontSize = 14.sp, fontFamily = ibmplexsans, fontWeight = FontWeight.Bold)
+                                    Text("350", color = colorResource(id = R.color.colorOnBackground), fontSize = 14.sp, fontFamily = ibmplexsans, fontWeight = FontWeight.Bold)
                                 }
                             }
 
@@ -243,7 +244,7 @@ fun BukuScreen(
                                 Spacer(modifier = Modifier.width(8.dp))
                                 Column {
                                     Text("Durasi", fontSize = 12.sp, color = Color.Gray, fontFamily = ibmplexsans, lineHeight = 1.25.em)
-                                    Text("5j 30m*", fontSize = 14.sp, fontFamily = ibmplexsans, fontWeight = FontWeight.Bold)
+                                    Text("5j 30m*", color = colorResource(id = R.color.colorOnBackground), fontSize = 14.sp, fontFamily = ibmplexsans, fontWeight = FontWeight.Bold)
                                 }
                             }
                         }
@@ -254,6 +255,7 @@ fun BukuScreen(
                     item {
                         // Deskripsi
                         Text(
+                            color = colorResource(id = R.color.colorOnBackground),
                             text = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut eleifend semper fringilla. Vestibulum convallis rutrum arcu, et dapibus arcu sollicitudin eu. Duis gravida faucibus maximus.",
                             fontSize = 14.sp,
                             lineHeight = 1.5.em,
@@ -285,7 +287,7 @@ fun BukuScreen(
                                     modifier = Modifier.size(20.dp)
                                 )
                                 Spacer(modifier = Modifier.width(8.dp))
-                                Text("Beli & Baca")
+                                Text("Beli & Baca", fontFamily = ibmplexsans,)
                             }
 
                             OutlinedButton(
@@ -298,7 +300,7 @@ fun BukuScreen(
                                     modifier = Modifier.size(20.dp)
                                 )
                                 Spacer(modifier = Modifier.width(8.dp))
-                                Text("Tambahkan ke Koleksi")
+                                Text("Tambahkan ke Koleksi", fontFamily = ibmplexsans)
                             }
                         }
                     }
