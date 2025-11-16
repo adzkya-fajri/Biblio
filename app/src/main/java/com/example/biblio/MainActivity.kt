@@ -26,6 +26,10 @@ val ibmplexsans = FontFamily(
     Font(R.font.ibmplexsans_medium, FontWeight.Bold),
 )
 
+val ibmplexmono = FontFamily(
+    Font(R.font.ibmplexmono_regular, FontWeight.Normal),
+)
+
 val fraunces = FontFamily(
     Font(R.font.fraunces, FontWeight.Normal),
 )
