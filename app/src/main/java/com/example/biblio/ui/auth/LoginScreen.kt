@@ -1,6 +1,9 @@
 package com.example.biblio.ui.auth
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
@@ -14,6 +17,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -52,7 +57,7 @@ fun LoginScreen(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .padding(24.dp)
+            .padding(start = 24.dp, end = 24.dp, top = 24.dp)
     ) {
         Column(
             horizontalAlignment = Alignment.Start,
@@ -77,8 +82,12 @@ fun LoginScreen(
 
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center,
-            modifier = Modifier.align(Alignment.Center)
+            verticalArrangement = Arrangement.Bottom,
+            modifier = Modifier
+                .fillMaxWidth()
+                .imePadding()
+                .padding(top = 150.dp)
+                .align(Alignment.Center)
         ) {
             OutlinedTextField(
                 value = email,

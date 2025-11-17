@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -71,7 +72,7 @@ fun RegisterScreen(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .padding(24.dp)
+            .padding(start = 24.dp, end = 24.dp, top = 24.dp)
     ) {
         Column(
             horizontalAlignment = Alignment.Start,
@@ -96,8 +97,12 @@ fun RegisterScreen(
 
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center,
-            modifier = Modifier.align(Alignment.Center)
+            verticalArrangement = Arrangement.Bottom,
+            modifier = Modifier
+                .fillMaxWidth()
+                .imePadding()
+                .padding(top = 150.dp)
+                .align(Alignment.Center)
         ) {
             OutlinedTextField(
                 value = displayName,
