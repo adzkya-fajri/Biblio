@@ -1,0 +1,15 @@
+{
+  "bookId": "laskar_pelangi",
+  "chapters": [
+    {
+      "id": 1,
+      "title": "Bab 1: Sekolah Muhammadiyah",
+      "content": "Pagi itu, sepuluh anak laki-laki berkumpul di depan sekolah Muhammadiyah..."
+    },
+    {
+      "id": 2,
+      "title": "Bab 2: Ibu Guru Kami",
+      "content": "Bu Muslimah adalah guru kami yang paling kami hormati..."
+    }
+  ]
+}
