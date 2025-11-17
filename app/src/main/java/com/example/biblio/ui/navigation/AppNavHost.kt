@@ -14,15 +14,18 @@ import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.example.biblio.ui.MainScreen
 import com.example.biblio.ui.auth.LoginScreen
 import com.example.biblio.ui.auth.RegisterScreen
 import com.example.biblio.ui.auth.WelcomeScreen
 import com.example.biblio.ui.screens.AboutBiblioScreen
 import com.example.biblio.ui.screens.BerandaScreen
+import com.example.biblio.ui.screens.BookReaderScreen
 import com.example.biblio.ui.screens.EditNameScreen
 import com.example.biblio.ui.screens.KoleksiScreen
 import com.example.biblio.ui.screens.ManageProfileScreen
@@ -121,6 +124,18 @@ fun AppNavHost() {
         }
         composable("main") {
             MainScreen(navController = navController)
+        }
+        composable(
+            route = "reader/{bookJson}",
+            arguments = listOf(
+                navArgument("bookJson") { type = NavType.StringType }
+            )
+        ) { backStackEntry ->
+            val bookJson = backStackEntry.arguments?.getString("bookJson") ?: ""
+            BookReaderScreen(
+                bookJson = bookJson,
+                navController = navController
+            )
         }
     }
 }

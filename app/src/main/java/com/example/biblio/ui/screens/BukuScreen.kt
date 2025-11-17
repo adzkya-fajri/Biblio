@@ -56,6 +56,9 @@ import com.example.biblio.viewmodel.BukuViewModelFactory
 import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
 import kotlinx.coroutines.delay
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
+import java.net.URLEncoder
 
 @Composable
 fun BukuScreen(
@@ -281,8 +284,15 @@ fun BukuScreen(
                                 .padding(horizontal = 16.dp),
                             verticalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
+                            // TOMBOL BELI & BACA (NAVIGATE KE READER)
                             Button(
-                                onClick = { },
+                                onClick = {
+                                    book?.let {
+                                        val bookJson = Json.encodeToString(it)
+                                        val encoded = URLEncoder.encode(bookJson, "UTF-8")
+                                        navController.navigate("reader/$encoded")
+                                    }
+                                },
                                 modifier = Modifier.fillMaxWidth()
                             ) {
                                 Icon(
@@ -295,7 +305,10 @@ fun BukuScreen(
                             }
 
                             OutlinedButton(
-                                onClick = { },
+                                onClick = {
+                                    // TODO: Tambah ke koleksi favorit
+                                    book?.let { viewModel.toggleFavorite(it.id) }
+                                },
                                 modifier = Modifier.fillMaxWidth()
                             ) {
                                 Icon(
