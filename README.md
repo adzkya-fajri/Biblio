@@ -1,4 +1,34 @@
-Akses seluruh koleksi perpustakaan langsung dari ponsel Android Anda. Baca e-book, baca jurnal terbaru, atau dengankan audiobook kapan pun Anda punya waktu, baik online maupun offline. Aplikasi ini dirancang untuk membuat pengalaman membaca Anda menjadi lebih mudah, personal, dan efisien.
+# Biblio 
+Sebuah aplikasi perpustakaan sederhana.
 
+## TODO
+- [ ] Add bookmark functionality
+- [ ] Add reading progress tracker
+- [ ] Add notes/highlights
+- [ ] Add swipe gesture for next/prev chapter
+- [ ] Add reading statistics
+- [ ] Add text-to-speech
+- [ ] Add night mode schedule
+- [ ] Add font family selection
 
-so really klotin
+## Struktur Navigasi AppNavHost
+```tree
+AppNavHost
+├── WelcomeScreen
+├── LoginScreen
+├── RegisterScreen
+├── MainScreen (Auth Guard)
+│   ├── BerandaScreen
+│   │   └── ProfileScreen
+│   │       └── SettingsScreen
+│   │           └── AboutScreen
+│   ├── CariScreen
+│   │   └── BukuScreen
+│   ├── KoleksiScreen
+│   │   └── FavoriteScreen
+│   └── BukuScreen ← shared (dari Beranda/Cari/Favorite/KoleksiScreen)
+└── ReaderScreen (Auth Guard)
+```
+
+## Inspirasi
+Terinspirasi dari banyak aplikasi seperti Spotify, Google Play Book, dll.
