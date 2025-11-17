@@ -1,6 +1,7 @@
 package com.example.biblio.ui.auth
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -32,6 +33,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
@@ -99,9 +101,18 @@ fun RegisterScreen(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Bottom,
             modifier = Modifier
+                .background(
+                    brush = Brush.verticalGradient(
+                        colors = listOf(
+                            Color.Transparent,
+                            colorResource(R.color.colorBackground)
+                        ),
+                        startY = 0f,
+                        endY = 100f // adjust gradasi nya
+                    )
+                )
+                .padding(top = 50.dp)
                 .fillMaxWidth()
-                .imePadding()
-                .padding(top = 150.dp)
                 .align(Alignment.Center)
         ) {
             OutlinedTextField(

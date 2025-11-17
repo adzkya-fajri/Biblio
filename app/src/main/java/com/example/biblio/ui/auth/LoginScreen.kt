@@ -84,9 +84,18 @@ fun LoginScreen(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Bottom,
             modifier = Modifier
+                .background(
+                    brush = Brush.verticalGradient(
+                        colors = listOf(
+                            Color.Transparent,
+                            colorResource(R.color.colorBackground)
+                        ),
+                        startY = 0f,
+                        endY = 100f // adjust gradasi nya
+                    )
+                    )
+                .padding(top = 50.dp)
                 .fillMaxWidth()
-                .imePadding()
-                .padding(top = 150.dp)
                 .align(Alignment.Center)
         ) {
             OutlinedTextField(
