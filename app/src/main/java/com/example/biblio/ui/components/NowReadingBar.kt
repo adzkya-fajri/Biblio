@@ -1,6 +1,7 @@
 package com.example.biblio.ui.components
 
 import android.util.Log
+import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
@@ -67,12 +68,15 @@ fun NowReadingBar(
     modifier: Modifier = Modifier,
 ) {
     val contentColor = if (colorContainer.luminance() > 0.5f) Color.Black else Color.White
-    var offsetY by remember { mutableFloatStateOf(0f) }
 
     var isClosing by remember { mutableStateOf(false) }
     val scale by animateFloatAsState(
         targetValue = if (isClosing) 0.8f else 1f,
         animationSpec = tween(200)
+    )
+    val offsetY by animateDpAsState(
+        targetValue = if (isClosing) 100.dp else 0.dp,
+        animationSpec = tween(300)
     )
     val alpha by animateFloatAsState(
         targetValue = if (isClosing) 0f else 1f,
@@ -81,7 +85,7 @@ fun NowReadingBar(
 
     LaunchedEffect(isClosing) {
         if (isClosing) {
-            delay(200) // tunggu animasi selesai
+            delay(500) // tunggu animasi selesai
             onDismiss()
         }
     }
@@ -90,6 +94,7 @@ fun NowReadingBar(
         modifier = modifier
             .scale(scale) // ✅ tambah scale
             .alpha(alpha) // ✅ tambah alpha
+            .offset(y = offsetY)
             .padding(start = 8.dp, end = 8.dp, bottom = 8.dp)
     ) {
         Card(
@@ -123,11 +128,14 @@ fun NowReadingBar(
                             text = "$bookTitle • $bookAuthor",
                             fontSize = 14.sp,
                             fontFamily = ibmplexsans,
-                            fontWeight = FontWeight.Bold,
+                            fontWeight = FontWeight.Medium,
                             color = contentColor,
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis
                         )
+
+                        Spacer(modifier = Modifier.height(4.dp))
+
                         Text(
                             text = "Halaman $currentPage dari $totalPages",
                             fontFamily = ibmplexsans,
@@ -159,5 +167,4 @@ fun NowReadingBar(
             }
         }
     }
-
 }
