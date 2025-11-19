@@ -71,8 +71,7 @@ fun BookReaderScreen(
         containerColor = backgroundColor,
         bottomBar = {
             BottomAppBar(
-                containerColor = if (settings.isDarkMode) Color(0xFF2A2A2A) else colorResource(R.color.colorSurface),
-                tonalElevation = 8.dp
+                containerColor = if (settings.isDarkMode) Color(0xFF2A2A2A) else colorResource(R.color.colorBackground),
             ) {
                 // BACK BUTTON
                 IconButton(onClick = { navController.navigateUp() }) {

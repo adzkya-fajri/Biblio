@@ -7,6 +7,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -25,6 +27,9 @@ fun ReaderSettingsSheet(
     onDismiss: () -> Unit,
     isDarkMode: Boolean
 ) {
+    // Tambahin haptic biar keren
+    val haptic = LocalHapticFeedback.current
+
     val backgroundColor = if (isDarkMode) Color(0xFF2A2A2A) else colorResource(R.color.colorBackground)
     val textColor = if (isDarkMode) Color(0xFFE0E0E0) else colorResource(R.color.colorOnBackground)
 
@@ -49,6 +54,25 @@ fun ReaderSettingsSheet(
                 color = textColor,
                 modifier = Modifier.padding(bottom = 24.dp)
             )
+
+            // Preview
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.cardColors(
+                    containerColor = if (isDarkMode) Color(0xFF1A1A1A) else colorResource(R.color.colorBackgroundVariant)
+                )
+            ) {
+                Text(
+                    text = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+                    fontSize = fontSize.sp,
+                    fontFamily = ibmplexsans,
+                    color = textColor,
+                    lineHeight = fontSize.sp * lineSpacing,
+                    modifier = Modifier.padding(16.dp)
+                )
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
 
             // Font Size Setting
             Text(
@@ -75,7 +99,10 @@ fun ReaderSettingsSheet(
 
                 Slider(
                     value = fontSize.toFloat(),
-                    onValueChange = { onFontSizeChange(it.toInt()) },
+                    onValueChange = {
+                        haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                        onFontSizeChange(it.toInt())
+                    },
                     valueRange = 12f..24f,
                     steps = 5,
                     modifier = Modifier.weight(1f).padding(horizontal = 16.dp)
@@ -124,7 +151,10 @@ fun ReaderSettingsSheet(
 
                 Slider(
                     value = lineSpacing,
-                    onValueChange = onLineSpacingChange,
+                    onValueChange = {
+                        haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                        onLineSpacingChange(it)
+                    },
                     valueRange = 1.0f..2.5f,
                     steps = 5,
                     modifier = Modifier.weight(1f).padding(horizontal = 16.dp)
@@ -147,25 +177,6 @@ fun ReaderSettingsSheet(
             )
 
             Spacer(modifier = Modifier.height(24.dp))
-
-            // Preview
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                colors = CardDefaults.cardColors(
-                    containerColor = if (isDarkMode) Color(0xFF1A1A1A) else Color(0xFFF5F5F5)
-                )
-            ) {
-                Text(
-                    text = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
-                    fontSize = fontSize.sp,
-                    fontFamily = ibmplexsans,
-                    color = textColor,
-                    lineHeight = fontSize.sp * lineSpacing,
-                    modifier = Modifier.padding(16.dp)
-                )
-            }
-
-            Spacer(modifier = Modifier.height(16.dp))
         }
     }
 }
