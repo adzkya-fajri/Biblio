@@ -35,16 +35,9 @@ fun BottomBar(
                         label,
                         fontFamily = fontFamily,
                         fontSize = 13.sp,
-                        fontWeight = FontWeight.Bold
+                        fontWeight = FontWeight.SemiBold
                     )
                 },
-                colors = NavigationBarItemDefaults.colors(
-                    selectedIconColor = colorResource(id = R.color.colorOnBackground),
-                    selectedTextColor = colorResource(id = R.color.colorOnBackground),
-                    unselectedIconColor = colorResource(id = R.color.colorOnSurfaceVariant),
-                    unselectedTextColor = colorResource(id = R.color.colorOnSurfaceVariant),
-                    indicatorColor = colorResource(id = R.color.colorSecondary)
-                )
             )
         }
     }
