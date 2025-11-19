@@ -17,6 +17,22 @@
     <!-- Surface -->
     <color name="colorSurface">#1E1E1E</color>
     <color name="colorOnSurface">#EBEBEB</color>
-    <color name="colorOnSurfaceVariant">#989898</color>
+    <color name="colorSurfaceVariant">#43483F</color>
+    <color name="colorOnSurfaceVariant">#C3C8BC</color>
 
+    <!-- Container -->
+    <color name="colorPrimaryContainer">#004D45</color>
+    <color name="colorSecondaryContainer">#00403B</color>
+    <color name="colorSurfaceContainer">#1E1E1E</color>
+    <color name="colorOnPrimaryContainer">#7CF1EA</color>
+    <color name="colorOnSecondaryContainer">#ADF8F1</color>
+
+    <!-- Lainnya -->
+    <color name="colorError">#FFB4AB</color>
+    <color name="colorOnError">#690005</color>
+    <color name="colorErrorContainer">#93000A</color>
+    <color name="colorOnErrorContainer">#FFDAD6</color>
+
+    <color name="colorOutline">#384947</color>
+    <color name="colorOutlineVariant">#274440</color>
 </resources>
