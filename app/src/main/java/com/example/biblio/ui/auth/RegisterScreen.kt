@@ -187,31 +187,6 @@ fun RegisterScreen(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            OutlinedButton(
-                onClick = {  },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(50.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = Color.Transparent,
-                    contentColor = colorResource(id = R.color.colorPrimaryVariant)
-                ),
-                border = BorderStroke(1.dp, colorResource(id = R.color.colorPrimaryVariant))
-
-            ) {
-                Icon(
-                    painter = painterResource(id = R.drawable.logo_google),
-                    contentDescription = "Google Logo",
-                    tint = Color.Unspecified
-                )
-
-                Spacer(Modifier.width(8.dp))
-
-                Text("Daftar menggunakan Google", fontFamily = ibmplexsans)
-            }
-
-            Spacer(modifier = Modifier.height(16.dp))
-
             Row(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 modifier = Modifier.fillMaxWidth()

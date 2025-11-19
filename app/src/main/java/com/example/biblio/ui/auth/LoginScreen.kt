@@ -1,14 +1,17 @@
 package com.example.biblio.ui.auth
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -153,8 +156,33 @@ fun LoginScreen(
                         color = MaterialTheme.colorScheme.onPrimary
                     )
                 } else {
-                    Text("Login", fontFamily = ibmplexsans)
+                    Text("Masuk", fontFamily = ibmplexsans)
                 }
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            OutlinedButton(
+                onClick = {  },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(50.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color.Transparent,
+                    contentColor = colorResource(id = R.color.colorPrimaryVariant)
+                ),
+                border = BorderStroke(1.dp, colorResource(id = R.color.colorPrimaryVariant))
+
+            ) {
+                Icon(
+                    painter = painterResource(id = R.drawable.logo_google),
+                    contentDescription = "Google Logo",
+                    tint = Color.Unspecified
+                )
+
+                Spacer(Modifier.width(8.dp))
+
+                Text("Masuk menggunakan Google", fontFamily = ibmplexsans)
             }
 
             Spacer(modifier = Modifier.height(16.dp))

@@ -91,7 +91,7 @@ fun WelcomeScreen(
             Spacer(modifier = Modifier.height(16.dp))
 
             Button(
-                onClick = { navController?.navigate("login") },
+                onClick = { navController?.navigate("register") },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(50.dp),
@@ -107,7 +107,7 @@ fun WelcomeScreen(
 
                 Spacer(Modifier.width(8.dp))
 
-                Text("Masuk menggunakan email", fontFamily = ibmplexsans)
+                Text("Daftar menggunakan email", fontFamily = ibmplexsans)
             }
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -132,7 +132,7 @@ fun WelcomeScreen(
 
                 Spacer(Modifier.width(8.dp))
 
-                Text("Masuk menggunakan Google", fontFamily = ibmplexsans)
+                Text("Daftar menggunakan Google", fontFamily = ibmplexsans)
             }
 
             Spacer(modifier = Modifier.height(8.dp))
@@ -144,8 +144,8 @@ fun WelcomeScreen(
                 TextButton(onClick = {  }) {
                     Text("Syarat & Ketentuan", fontFamily = ibmplexsans, color = colorResource(id = R.color.colorPrimaryVariant))
                 }
-                TextButton(onClick = { navController?.navigate("register") }) {
-                    Text("Daftar", fontFamily = ibmplexsans, color = colorResource(id = R.color.colorPrimaryVariant))
+                TextButton(onClick = { navController?.navigate("login") }) {
+                    Text("Masuk", fontFamily = ibmplexsans, color = colorResource(id = R.color.colorPrimaryVariant))
                 }
             }
         }
