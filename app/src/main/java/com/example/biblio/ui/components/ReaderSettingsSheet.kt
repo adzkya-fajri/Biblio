@@ -31,7 +31,10 @@ fun ReaderSettingsSheet(
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         containerColor = backgroundColor,
-        shape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp)
+        shape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp),
+        sheetState = rememberModalBottomSheetState(
+            skipPartiallyExpanded = true
+        )
     ) {
         Column(
             modifier = Modifier
