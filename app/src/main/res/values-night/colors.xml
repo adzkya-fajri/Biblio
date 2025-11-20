@@ -17,7 +17,7 @@
     <!-- Surface -->
     <color name="colorSurface">#1E1E1E</color>
     <color name="colorOnSurface">#EBEBEB</color>
-    <color name="colorSurfaceVariant">#43483F</color>
+    <color name="colorSurfaceVariant">#042B24</color>
     <color name="colorOnSurfaceVariant">#C3C8BC</color>
 
     <!-- Container -->

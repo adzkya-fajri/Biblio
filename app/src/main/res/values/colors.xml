@@ -17,7 +17,7 @@
     <!-- Surface (misal untuk Card, BottomBar, dll) -->
     <color name="colorSurface">#FFFFFF</color>
     <color name="colorOnSurface">#171717</color>
-    <color name="colorSurfaceVariant">#E0E3DB</color>
+    <color name="colorSurfaceVariant">#F6F6F6</color>
     <color name="colorOnSurfaceVariant">#505050</color>
 
     <!-- Container -->
@@ -33,6 +33,6 @@
     <color name="colorErrorContainer">#FFDAD6</color>
     <color name="colorOnErrorContainer">#410002</color>
 
-    <color name="colorOutline">#8FC6C3</color>
-    <color name="colorOutlineVariant">#6FC8C4</color>
+    <color name="colorOutline">#119284</color>
+    <color name="colorOutlineVariant">#8FC6C3</color>
 </resources>
