@@ -45,8 +45,8 @@ fun SectionItem(section: Section,
         // Horizontal scroll untuk books (LazyRow)
         LazyRow(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(6.dp),
-            contentPadding = PaddingValues(horizontal = 16.dp)
+            horizontalArrangement = Arrangement.spacedBy(4.dp),
+            contentPadding = PaddingValues(horizontal = 8.dp)
         ) {
             items(
                 items = section.books,
