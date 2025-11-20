@@ -151,7 +151,14 @@ fun MainScreen(navController: NavController) {
         ) {
             composable("beranda") { BerandaScreen(navController = innerNavController, bottomPadding = bottomPadding) }
             composable("cari") { CariScreen(bottomPadding = bottomPadding) }
-            composable("koleksi") { KoleksiScreen(bottomPadding = bottomPadding) }
+            composable("koleksi") {
+                KoleksiScreen(
+                    bottomPadding = bottomPadding,
+                    onBookClick = { bookId ->
+                        innerNavController.navigate("buku/$bookId")
+                    }
+                )
+            }
 
             composable(
                 route = "buku/{bookId}",
