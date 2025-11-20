@@ -5,6 +5,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -92,6 +93,18 @@ fun CariScreen(
         contentPadding = PaddingValues(bottom = bottomPadding, top = 10.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
+        item {
+            Box (
+                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+            ){
+                Text(
+                    "Mau nyari apa ya?",
+                    style = MaterialTheme.typography.headlineLarge,
+                    color = colorResource(id = R.color.colorOnBackground)
+                )
+            }
+        }
+
         // HEADER ITEMS - gunakan `item` bukan `items`
         item {
             SearchBar(

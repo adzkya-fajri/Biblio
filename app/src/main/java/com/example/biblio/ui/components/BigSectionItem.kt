@@ -12,10 +12,12 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.example.biblio.R
 import com.example.biblio.data.model.Section
 import com.example.biblio.fraunces
 import com.example.biblio.viewmodel.BukuViewModel
@@ -33,6 +35,7 @@ fun BigSectionItem(
             fontSize = 28.sp,
             fontWeight = FontWeight.Bold,
             fontFamily = fraunces,
+            color = colorResource(R.color.colorOnBackground),
             modifier = Modifier.padding(horizontal = 16.dp)
         )
 

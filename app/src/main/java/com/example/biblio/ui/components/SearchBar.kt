@@ -9,9 +9,11 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.biblio.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -28,17 +30,17 @@ fun SearchBar(
         leadingIcon = {
             Icon(Icons.Default.Search, contentDescription = "Search")
         },
-        shape = RoundedCornerShape(12.dp),
+        shape = RoundedCornerShape(50),
         colors = OutlinedTextFieldDefaults.colors(
             // CARA BARU untuk Material3
-            focusedContainerColor = Color(0xFFF5F5F5),
-            unfocusedContainerColor = Color(0xFFF5F5F5),
-            disabledContainerColor = Color(0xFFF5F5F5),
+            focusedContainerColor = colorResource(R.color.colorSurfaceVariant),
+            unfocusedContainerColor = colorResource(R.color.colorSurfaceVariant),
+            disabledContainerColor = colorResource(R.color.colorSurfaceVariant),
 
-            focusedBorderColor = Color(0xFF1976D2),
+            focusedBorderColor = Color.Transparent,
             unfocusedBorderColor = Color.Transparent,
 
-            cursorColor = Color(0xFF1976D2),
+            cursorColor = colorResource(R.color.colorPrimaryVariant),
         ),
         singleLine = true
     )

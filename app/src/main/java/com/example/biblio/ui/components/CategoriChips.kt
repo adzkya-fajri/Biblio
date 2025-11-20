@@ -9,9 +9,12 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.biblio.R
+
 @Composable
 fun CategoryChips(
     selectedCategory: String,
@@ -38,12 +41,12 @@ fun CategoryChips(
 
             FilterChip(
                 selected = isSelected,
+                shape = RoundedCornerShape(50),
                 onClick = { onCategorySelected(category) },
                 label = { Text(category) },
                 colors = FilterChipDefaults.filterChipColors(
                     selectedContainerColor = colors[index % colors.size],
                     selectedLabelColor = Color.White,
-                    containerColor = Color(0xFFF5F5F5)
                 )
             )
         }
