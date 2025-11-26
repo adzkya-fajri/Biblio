@@ -137,5 +137,8 @@ fun AppNavHost() {
                 navController = navController
             )
         }
+        composable("style_text") {
+            StyleTextScreen(onNavigateBack = { navController.navigateUp() })
+        }
     }
 }

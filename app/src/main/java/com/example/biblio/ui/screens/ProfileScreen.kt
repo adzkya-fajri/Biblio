@@ -118,7 +118,11 @@ fun ProfileScreen(
                 painter = painterResource(R.drawable.text_fields_24px),
                 title = "Style Text",
                 subtitle = "Ubah gaya font aplikasi",
-                onClick = {  }
+                onClick = {
+                    navController.navigate("style_text") {
+                        launchSingleTop = true
+                    }
+                }
             )
 
             HorizontalDivider(thickness = 1.dp, color = MaterialTheme.colorScheme.outline)
