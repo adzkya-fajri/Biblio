@@ -1,15 +1,16 @@
-# Biblio 
-Sebuah aplikasi perpustakaan sederhana.
+# 📚 Perpustakaan Digital — Android App (Kotlin + Jetpack Compose)
+
+Perpustakaan Digital adalah aplikasi Android modern yang memungkinkan pengguna untuk mencari, membaca, serta meminjam buku secara digital. Dibangun menggunakan Jetpack Compose untuk UI deklaratif yang lebih cepat, bersih, dan efisien.
 
 ## TODO
 - [ ] Add bookmark functionality
-- [ ] Add reading progress tracker
-- [ ] Add notes/highlights
-- [ ] Add swipe gesture for next/prev chapter
-- [ ] Add reading statistics
-- [ ] Add text-to-speech
-- [ ] Add night mode schedule
-- [ ] Add font family selection
+- [x] Add reading progress tracker
+- ~~[ ] Add notes/highlights~~
+- [x] Add swipe gesture for next/prev chapter
+- [x] Add reading statistics
+- ~~[ ] Add text-to-speech~~
+- [x] Add night mode schedule
+- [x] Add font family selection
 
 ## Struktur Navigasi AppNavHost
 ```tree
