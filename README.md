@@ -30,11 +30,11 @@ AppNavHost
 │   └── BukuScreen ← shared (dari Beranda/Cari/Favorite/KoleksiScreen)
 └── ReaderScreen (Auth Guard)
 ```
-📱 Instalasi Aplikasi (APK)
+## 📱 Instalasi Aplikasi (APK)
 
 Untuk mencoba aplikasi secara langsung tanpa membangun proyek di Android Studio, kamu dapat mengunduh dan menginstal file APK berikut:
 
 📥 Download APK:
-[app-debug.apk](url:https://docs.google.com/uc?export=download&id=1XrGdEZIngOsjx-C_3zDQ0KYdDxIAZG5v) 
+[[Biblio.apk](https://docs.google.com/uc?export=download&id=1XrGdEZIngOsjx-C_3zDQ0KYdDxIAZG5v)] 
 ## Inspirasi
 Terinspirasi dari banyak aplikasi seperti Spotify, Google Play Book, dll.
