@@ -35,6 +35,6 @@ AppNavHost
 Untuk mencoba aplikasi secara langsung tanpa membangun proyek di Android Studio, kamu dapat mengunduh dan menginstal file APK berikut:
 
 📥 Download APK:
-[app-debug.apk](app/build/outputs/apk/debug/app-debug.apk) 
+[app-debug.apk](url:https://docs.google.com/uc?export=download&id=1XrGdEZIngOsjx-C_3zDQ0KYdDxIAZG5v) 
 ## Inspirasi
 Terinspirasi dari banyak aplikasi seperti Spotify, Google Play Book, dll.
