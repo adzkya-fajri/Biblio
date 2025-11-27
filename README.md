@@ -35,6 +35,7 @@ AppNavHost
 Untuk mencoba aplikasi secara langsung tanpa membangun proyek di Android Studio, kamu dapat mengunduh dan menginstal file APK berikut:
 
 📥 Download APK:
-[[Biblio.apk](https://docs.google.com/uc?export=download&id=1XrGdEZIngOsjx-C_3zDQ0KYdDxIAZG5v)] 
+[git](app/release/app-release.apk)
+[anyone link](https://drive.google.com/file/d/17TPV4_CoAkwqWTKSvTZ7sUpm7Yaajx-L/view?usp=drivesdk)
 ## Inspirasi
 Terinspirasi dari banyak aplikasi seperti Spotify, Google Play Book, dll.
