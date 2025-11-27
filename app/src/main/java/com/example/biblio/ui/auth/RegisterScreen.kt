@@ -39,6 +39,7 @@ import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
@@ -47,9 +48,9 @@ import androidx.navigation.NavController
 import com.example.biblio.R
 import com.example.biblio.fraunces
 import com.example.biblio.ibmplexsans
+import com.example.biblio.ui.theme.BiblioTheme
 import com.example.biblio.viewmodel.AuthState
 import com.example.biblio.viewmodel.AuthViewModel
-
 
 @Composable
 fun RegisterScreen(
@@ -71,6 +72,35 @@ fun RegisterScreen(
         }
     }
 
+    RegisterScreenContent(
+        displayName = displayName,
+        email = email,
+        password = password,
+        passwordVisible = passwordVisible,
+        authState = authState,
+        onNameChange = { displayName = it },
+        onEmailChange = { email = it },
+        onPasswordChange = { password = it },
+        onPasswordVisibilityToggle = { passwordVisible = !passwordVisible },
+        onRegisterClick = { viewModel.register(email, password, displayName) },
+        onLoginClick = { navController?.navigate("login") }
+    )
+}
+
+@Composable
+fun RegisterScreenContent(
+    displayName: String,
+    email: String,
+    password: String,
+    passwordVisible: Boolean,
+    authState: AuthState,
+    onNameChange: (String) -> Unit,
+    onEmailChange: (String) -> Unit,
+    onPasswordChange: (String) -> Unit,
+    onPasswordVisibilityToggle: () -> Unit,
+    onRegisterClick: () -> Unit,
+    onLoginClick: () -> Unit
+) {
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -117,7 +147,7 @@ fun RegisterScreen(
         ) {
             OutlinedTextField(
                 value = displayName,
-                onValueChange = { displayName = it },
+                onValueChange = onNameChange,
                 label = { Text("Nama", fontFamily = ibmplexsans) },
                 singleLine = true,
                 enabled = authState !is AuthState.Loading,
@@ -128,7 +158,7 @@ fun RegisterScreen(
 
             OutlinedTextField(
                 value = email,
-                onValueChange = { email = it },
+                onValueChange = onEmailChange,
                 label = { Text("Email", fontFamily = ibmplexsans) },
                 singleLine = true,
                 enabled = authState !is AuthState.Loading,
@@ -139,14 +169,14 @@ fun RegisterScreen(
 
             OutlinedTextField(
                 value = password,
-                onValueChange = { password = it },
+                onValueChange = onPasswordChange,
                 label = { Text("Password", fontFamily = ibmplexsans) },
                 singleLine = true,
                 enabled = authState !is AuthState.Loading,
                 visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
                 trailingIcon = {
                     val icon = if (passwordVisible) R.drawable.visibility_off_24px else R.drawable.visibility_24px
-                    IconButton(onClick = { passwordVisible = !passwordVisible }) {
+                    IconButton(onClick = onPasswordVisibilityToggle) {
                         Icon(painter = painterResource(id = icon), contentDescription = null)
                     }
                 },
@@ -169,7 +199,7 @@ fun RegisterScreen(
             Spacer(modifier = Modifier.height(16.dp))
 
             Button(
-                onClick = { viewModel.register(email, password, displayName) },
+                onClick = onRegisterClick,
                 enabled = authState !is AuthState.Loading && email.isNotBlank() && password.isNotBlank() && displayName.isNotBlank(),
                 modifier = Modifier
                     .fillMaxWidth()
@@ -191,10 +221,72 @@ fun RegisterScreen(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 modifier = Modifier.fillMaxWidth()
             ) {
-                TextButton(onClick = { navController?.navigate("login") }) {
+                TextButton(onClick = onLoginClick) {
                     Text("Sudah punya akun?", fontFamily = ibmplexsans)
                 }
             }
         }
+    }
+}
+
+// PREVIEW
+
+@Preview(showBackground = true)
+@Composable
+fun RegisterScreenPreview() {
+    BiblioTheme {
+        RegisterScreenContent(
+            displayName = "example",
+            email = "user@example.com",
+            password = "password123",
+            passwordVisible = false,
+            authState = AuthState.Idle,
+            onNameChange = { },
+            onEmailChange = { },
+            onPasswordChange = { },
+            onPasswordVisibilityToggle = { },
+            onLoginClick = { },
+            onRegisterClick = { }
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun RegisterScreenLoadingPreview() {
+    BiblioTheme {
+        RegisterScreenContent(
+            displayName = "example",
+            email = "user@example.com",
+            password = "password123",
+            passwordVisible = false,
+            authState = AuthState.Loading,
+            onNameChange = { },
+            onEmailChange = { },
+            onPasswordChange = { },
+            onPasswordVisibilityToggle = { },
+            onLoginClick = { },
+            onRegisterClick = { }
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun RegisterScreenErrorPreview() {
+    BiblioTheme {
+        RegisterScreenContent(
+            displayName = "example",
+            email = "user@example.com",
+            password = "password123",
+            passwordVisible = false,
+            authState = AuthState.Error("Password minimal 6 karakter!"),
+            onNameChange = { },
+            onEmailChange = { },
+            onPasswordChange = { },
+            onPasswordVisibilityToggle = { },
+            onLoginClick = { },
+            onRegisterClick = { }
+        )
     }
 }

@@ -35,6 +35,7 @@ import androidx.navigation.NavController
 import com.example.biblio.R
 import com.example.biblio.fraunces
 import com.example.biblio.ibmplexsans
+import com.example.biblio.ui.theme.BiblioTheme
 import com.example.biblio.viewmodel.AuthState
 import com.example.biblio.viewmodel.AuthViewModel
 
@@ -47,16 +48,43 @@ fun LoginScreen(
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var passwordVisible by remember { mutableStateOf(false) }
-
     val authState by viewModel.authState.collectAsState()
 
-    // Handle login success
     LaunchedEffect(authState) {
         if (authState is AuthState.Success) {
             onLoginSuccess()
         }
     }
 
+    LoginScreenContent(
+        email = email,
+        password = password,
+        passwordVisible = passwordVisible,
+        authState = authState,
+        onEmailChange = { email = it },
+        onPasswordChange = { password = it },
+        onPasswordVisibilityToggle = { passwordVisible = !passwordVisible },
+        onLoginClick = { viewModel.login(email, password) },
+        onGoogleSignIn = { },
+        onForgotPassword = { },
+        onRegisterClick = { navController?.navigate("register") }
+    )
+}
+
+@Composable
+fun LoginScreenContent(
+    email: String,
+    password: String,
+    passwordVisible: Boolean,
+    authState: AuthState,
+    onEmailChange: (String) -> Unit,
+    onPasswordChange: (String) -> Unit,
+    onPasswordVisibilityToggle: () -> Unit,
+    onLoginClick: () -> Unit,
+    onGoogleSignIn: () -> Unit,
+    onForgotPassword: () -> Unit,
+    onRegisterClick: () -> Unit
+) {
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -94,16 +122,16 @@ fun LoginScreen(
                             colorResource(R.color.colorBackground)
                         ),
                         startY = 0f,
-                        endY = 100f // adjust gradasi nya
+                        endY = 100f
                     )
-                    )
+                )
                 .padding(top = 50.dp)
                 .fillMaxWidth()
                 .align(Alignment.Center)
         ) {
             OutlinedTextField(
                 value = email,
-                onValueChange = { email = it },
+                onValueChange = onEmailChange,
                 label = { Text("Email", fontFamily = ibmplexsans) },
                 singleLine = true,
                 enabled = authState !is AuthState.Loading,
@@ -114,14 +142,14 @@ fun LoginScreen(
 
             OutlinedTextField(
                 value = password,
-                onValueChange = { password = it },
+                onValueChange = onPasswordChange,
                 label = { Text("Password", fontFamily = ibmplexsans) },
                 singleLine = true,
                 enabled = authState !is AuthState.Loading,
                 visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
                 trailingIcon = {
                     val icon = if (passwordVisible) R.drawable.visibility_off_24px else R.drawable.visibility_24px
-                    IconButton(onClick = { passwordVisible = !passwordVisible }) {
+                    IconButton(onClick = onPasswordVisibilityToggle) {
                         Icon(painter = painterResource(id = icon), contentDescription = null)
                     }
                 },
@@ -130,7 +158,6 @@ fun LoginScreen(
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            // Error message
             if (authState is AuthState.Error) {
                 Text(
                     text = (authState as AuthState.Error).message,
@@ -144,7 +171,7 @@ fun LoginScreen(
             Spacer(modifier = Modifier.height(16.dp))
 
             Button(
-                onClick = { viewModel.login(email, password) },
+                onClick = onLoginClick,
                 enabled = authState !is AuthState.Loading && email.isNotBlank() && password.isNotBlank(),
                 modifier = Modifier
                     .fillMaxWidth()
@@ -163,7 +190,7 @@ fun LoginScreen(
             Spacer(modifier = Modifier.height(16.dp))
 
             OutlinedButton(
-                onClick = {  },
+                onClick = onGoogleSignIn,
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(50.dp),
@@ -172,16 +199,13 @@ fun LoginScreen(
                     contentColor = colorResource(id = R.color.colorPrimaryVariant)
                 ),
                 border = BorderStroke(1.dp, colorResource(id = R.color.colorPrimaryVariant))
-
             ) {
                 Icon(
                     painter = painterResource(id = R.drawable.logo_google),
                     contentDescription = "Google Logo",
                     tint = Color.Unspecified
                 )
-
                 Spacer(Modifier.width(8.dp))
-
                 Text("Masuk menggunakan Google", fontFamily = ibmplexsans)
             }
 
@@ -191,13 +215,75 @@ fun LoginScreen(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 modifier = Modifier.fillMaxWidth()
             ) {
-                TextButton(onClick = { /* Lupa password */ }) {
+                TextButton(onClick = onForgotPassword) {
                     Text("Lupa password?", fontFamily = ibmplexsans)
                 }
-                TextButton(onClick = { navController?.navigate("register") }) {
+                TextButton(onClick = onRegisterClick) {
                     Text("Belum punya akun?", fontFamily = ibmplexsans)
                 }
             }
         }
+    }
+}
+
+// PREVIEW
+
+@Preview(showBackground = true)
+@Composable
+fun LoginScreenPreview() {
+    BiblioTheme {
+        LoginScreenContent(
+            email = "user@example.com",
+            password = "password123",
+            passwordVisible = false,
+            authState = AuthState.Idle,
+            onEmailChange = { },
+            onPasswordChange = { },
+            onPasswordVisibilityToggle = { },
+            onLoginClick = { },
+            onGoogleSignIn = { },
+            onForgotPassword = { },
+            onRegisterClick = { }
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun LoginScreenLoadingPreview() {
+    BiblioTheme {
+        LoginScreenContent(
+            email = "user@example.com",
+            password = "password123",
+            passwordVisible = false,
+            authState = AuthState.Loading,
+            onEmailChange = { },
+            onPasswordChange = { },
+            onPasswordVisibilityToggle = { },
+            onLoginClick = { },
+            onGoogleSignIn = { },
+            onForgotPassword = { },
+            onRegisterClick = { }
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun LoginScreenErrorPreview() {
+    BiblioTheme {
+        LoginScreenContent(
+            email = "user@example.com",
+            password = "wrongpassword",
+            passwordVisible = false,
+            authState = AuthState.Error("Email atau password salah"),
+            onEmailChange = { },
+            onPasswordChange = { },
+            onPasswordVisibilityToggle = { },
+            onLoginClick = { },
+            onGoogleSignIn = { },
+            onForgotPassword = { },
+            onRegisterClick = { }
+        )
     }
 }
