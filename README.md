@@ -36,6 +36,6 @@ Untuk mencoba aplikasi secara langsung tanpa membangun proyek di Android Studio,
 
 📥 Download APK:
 [git](app/release/app-release.apk)
-[anyone link](https://drive.google.com/file/d/17TPV4_CoAkwqWTKSvTZ7sUpm7Yaajx-L/view?usp=drivesdk)
+[anyone link](https://docs.google.com/uc?export=download&id=17TPV4_CoAkwqWTKSvTZ7sUpm7Yaajx-L)
 ## Inspirasi
 Terinspirasi dari banyak aplikasi seperti Spotify, Google Play Book, dll.
