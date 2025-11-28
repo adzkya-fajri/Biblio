@@ -96,6 +96,7 @@ fun ProfileScreen(
                 user?.let {
                     Profile(
                         name = it.displayName ?: "Unknown",
+                        photoUrl = it.photoUrl.toString(),
                         fontSize = 48.sp,
                         modifier = Modifier.padding(horizontal = 16.dp),
                         navController = navController,

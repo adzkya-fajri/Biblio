@@ -24,6 +24,7 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.zIndex
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import coil.compose.AsyncImage
@@ -33,6 +34,7 @@ import com.example.biblio.ibmplexsans
 @Composable
 fun Profile(
     name: String,
+    photoUrl: String?,
     backgroundColor: Color = colorResource(id = R.color.colorPrimaryVariant),
     textColor: Color = Color.White,
     size: Dp = 48.dp,
@@ -48,12 +50,33 @@ fun Profile(
             .clickable { navController?.navigate("profile") },
         contentAlignment = Alignment.Center
     ) {
-        Text(
-            text = name.firstOrNull()?.uppercase() ?: "?",
-            color = textColor,
-            fontFamily = ibmplexsans,
-            fontSize = fontSize,
-            fontWeight = FontWeight.Bold
-        )
+        if (photoUrl != null) {
+            AsyncImage(
+                model = photoUrl,
+                contentDescription = "Profile Photo",
+                modifier = Modifier
+                    .zIndex(2f)
+                    .fillMaxSize(),
+                contentScale = ContentScale.Crop
+            )
+
+            // FALLBACK
+            Text(
+                text = name.firstOrNull()?.uppercase() ?: "?",
+                color = textColor,
+                fontFamily = ibmplexsans,
+                fontSize = fontSize,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.zIndex(1f)
+            )
+        } else {
+            Text(
+                text = name.firstOrNull()?.uppercase() ?: "?",
+                color = textColor,
+                fontFamily = ibmplexsans,
+                fontSize = fontSize,
+                fontWeight = FontWeight.Bold
+            )
+        }
     }
 }

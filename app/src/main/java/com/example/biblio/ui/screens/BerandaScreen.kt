@@ -99,7 +99,7 @@ fun BerandaScreen(
                     user?.let {
                         Profile(
                             name = it.displayName ?: "Unknown",
-//                            photoUrl = it.photoUrl, // ✅ PASS DATA
+                            photoUrl = it.photoUrl.toString(), // ✅ PASS DATA
                             modifier = Modifier.padding(horizontal = 16.dp),
                             navController = navController
                         )
