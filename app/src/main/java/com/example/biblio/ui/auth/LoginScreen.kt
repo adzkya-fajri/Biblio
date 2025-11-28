@@ -44,6 +44,7 @@ import com.example.biblio.ibmplexsans
 import com.example.biblio.ui.theme.BiblioTheme
 import com.example.biblio.viewmodel.AuthState
 import com.example.biblio.viewmodel.AuthViewModel
+import com.example.biblio.viewmodel.GoogleAuthState
 import com.google.android.gms.common.api.ApiException
 import com.google.android.libraries.identity.googleid.GetGoogleIdOption
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
@@ -62,10 +63,11 @@ fun LoginScreen(
     var password by remember { mutableStateOf("") }
     var passwordVisible by remember { mutableStateOf(false) }
     val authState by viewModel.authState.collectAsState()
+    val googleAuthState by viewModel.googleAuthState.collectAsState()
     val context = LocalContext.current
 
-    LaunchedEffect(authState) {
-        if (authState is AuthState.Success) {
+    LaunchedEffect(authState, googleAuthState) {
+        if (authState is AuthState.Success || googleAuthState is GoogleAuthState.Success) {
             onLoginSuccess()
         }
     }
@@ -74,6 +76,7 @@ fun LoginScreen(
         email = email,
         password = password,
         passwordVisible = passwordVisible,
+        googleAuthState = googleAuthState,
         authState = authState,
         onEmailChange = { email = it },
         onPasswordChange = { password = it },
@@ -92,6 +95,7 @@ fun LoginScreenContent(
     email: String,
     password: String,
     passwordVisible: Boolean,
+    googleAuthState: GoogleAuthState,
     authState: AuthState,
     onEmailChange: (String) -> Unit,
     onPasswordChange: (String) -> Unit,
@@ -196,7 +200,7 @@ fun LoginScreenContent(
                 if (authState is AuthState.Loading) {
                     CircularProgressIndicator(
                         modifier = Modifier.size(24.dp),
-                        color = MaterialTheme.colorScheme.onPrimary
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 } else {
                     Text("Masuk", fontFamily = ibmplexsans)
@@ -207,22 +211,29 @@ fun LoginScreenContent(
 
             OutlinedButton(
                 onClick = onGoogleSignIn,
+                enabled = googleAuthState !is GoogleAuthState.Loading,
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(50.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = Color.Transparent,
-                    contentColor = colorResource(id = R.color.colorPrimaryVariant)
-                ),
                 border = BorderStroke(1.dp, colorResource(id = R.color.colorPrimaryVariant))
+
             ) {
-                Icon(
-                    painter = painterResource(id = R.drawable.logo_google),
-                    contentDescription = "Google Logo",
-                    tint = Color.Unspecified
-                )
-                Spacer(Modifier.width(8.dp))
-                Text("Masuk menggunakan Google", fontFamily = ibmplexsans)
+
+                if (googleAuthState is GoogleAuthState.Loading) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(24.dp),
+                    )
+                } else {
+                    Icon(
+                        painter = painterResource(id = R.drawable.logo_google),
+                        contentDescription = "Google Logo",
+                        tint = Color.Unspecified
+                    )
+
+                    Spacer(Modifier.width(8.dp))
+
+                    Text("Masuk menggunakan Google", fontFamily = ibmplexsans)
+                }
             }
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -252,6 +263,7 @@ fun LoginScreenPreview() {
             email = "user@example.com",
             password = "password123",
             passwordVisible = false,
+            googleAuthState = GoogleAuthState.Idle,
             authState = AuthState.Idle,
             onEmailChange = { },
             onPasswordChange = { },
@@ -266,13 +278,35 @@ fun LoginScreenPreview() {
 
 @Preview(showBackground = true)
 @Composable
-fun LoginScreenLoadingPreview() {
+fun LoginScreenLoadingEmailPreview() {
     BiblioTheme {
         LoginScreenContent(
             email = "user@example.com",
             password = "password123",
             passwordVisible = false,
+            googleAuthState = GoogleAuthState.Idle,
             authState = AuthState.Loading,
+            onEmailChange = { },
+            onPasswordChange = { },
+            onPasswordVisibilityToggle = { },
+            onLoginClick = { },
+            onGoogleSignIn = { },
+            onForgotPassword = { },
+            onRegisterClick = { }
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun LoginScreenLoadingGooglePreview() {
+    BiblioTheme {
+        LoginScreenContent(
+            email = "user@example.com",
+            password = "password123",
+            passwordVisible = false,
+            googleAuthState = GoogleAuthState.Loading,
+            authState = AuthState.Idle,
             onEmailChange = { },
             onPasswordChange = { },
             onPasswordVisibilityToggle = { },
@@ -292,6 +326,7 @@ fun LoginScreenErrorPreview() {
             email = "user@example.com",
             password = "wrongpassword",
             passwordVisible = false,
+            googleAuthState = GoogleAuthState.Error("Terjadi kesalahan"),
             authState = AuthState.Error("Email atau password salah"),
             onEmailChange = { },
             onPasswordChange = { },

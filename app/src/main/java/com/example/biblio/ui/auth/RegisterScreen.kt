@@ -208,7 +208,7 @@ fun RegisterScreenContent(
                 if (authState is AuthState.Loading) {
                     CircularProgressIndicator(
                         modifier = Modifier.size(24.dp),
-                        color = MaterialTheme.colorScheme.onPrimary
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 } else {
                     Text("Daftar", fontFamily = ibmplexsans)

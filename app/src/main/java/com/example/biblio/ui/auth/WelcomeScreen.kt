@@ -49,8 +49,11 @@ import com.example.biblio.ibmplexsans
 import com.example.biblio.ui.theme.BiblioTheme
 import com.example.biblio.viewmodel.AuthState
 import com.example.biblio.viewmodel.AuthViewModel
+import com.example.biblio.viewmodel.GoogleAuthState
+import kotlin.Boolean
+import kotlin.String
+import kotlin.Unit
 
-@Preview(showBackground = true)
 @Composable
 fun WelcomeScreen(
     onLoginSuccess: () -> Unit,
@@ -59,14 +62,32 @@ fun WelcomeScreen(
     ) {
 
     val context = LocalContext.current
-    val authState by viewModel.authState.collectAsState()
+    val googleAuthState by viewModel.googleAuthState.collectAsState()
 
-    LaunchedEffect(authState) {
-        if (authState is AuthState.Success) {
+    LaunchedEffect(googleAuthState) {
+        if (googleAuthState is GoogleAuthState.Success) {
             onLoginSuccess()
         }
     }
 
+    WelcomeScreenContent(
+        googleAuthState = googleAuthState,
+        onGoogleSignIn = {
+            viewModel.googleLogin(context)
+        },
+        onLoginClick = { navController?.navigate("login") },
+        onRegisterClick = { navController?.navigate("register") },
+    )
+}
+
+@Composable
+fun WelcomeScreenContent
+    (
+        googleAuthState: GoogleAuthState,
+        onRegisterClick: () -> Unit,
+        onGoogleSignIn: () -> Unit,
+        onLoginClick: () -> Unit,
+    ) {
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -105,7 +126,7 @@ fun WelcomeScreen(
             Spacer(modifier = Modifier.height(16.dp))
 
             Button(
-                onClick = { navController?.navigate("register") },
+                onClick = onRegisterClick,
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(50.dp),
@@ -127,26 +148,30 @@ fun WelcomeScreen(
             Spacer(modifier = Modifier.height(16.dp))
 
             OutlinedButton(
-                onClick = { viewModel.googleLogin(context) },
+                onClick = onGoogleSignIn,
+                enabled = googleAuthState !is GoogleAuthState.Loading,
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(50.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = Color.Transparent,
-                    contentColor = colorResource(id = R.color.colorPrimaryVariant)
-                ),
                 border = BorderStroke(1.dp, colorResource(id = R.color.colorPrimaryVariant))
 
             ) {
-                Icon(
-                    painter = painterResource(id = R.drawable.logo_google),
-                    contentDescription = "Google Logo",
-                    tint = Color.Unspecified
-                )
 
-                Spacer(Modifier.width(8.dp))
+                if (googleAuthState is GoogleAuthState.Loading) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(24.dp),
+                    )
+                } else {
+                    Icon(
+                        painter = painterResource(id = R.drawable.logo_google),
+                        contentDescription = "Google Logo",
+                        tint = Color.Unspecified
+                    )
 
-                Text("Masuk menggunakan Google", fontFamily = ibmplexsans)
+                    Spacer(Modifier.width(8.dp))
+
+                    Text("Masuk menggunakan Google", fontFamily = ibmplexsans)
+                }
             }
 
             Spacer(modifier = Modifier.height(8.dp))
@@ -155,13 +180,62 @@ fun WelcomeScreen(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 modifier = Modifier.fillMaxWidth()
             ) {
-                TextButton(onClick = {  }) {
-                    Text("Syarat & Ketentuan", fontFamily = ibmplexsans, color = colorResource(id = R.color.colorPrimaryVariant))
+                TextButton(onClick = { }) {
+                    Text(
+                        "Syarat & Ketentuan",
+                        fontFamily = ibmplexsans,
+                        color = colorResource(id = R.color.colorPrimaryVariant)
+                    )
                 }
-                TextButton(onClick = { navController?.navigate("login") }) {
-                    Text("Masuk", fontFamily = ibmplexsans, color = colorResource(id = R.color.colorPrimaryVariant))
+                TextButton(onClick = onLoginClick) {
+                    Text(
+                        "Masuk",
+                        fontFamily = ibmplexsans,
+                        color = colorResource(id = R.color.colorPrimaryVariant)
+                    )
                 }
             }
         }
+    }
+}
+
+// PREVIEW
+
+@Preview(showBackground = true)
+@Composable
+fun WelcomeScreenPreview() {
+    BiblioTheme {
+        WelcomeScreenContent(
+            googleAuthState = GoogleAuthState.Idle,
+            onRegisterClick = { },
+            onLoginClick = { },
+            onGoogleSignIn = { },
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun WelcomeScreenLoadingPreview() {
+    BiblioTheme {
+        WelcomeScreenContent(
+            googleAuthState = GoogleAuthState.Loading,
+            onRegisterClick = { },
+            onLoginClick = { },
+            onGoogleSignIn = { },
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun WelcomeScreenErrorPreview() {
+    BiblioTheme {
+        WelcomeScreenContent(
+            googleAuthState = GoogleAuthState.Error("Tidak dapat login!"),
+            onRegisterClick = { },
+            onLoginClick = { },
+            onGoogleSignIn = { },
+        )
     }
 }
