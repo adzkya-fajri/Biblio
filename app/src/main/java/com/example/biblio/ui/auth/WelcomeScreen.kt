@@ -32,6 +32,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -46,15 +47,25 @@ import com.example.biblio.R
 import com.example.biblio.fraunces
 import com.example.biblio.ibmplexsans
 import com.example.biblio.ui.theme.BiblioTheme
+import com.example.biblio.viewmodel.AuthState
 import com.example.biblio.viewmodel.AuthViewModel
 
 @Preview(showBackground = true)
 @Composable
 fun WelcomeScreen(
-//    onLoginSuccess: () -> Unit,
-//    viewModel: AuthViewModel = viewModel()
+    onLoginSuccess: () -> Unit,
     navController: NavController? = null,
+    viewModel: AuthViewModel = viewModel(),
     ) {
+
+    val context = LocalContext.current
+    val authState by viewModel.authState.collectAsState()
+
+    LaunchedEffect(authState) {
+        if (authState is AuthState.Success) {
+            onLoginSuccess()
+        }
+    }
 
     Box(
         modifier = Modifier
@@ -116,7 +127,7 @@ fun WelcomeScreen(
             Spacer(modifier = Modifier.height(16.dp))
 
             OutlinedButton(
-                onClick = {  },
+                onClick = { viewModel.googleLogin(context) },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(50.dp),
@@ -135,7 +146,7 @@ fun WelcomeScreen(
 
                 Spacer(Modifier.width(8.dp))
 
-                Text("Daftar menggunakan Google", fontFamily = ibmplexsans)
+                Text("Masuk menggunakan Google", fontFamily = ibmplexsans)
             }
 
             Spacer(modifier = Modifier.height(8.dp))

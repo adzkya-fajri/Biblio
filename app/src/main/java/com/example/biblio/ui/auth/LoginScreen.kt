@@ -1,5 +1,7 @@
 package com.example.biblio.ui.auth
 
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -22,6 +24,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -30,6 +33,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
+import androidx.credentials.CredentialManager
+import androidx.credentials.CustomCredential
+import androidx.credentials.GetCredentialRequest
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.biblio.R
@@ -38,6 +44,13 @@ import com.example.biblio.ibmplexsans
 import com.example.biblio.ui.theme.BiblioTheme
 import com.example.biblio.viewmodel.AuthState
 import com.example.biblio.viewmodel.AuthViewModel
+import com.google.android.gms.common.api.ApiException
+import com.google.android.libraries.identity.googleid.GetGoogleIdOption
+import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.GoogleAuthProvider
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
 
 @Composable
 fun LoginScreen(
@@ -49,6 +62,7 @@ fun LoginScreen(
     var password by remember { mutableStateOf("") }
     var passwordVisible by remember { mutableStateOf(false) }
     val authState by viewModel.authState.collectAsState()
+    val context = LocalContext.current
 
     LaunchedEffect(authState) {
         if (authState is AuthState.Success) {
@@ -65,7 +79,9 @@ fun LoginScreen(
         onPasswordChange = { password = it },
         onPasswordVisibilityToggle = { passwordVisible = !passwordVisible },
         onLoginClick = { viewModel.login(email, password) },
-        onGoogleSignIn = { },
+        onGoogleSignIn = {
+            viewModel.googleLogin(context)
+        },
         onForgotPassword = { },
         onRegisterClick = { navController?.navigate("register") }
     )

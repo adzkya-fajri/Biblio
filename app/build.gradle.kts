@@ -1,3 +1,8 @@
+import java.util.Properties
+
+val localProperties = Properties()
+localProperties.load(project.rootProject.file("local.properties").inputStream())
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -17,6 +22,10 @@ android {
         targetSdk = 36
         versionCode = 1
         versionName = "1.0"
+
+        val properties = Properties()
+        properties.load(project.rootProject.file("local.properties").inputStream())
+        buildConfigField("String", "WEB_CLIENT_ID", "\"${properties["WEB_CLIENT_ID"]}\"")
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -147,4 +156,8 @@ dependencies {
 
     // Add the dependencies for any other desired Firebase products
     // https://firebase.google.com/docs/android/setup#available-libraries
+
+    implementation("androidx.credentials:credentials:1.3.0")
+    implementation("androidx.credentials:credentials-play-services-auth:1.3.0")
+    implementation("com.google.android.libraries.identity.googleid:googleid:1.1.1")
 }

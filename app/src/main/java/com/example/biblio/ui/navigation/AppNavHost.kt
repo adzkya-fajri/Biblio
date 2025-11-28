@@ -120,7 +120,14 @@ fun AppNavHost() {
             )
         }
         composable("welcome") {
-            WelcomeScreen(navController = navController)
+            WelcomeScreen(
+                onLoginSuccess = {
+                    navController.navigate("main") {
+                        popUpTo("welcome") { inclusive = true }
+                    }
+                },
+                navController = navController
+            )
         }
         composable("main") {
             MainScreen(navController = navController)

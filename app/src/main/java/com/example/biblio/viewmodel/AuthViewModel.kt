@@ -1,17 +1,28 @@
 package com.example.biblio.viewmodel
 
+import android.content.Context
 import android.net.Uri
 import android.util.Log
+import android.util.Log.e
+import androidx.credentials.CredentialManager
+import androidx.credentials.CustomCredential
+import androidx.credentials.GetCredentialRequest
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.biblio.BuildConfig
 import com.example.biblio.data.model.User
 import com.example.biblio.data.repository.AuthRepository
+import com.google.android.libraries.identity.googleid.GetGoogleIdOption
+import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.auth.UserProfileChangeRequest
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
+import kotlin.fold
 
 sealed class AuthState {
     object Idle : AuthState()
@@ -36,6 +47,41 @@ class AuthViewModel(private val repository: AuthRepository = AuthRepository()) :
                 onSuccess = { AuthState.Success(it) },
                 onFailure = { AuthState.Error(it.message ?: "Unknown error") }
             )
+        }
+    }
+
+    fun googleLogin(context: Context) {
+        viewModelScope.launch {
+            _authState.value = AuthState.Loading
+            try {
+                val credentialManager = CredentialManager.create(context)
+
+                val googleIdOption = GetGoogleIdOption.Builder()
+                    .setFilterByAuthorizedAccounts(false)
+                    .setServerClientId(BuildConfig.WEB_CLIENT_ID)
+                    .build()
+
+                val request = GetCredentialRequest.Builder()
+                    .addCredentialOption(googleIdOption)
+                    .build()
+
+                val result = credentialManager.getCredential(context, request)
+                val credential = result.credential
+
+                if (credential is CustomCredential &&
+                    credential.type == GoogleIdTokenCredential.TYPE_GOOGLE_ID_TOKEN_CREDENTIAL) {
+                    val googleIdTokenCredential = GoogleIdTokenCredential.createFrom(credential.data)
+                    val idToken = googleIdTokenCredential.idToken
+
+                    val authResult = repository.googleLogin(idToken)
+                    _authState.value = authResult.fold(
+                        onSuccess = { AuthState.Success(it) },
+                        onFailure = { AuthState.Error(it.message ?: "Unknown error") }
+                    )
+                }
+            } catch (e: Exception) {
+                _authState.value = AuthState.Error(e.message ?: "Google sign in failed")
+            }
         }
     }
 
