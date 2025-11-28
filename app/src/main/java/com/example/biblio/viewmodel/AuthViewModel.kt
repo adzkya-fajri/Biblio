@@ -24,6 +24,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import kotlin.fold
 
+// State autentikasi provider email
 sealed class AuthState {
     object Idle : AuthState()
     object Loading : AuthState()
@@ -31,9 +32,25 @@ sealed class AuthState {
     data class Error(val message: String) : AuthState()
 }
 
+// State autentikasi provider Google
+sealed class GoogleAuthState {
+    object Idle : GoogleAuthState()
+    object Loading : GoogleAuthState()
+    data class Success(val user: User) : GoogleAuthState()
+    data class Error(val message: String) : GoogleAuthState()
+}
+
+
 class AuthViewModel(private val repository: AuthRepository = AuthRepository()) : ViewModel() {
+
+    // State autentikasi provider email
     private val _authState = MutableStateFlow<AuthState>(AuthState.Idle)
     val authState: StateFlow<AuthState> = _authState
+
+    // State autentikasi provider Google
+    private val _googleAuthState = MutableStateFlow<GoogleAuthState>(GoogleAuthState.Idle)
+    val googleAuthState: StateFlow<GoogleAuthState> = _googleAuthState
+
     private val _updateState = MutableStateFlow<UpdateState>(UpdateState.Idle)
     val updateState = _updateState.asStateFlow()
 
@@ -52,7 +69,7 @@ class AuthViewModel(private val repository: AuthRepository = AuthRepository()) :
 
     fun googleLogin(context: Context) {
         viewModelScope.launch {
-            _authState.value = AuthState.Loading
+            _googleAuthState.value = GoogleAuthState.Loading
             try {
                 val credentialManager = CredentialManager.create(context)
 
@@ -74,13 +91,13 @@ class AuthViewModel(private val repository: AuthRepository = AuthRepository()) :
                     val idToken = googleIdTokenCredential.idToken
 
                     val authResult = repository.googleLogin(idToken)
-                    _authState.value = authResult.fold(
-                        onSuccess = { AuthState.Success(it) },
-                        onFailure = { AuthState.Error(it.message ?: "Unknown error") }
+                    _googleAuthState.value = authResult.fold(
+                        onSuccess = { GoogleAuthState.Success(it) },
+                        onFailure = { GoogleAuthState.Error(it.message ?: "Unknown error") }
                     )
                 }
             } catch (e: Exception) {
-                _authState.value = AuthState.Error(e.message ?: "Google sign in failed")
+                _googleAuthState.value = GoogleAuthState.Error(e.message ?: "Google sign in failed")
             }
         }
     }
