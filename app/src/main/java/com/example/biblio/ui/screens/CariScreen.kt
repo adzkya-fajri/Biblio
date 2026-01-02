@@ -1,5 +1,8 @@
 package com.example.biblio.ui.screens
 
+import androidx.compose.animation.AnimatedContentScope
+import androidx.compose.animation.ExperimentalSharedTransitionApi
+import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -30,6 +33,7 @@ import com.example.biblio.viewmodel.BukuViewModel
 import com.example.biblio.viewmodel.BukuViewModelFactory
 import androidx.navigation.NavController
 
+@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 fun CariScreen(
     navController: NavController? = null,
@@ -39,7 +43,9 @@ fun CariScreen(
             BukuRepository(LocalContext.current),
             FavoriteRepository(LocalContext.current)  // ← TAMBAHAN
         )
-    )
+    ),
+    sharedTransitionScope: SharedTransitionScope,
+    animatedContentScope: AnimatedContentScope,
 ) {
     var searchQuery by remember { mutableStateOf("") }
     var selectedCategory by remember { mutableStateOf("Semua") }
@@ -210,8 +216,10 @@ fun CariScreen(
                 ) { section ->
                     BigSectionItem(
                         section = section,
-                        navController = navController,  // ✅ TAMBAHAN
-                        viewModel = viewModel           // ✅ TAMBAHAN
+                        navController = navController,
+                        viewModel = viewModel,
+                        sharedTransitionScope = sharedTransitionScope,
+                        animatedContentScope = animatedContentScope
                     )
                 }
             }
@@ -223,8 +231,10 @@ fun CariScreen(
             ) { section ->
                 SectionItem(
                     section = section,
-                    navController = navController,  // ✅ TAMBAHAN
-                    viewModel = viewModel           // ✅ TAMBAHAN
+                    navController = navController,
+                    viewModel = viewModel,
+                    sharedTransitionScope = sharedTransitionScope,
+                    animatedContentScope = animatedContentScope
                 )
             }
         }

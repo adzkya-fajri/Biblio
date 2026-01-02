@@ -1,5 +1,8 @@
 package com.example.biblio.ui.components
 
+import androidx.compose.animation.AnimatedContentScope
+import androidx.compose.animation.ExperimentalSharedTransitionApi
+import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -22,11 +25,14 @@ import com.example.biblio.data.model.Section
 import com.example.biblio.fraunces
 import com.example.biblio.viewmodel.BukuViewModel
 
+@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 fun BigSectionItem(
     section: Section,
     navController: NavController? = null,
-    viewModel: BukuViewModel
+    viewModel: BukuViewModel,
+    sharedTransitionScope: SharedTransitionScope,
+    animatedContentScope: AnimatedContentScope
 ) {
     Column(modifier = Modifier.fillMaxWidth()) {
         // Section Title
@@ -47,7 +53,13 @@ fun BigSectionItem(
             contentPadding = PaddingValues(horizontal = 16.dp)
         ) {
             items(section.books) { book ->
-                BookItem(book = book, viewModel = viewModel, coverHeight = 225.dp, coverWidth = 150.dp)
+                BookItem(
+                    book = book,
+                    navController = navController,
+                    viewModel = viewModel,
+                    sharedTransitionScope = sharedTransitionScope,
+                    animatedContentScope = animatedContentScope
+                )
             }
         }
     }

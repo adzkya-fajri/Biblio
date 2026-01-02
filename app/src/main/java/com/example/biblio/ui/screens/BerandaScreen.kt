@@ -1,15 +1,14 @@
 package com.example.biblio.ui.screens
 
-import android.R.attr.name
-import android.annotation.SuppressLint
+import androidx.compose.animation.AnimatedContentScope
+import androidx.compose.animation.ExperimentalSharedTransitionApi
+import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Text
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults.Indicator
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
@@ -18,26 +17,16 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import coil.compose.AsyncImage
 import com.example.biblio.R
 import com.example.biblio.data.repository.BukuRepository
 import com.example.biblio.data.repository.FavoriteRepository
-//import com.example.biblio.data.repository.UserRepository
-import com.example.biblio.fraunces
-import com.example.biblio.ibmplexsans
-import com.example.biblio.ui.components.BigSectionItem
 import com.example.biblio.ui.components.Profile
 import com.example.biblio.ui.components.SectionItem
 import com.example.biblio.viewmodel.BukuViewModel
@@ -45,12 +34,13 @@ import com.example.biblio.viewmodel.BukuViewModelFactory
 import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
 
-@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalSharedTransitionApi::class)
 @Composable
 fun BerandaScreen(
     navController: NavController,
     bottomPadding: Dp,
+    sharedTransitionScope: SharedTransitionScope,
+    animatedContentScope: AnimatedContentScope,
     viewModel: BukuViewModel = viewModel(
         factory = BukuViewModelFactory(
             BukuRepository(LocalContext.current),
@@ -61,6 +51,8 @@ fun BerandaScreen(
     val bookDatabase by viewModel.bookDatabase.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
     val state = rememberPullToRefreshState()
+    // Di BerandaScreen
+    val sections = bookDatabase?.sections?.take(1) ?: emptyList() // Load 1 section dulu
 
     PullToRefreshBox(
         isRefreshing = isLoading,
@@ -90,8 +82,7 @@ fun BerandaScreen(
                 )
         ) {
             LazyColumn(
-                modifier = Modifier
-                    .fillMaxSize(),
+                modifier = Modifier.fillMaxSize(),
                 contentPadding = PaddingValues(bottom = bottomPadding, top = 10.dp)
             ) {
                 item {
@@ -99,7 +90,7 @@ fun BerandaScreen(
                     user?.let {
                         Profile(
                             name = it.displayName ?: "Unknown",
-                            photoUrl = it.photoUrl.toString(), // ✅ PASS DATA
+                            photoUrl = it.photoUrl.toString(),
                             modifier = Modifier.padding(horizontal = 16.dp),
                             navController = navController
                         )
@@ -116,7 +107,9 @@ fun BerandaScreen(
                         SectionItem(
                             section = section,
                             navController = navController,
-                            viewModel = viewModel
+                            viewModel = viewModel,
+                            sharedTransitionScope = sharedTransitionScope,
+                            animatedContentScope = animatedContentScope
                         )
                     }
                 }

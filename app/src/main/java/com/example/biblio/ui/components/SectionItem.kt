@@ -1,6 +1,8 @@
 package com.example.biblio.ui.components
 
-//import com.example.biblio.Section
+import androidx.compose.animation.AnimatedContentScope
+import androidx.compose.animation.ExperimentalSharedTransitionApi
+import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -17,22 +19,24 @@ import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.biblio.R
 import com.example.biblio.data.model.Section
 import com.example.biblio.fraunces
 import com.example.biblio.viewmodel.BukuViewModel
 
+@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
-fun SectionItem(section: Section,
-                navController: NavController? = null,  // ← Tambah parameter
-                viewModel: BukuViewModel  // ← TAMBAHAN
-                ) {
+fun SectionItem(
+    section: Section,
+    navController: NavController? = null,
+    viewModel: BukuViewModel,
+    sharedTransitionScope: SharedTransitionScope,
+    animatedContentScope: AnimatedContentScope
+) {
     Column(modifier = Modifier.fillMaxWidth()) {
-        // Section Title
         Text(
-            text = section.title,  // ← Ganti 'name' jadi 'title'
+            text = section.title,
             fontSize = 20.sp,
             fontFamily = fraunces,
             color = colorResource(R.color.colorOnBackground),
@@ -42,7 +46,6 @@ fun SectionItem(section: Section,
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Horizontal scroll untuk books (LazyRow)
         LazyRow(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(4.dp),
@@ -50,12 +53,14 @@ fun SectionItem(section: Section,
         ) {
             items(
                 items = section.books,
-                key = { book -> book.id } // ← Ganti 'isbn' jadi 'id' untuk key
+                key = { book -> book.id }
             ) { book ->
                 BookItem(
                     book = book,
-                    navController = navController,  // ← Pass navController
-                    viewModel = viewModel // ✅ PASS BOTH!
+                    navController = navController,
+                    viewModel = viewModel,
+                    sharedTransitionScope = sharedTransitionScope,
+                    animatedContentScope = animatedContentScope
                 )
             }
         }

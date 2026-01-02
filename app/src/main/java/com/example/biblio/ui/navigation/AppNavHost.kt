@@ -132,20 +132,5 @@ fun AppNavHost() {
         composable("main") {
             MainScreen(navController = navController)
         }
-        composable(
-            route = "reader/{bookJson}",
-            arguments = listOf(
-                navArgument("bookJson") { type = NavType.StringType }
-            )
-        ) { backStackEntry ->
-            val bookJson = backStackEntry.arguments?.getString("bookJson") ?: ""
-            BookReaderScreen(
-                bookJson = bookJson,
-                navController = navController
-            )
-        }
-        composable("style_text") {
-            StyleTextScreen(onNavigateBack = { navController.navigateUp() })
-        }
     }
 }

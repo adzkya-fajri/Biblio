@@ -1,6 +1,14 @@
 package com.example.biblio.ui.components
 
+import androidx.compose.animation.AnimatedContentScope
+import androidx.compose.animation.ExperimentalSharedTransitionApi
+import androidx.compose.animation.SharedTransitionScope
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.LocalIndication
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
@@ -21,9 +29,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -35,18 +43,18 @@ import com.example.biblio.data.model.Buku
 import com.example.biblio.ibmplexsans
 import com.example.biblio.viewmodel.BukuViewModel
 
+@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 fun BookItem(
     book: Buku,
     navController: NavController? = null,
     viewModel: BukuViewModel,
+    sharedTransitionScope: SharedTransitionScope,
+    animatedContentScope: AnimatedContentScope,
     coverHeight: Dp = 180.dp,
     coverWidth: Dp = 120.dp,
 ) {
-    // FIX 1: Add explicit initial value for type inference
     val favoriteIds by viewModel.favoriteIds.collectAsState(initial = emptySet())
-
-    // FIX 2: Ensure type compatibility - convert book.id to String if needed
     val isFavorite = favoriteIds.contains(book.id.toString())
 
     Column(
@@ -56,40 +64,44 @@ fun BookItem(
                 interactionSource = remember { MutableInteractionSource() },
                 indication = LocalIndication.current
             ) {
-                navController?.navigate("buku/${book.id}")  // ← Pass book ID
-                println("Buku diklik: ${book.judul}")
+                navController?.navigate("buku/${book.id}")
             }
     ) {
-        // ========================================
-        // BOX UNTUK OVERLAY COVER DAN TOMBOL
-        // ========================================
-
         Box(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(coverHeight)
         ) {
-            // Card = lapisan bawah
-            Card(
-                modifier = Modifier.fillMaxSize(),
-                shape = RoundedCornerShape(8.dp),
-                elevation = CardDefaults.cardElevation(3.dp)
-            ) {
-                AsyncImage(
-                    model = book.cover,
-                    contentDescription = "Book Cover",
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier.fillMaxSize()
-                )
+            with(sharedTransitionScope) {
+                Card(
+                    modifier = Modifier
+                        .background(Color.Transparent)
+                        .fillMaxSize()
+                        .sharedElement(
+                            state = rememberSharedContentState(key = "cover-${book.id}"),
+                            animatedVisibilityScope = animatedContentScope,
+                            boundsTransform = { _, _ ->
+                                spring(
+                                    dampingRatio = Spring.DampingRatioLowBouncy,
+                                    stiffness = Spring.StiffnessMediumLow
+                                )
+                            }
+                        ),
+                    shape = RoundedCornerShape(8.dp),
+                    elevation = CardDefaults.cardElevation(3.dp)
+                ) {
+                    AsyncImage(
+                        model = book.cover,
+                        contentDescription = "Book Cover",
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier.fillMaxSize()
+                    )
+                }
             }
-            // ========================================
-            // ✅ INI LOKASI YANG BENAR UNTUK .align(TopEnd)!
-            // Surface = lapisan atas (overlay)
-            // tombol favorit (lapisan atas)
-            // ========================================
+
             Surface(
                 modifier = Modifier
-                    .align(Alignment.TopEnd)  // SCOPE BOX!
+                    .align(Alignment.TopEnd)
                     .padding(8.dp)
                     .size(32.dp),
                 shape = CircleShape,
@@ -101,16 +113,8 @@ fun BookItem(
                     modifier = Modifier.size(32.dp)
                 ) {
                     Icon(
-                        imageVector = if (isFavorite) {
-                            Icons.Filled.Favorite
-                        } else {
-                            Icons.Filled.FavoriteBorder
-                        },
-                        contentDescription = if (isFavorite) {
-                            "Hapus dari favorit"
-                        } else {
-                            "Tambah ke favorit"
-                        },
+                        imageVector = if (isFavorite) Icons.Filled.Favorite else Icons.Filled.FavoriteBorder,
+                        contentDescription = if (isFavorite) "Hapus dari favorit" else "Tambah ke favorit",
                         tint = if (isFavorite) Color.Red else Color.Gray,
                         modifier = Modifier.size(20.dp)
                     )
@@ -120,30 +124,58 @@ fun BookItem(
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        // Judul buku
-        Text(
-            color = colorResource(id = R.color.colorOnBackground),
-            text = book.judul,
-            lineHeight = 1.25.em,
-            fontSize = 14.sp,
-            fontFamily = ibmplexsans,
-            fontWeight = FontWeight.Normal,
-            maxLines = 2,
-            overflow = TextOverflow.Ellipsis, // <- tambahkan ini
-            modifier = Modifier.fillMaxWidth()
-        )
+        with(sharedTransitionScope) {
+            Text(
+                color = colorResource(id = R.color.colorOnBackground),
+                text = book.judul,
+                lineHeight = 1.25.em,
+                fontSize = 14.sp,
+                fontFamily = ibmplexsans,
+                fontWeight = FontWeight.Normal,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .sharedBounds(
+                        sharedContentState = rememberSharedContentState(key = "title-${book.id}"),
+                        animatedVisibilityScope = animatedContentScope,
+                        boundsTransform = { _, _ ->
+                            spring(
+                                dampingRatio = Spring.DampingRatioLowBouncy,
+                                stiffness = Spring.StiffnessMediumLow
+                            )
+                        },
+                        resizeMode = SharedTransitionScope.ResizeMode.ScaleToBounds()
+                    )
+                    .skipToLookaheadSize(),
+            )
+        }
 
         Spacer(modifier = Modifier.height(2.dp))
 
-        // Penulis
-        Text(
-            text = book.penulis,
-            fontSize = 12.sp,
-            fontWeight = FontWeight.Normal,
-            color = Color.Gray,
-            fontFamily = ibmplexsans,
-            maxLines = 1,
-            modifier = Modifier.fillMaxWidth()
-        )
+        with(sharedTransitionScope) {
+            Text(
+                text = book.penulis,
+                fontSize = 12.sp,
+                fontWeight = FontWeight.Normal,
+                color = Color.Gray,
+                fontFamily = ibmplexsans,
+                maxLines = 1,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .sharedBounds(
+                        sharedContentState = rememberSharedContentState(key = "author-${book.id}"),
+                        animatedVisibilityScope = animatedContentScope,
+                        boundsTransform = { _, _ ->
+                            spring(
+                                dampingRatio = Spring.DampingRatioLowBouncy,
+                                stiffness = Spring.StiffnessMediumLow
+                            )
+                        },
+                        resizeMode = SharedTransitionScope.ResizeMode.ScaleToBounds()
+                    )
+                    .skipToLookaheadSize(),
+            )
+        }
     }
 }
