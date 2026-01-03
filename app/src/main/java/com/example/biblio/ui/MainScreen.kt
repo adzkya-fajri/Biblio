@@ -1,12 +1,11 @@
 package com.example.biblio.ui
 
-import androidx.compose.animation.AnimatedContentTransitionScope
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.ContentTransform
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionLayout
 import androidx.compose.animation.core.FastOutLinearInEasing
 import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -14,11 +13,9 @@ import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.slideOutVertically
-import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
@@ -40,16 +37,18 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import com.example.biblio.data.repository.BukuRepository
-import com.example.biblio.data.repository.FavoriteRepository
+import com.example.biblio.data.repository.FirebaseBookRepository
+import com.example.biblio.data.repository.FirebaseFavoriteRepository
 import com.example.biblio.ibmplexsans
 import com.example.biblio.ui.components.BottomBar
 import com.example.biblio.ui.components.NowReadingBar
 import com.example.biblio.ui.screens.*
-import com.example.biblio.viewmodel.BukuViewModel
-import com.example.biblio.viewmodel.BukuViewModelFactory
+import com.example.biblio.viewmodel.BookViewModel
+import com.example.biblio.viewmodel.BookViewModelFactory
 import com.google.firebase.Firebase
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.auth
+import com.google.firebase.firestore.FirebaseFirestore
 
 // MainScreen.kt - REFACTORED
 @OptIn(ExperimentalSharedTransitionApi::class)
@@ -59,36 +58,57 @@ fun MainScreen(navController: NavController) {
     val context = LocalContext.current
     val tabs = listOf("beranda", "cari", "koleksi")
 
-    val sharedViewModel: BukuViewModel = viewModel(
-        factory = BukuViewModelFactory(
-            BukuRepository(context),
-            FavoriteRepository(context)
+    val sharedViewModel: BookViewModel = viewModel(
+        factory = BookViewModelFactory(
+            bookRepository = FirebaseBookRepository(),
+            favoriteRepository = FirebaseFavoriteRepository(
+                auth = FirebaseAuth.getInstance(),
+                firestore = FirebaseFirestore.getInstance()
+            )
         )
     )
 
-    // Track current route
+// Track current route
     val navBackStackEntry by innerNavController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
-
-    // Dynamic UI visibility
     val isReaderScreen = currentRoute == "reader/{bookJson}"
 
-    val showBottomBar = !isReaderScreen
-    val showMiniPlayer = remember(currentRoute) {
-        mutableStateOf(!isReaderScreen)
+    // Persistent for app lifetime
+    val miniPlayerVisible = remember {
+        mutableStateOf(true)
     }
 
-    val bottomPadding by remember {
+    // Auto-hide on reader
+    LaunchedEffect(isReaderScreen) {
+        if (isReaderScreen) {
+            miniPlayerVisible.value = false
+        }
+    }
+
+    val showBottomBar = !isReaderScreen
+    val showMiniPlayer = miniPlayerVisible.value && !isReaderScreen
+
+    val targetPadding by remember(showBottomBar, showMiniPlayer) {
         derivedStateOf {
             when {
                 !showBottomBar -> 0.dp
-                showMiniPlayer.value -> 200.dp
+                showMiniPlayer -> 200.dp
                 else -> 108.dp
             }
         }
     }
 
+    val bottomPadding by animateDpAsState(
+        targetValue = targetPadding,
+        animationSpec = tween(
+            durationMillis = 300,
+            easing = FastOutSlowInEasing
+        ),
+        label = "BottomPadding"
+    )
+
     var selectedTab by remember { mutableIntStateOf(0) }
+
 
     val user = Firebase.auth.currentUser
     LaunchedEffect(user) {
@@ -104,30 +124,30 @@ fun MainScreen(navController: NavController) {
             NavHost(
                 navController = innerNavController,
                 startDestination = "beranda",
-                enterTransition = {
-                    slideInHorizontally(
-                        initialOffsetX = { it / 2 },
-                        animationSpec = tween(300, easing = FastOutSlowInEasing)
-                    ) + fadeIn(animationSpec = tween(200, easing = FastOutSlowInEasing))
-                },
-                exitTransition = {
-                    slideOutHorizontally(
-                        targetOffsetX = { -it / 3 },
-                        animationSpec = tween(200, easing = FastOutLinearInEasing)
-                    ) + fadeOut(animationSpec = tween(100, easing = FastOutLinearInEasing))
-                },
-                popEnterTransition = {
-                    slideInHorizontally(
-                        initialOffsetX = { -it / 3 },
-                        animationSpec = tween(200, easing = FastOutSlowInEasing)
-                    ) + fadeIn(tween(400, easing = FastOutSlowInEasing))
-                },
-                popExitTransition = {
-                    slideOutHorizontally(
-                        targetOffsetX = { it / 3 },
-                        animationSpec = tween(200, easing = FastOutLinearInEasing)
-                    ) + fadeOut(tween(100, easing = FastOutLinearInEasing))
-                }
+//                enterTransition = {
+//                    slideInHorizontally(
+//                        initialOffsetX = { it / 2 },
+//                        animationSpec = tween(300, easing = FastOutSlowInEasing)
+//                    ) + fadeIn(animationSpec = tween(200, easing = FastOutSlowInEasing))
+//                },
+//                exitTransition = {
+//                    slideOutHorizontally(
+//                        targetOffsetX = { -it / 3 },
+//                        animationSpec = tween(200, easing = FastOutLinearInEasing)
+//                    ) + fadeOut(animationSpec = tween(100, easing = FastOutLinearInEasing))
+//                },
+//                popEnterTransition = {
+//                    slideInHorizontally(
+//                        initialOffsetX = { -it / 3 },
+//                        animationSpec = tween(200, easing = FastOutSlowInEasing)
+//                    ) + fadeIn(tween(400, easing = FastOutSlowInEasing))
+//                },
+//                popExitTransition = {
+//                    slideOutHorizontally(
+//                        targetOffsetX = { it / 3 },
+//                        animationSpec = tween(200, easing = FastOutLinearInEasing)
+//                    ) + fadeOut(tween(100, easing = FastOutLinearInEasing))
+//                }
             ) {
                 composable("beranda") {
                     BerandaScreen(
@@ -159,19 +179,26 @@ fun MainScreen(navController: NavController) {
                 }
 
                 composable(
-                    route = "buku/{bookId}",
+                    route = "detail/{bookId}?sectionId={sectionId}",
                     arguments = listOf(
-                        navArgument("bookId") { type = NavType.StringType }
+                        navArgument("bookId") { type = NavType.StringType },
+                        navArgument("sectionId") {
+                            type = NavType.StringType
+                            nullable = true
+                            defaultValue = null
+                        }
                     )
                 ) { backStackEntry ->
                     val bookId = backStackEntry.arguments?.getString("bookId")
+                    val sectionId = backStackEntry.arguments?.getString("sectionId")
+
                     BukuScreen(
                         bookId = bookId,
-                        navController = innerNavController,
+                        sectionId = sectionId, // ← pass ke screen
                         bottomPadding = bottomPadding,
+                        navController = navController,
                         sharedTransitionScope = this@SharedTransitionLayout,
-                        animatedContentScope = this@composable,
-                        viewModel = sharedViewModel
+                        animatedContentScope = this@composable
                     )
                 }
 
@@ -183,10 +210,10 @@ fun MainScreen(navController: NavController) {
                     )
                 ) { backStackEntry ->
                     val bookJson = backStackEntry.arguments?.getString("bookJson") ?: ""
-                    BookReaderScreen(
-                        bookJson = bookJson,
-                        navController = innerNavController
-                    )
+//                    BookReaderScreen(
+//                        bookJson = bookJson,
+//                        navController = innerNavController
+//                    )
                 }
 
                 composable("settings") { SettingsScreen(navController = navController) }
@@ -196,7 +223,7 @@ fun MainScreen(navController: NavController) {
 
         // Mini player - only show on main tabs
         AnimatedVisibility(
-            visible = showMiniPlayer.value && showBottomBar,
+            visible = miniPlayerVisible.value && showBottomBar,
             enter = slideInVertically(
                 initialOffsetY = { it }
             ) + fadeIn(),
@@ -226,7 +253,7 @@ fun MainScreen(navController: NavController) {
                 currentPage = 265,
                 totalPages = 350,
                 onContinueReading = { },
-                onDismiss = { showMiniPlayer.value = false },
+                onDismiss = { miniPlayerVisible.value = false }
             )
         }
 

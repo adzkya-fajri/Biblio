@@ -3,6 +3,7 @@ package com.example.biblio.ui.screens
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Favorite
@@ -11,35 +12,42 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
-import com.example.biblio.data.model.Buku
-import com.example.biblio.data.repository.BukuRepository
-import com.example.biblio.data.repository.FavoriteRepository
+import com.example.biblio.data.model.Book
+import com.example.biblio.data.repository.FirebaseBookRepository
+import com.example.biblio.data.repository.FirebaseFavoriteRepository
 import com.example.biblio.fraunces
-import com.example.biblio.viewmodel.BukuViewModel
-import com.example.biblio.viewmodel.BukuViewModelFactory
+import com.example.biblio.viewmodel.BookViewModel
+import com.example.biblio.viewmodel.BookViewModelFactory
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun KoleksiScreen(
     bottomPadding: Dp,
     onBookClick: (String) -> Unit,
-    viewModel: BukuViewModel = viewModel(          // <— tambahkan factory
-        factory = BukuViewModelFactory(
-            BukuRepository(LocalContext.current),
-            FavoriteRepository(LocalContext.current)
+    viewModel: BookViewModel = viewModel(
+        factory = BookViewModelFactory(
+            bookRepository = FirebaseBookRepository(),
+            favoriteRepository = FirebaseFavoriteRepository(
+                auth = FirebaseAuth.getInstance(),
+                firestore = FirebaseFirestore.getInstance()
+            )
         )
     )
 ) {
-    val list by viewModel.favoriteBooks.collectAsStateWithLifecycle()
+    val favoriteBooks by viewModel.favoriteBooks.collectAsStateWithLifecycle()
 
     Scaffold(
         topBar = {
@@ -48,7 +56,7 @@ fun KoleksiScreen(
                     Text("Koleksi Favorit", fontFamily = fraunces)
                 },
                 actions = {
-                    if (list.isNotEmpty()) {
+                    if (favoriteBooks.isNotEmpty()) {
                         IconButton(onClick = { viewModel.clearAllFavorites() }) {
                             Icon(Icons.Default.Delete, contentDescription = "Hapus semua")
                         }
@@ -63,15 +71,22 @@ fun KoleksiScreen(
                 .padding(pad)
                 .padding(bottom = bottomPadding)
         ) {
-            if (list.isEmpty()) {
+            if (favoriteBooks.isEmpty()) {
                 EmptyKoleksi()
             } else {
                 LazyColumn(
                     contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    items(list, key = { it.id }) { buku ->
-                        KoleksiCard(buku, onBookClick = { onBookClick(buku.id) })
+                    items(
+                        items = favoriteBooks,
+                        key = { it.id }
+                    ) { book ->
+                        KoleksiCard(
+                            book = book,
+                            onBookClick = { onBookClick(book.id) },
+                            onToggleFavorite = { viewModel.toggleFavorite(book.id) }
+                        )
                     }
                 }
             }
@@ -98,12 +113,22 @@ private fun EmptyKoleksi() {
             style = MaterialTheme.typography.bodyLarge,
             textAlign = TextAlign.Center
         )
+        Spacer(Modifier.height(8.dp))
+        Text(
+            "Tandai buku yang kamu suka",
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+        )
     }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun KoleksiCard(buku: Buku, onBookClick: () -> Unit) {
+private fun KoleksiCard(
+    book: Book,
+    onBookClick: () -> Unit,
+    onToggleFavorite: () -> Unit
+) {
     Card(
         onClick = onBookClick,
         modifier = Modifier.fillMaxWidth()
@@ -113,20 +138,46 @@ private fun KoleksiCard(buku: Buku, onBookClick: () -> Unit) {
             verticalAlignment = Alignment.CenterVertically
         ) {
             AsyncImage(
-                model = buku.cover,
-                contentDescription = buku.judul,
+                model = book.cover,
+                contentDescription = book.title,
                 modifier = Modifier
                     .width(60.dp)
-                    .aspectRatio(2f / 3f),
+                    .aspectRatio(2f / 3f)
+                    .clip(RoundedCornerShape(4.dp)),
                 contentScale = ContentScale.Crop
             )
+
             Spacer(Modifier.width(12.dp))
+
             Column(Modifier.weight(1f)) {
-                Text(buku.judul, fontWeight = FontWeight.SemiBold)
-                Text(buku.penulis, style = MaterialTheme.typography.bodySmall)
+                Text(
+                    text = book.title,
+                    fontWeight = FontWeight.SemiBold,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis
+                )
+                Spacer(Modifier.height(4.dp))
+                Text(
+                    text = book.author,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+                )
+                if (book.publisher.isNotEmpty()) {
+                    Spacer(Modifier.height(2.dp))
+                    Text(
+                        text = book.publisher,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
+                    )
+                }
             }
-            IconButton(onClick = { /* toggle langsung di detail */ }) {
-                Icon(Icons.Default.Favorite, contentDescription = "Favorit")
+
+            IconButton(onClick = onToggleFavorite) {
+                Icon(
+                    Icons.Default.Favorite,
+                    contentDescription = "Remove from favorites",
+                    tint = MaterialTheme.colorScheme.error
+                )
             }
         }
     }

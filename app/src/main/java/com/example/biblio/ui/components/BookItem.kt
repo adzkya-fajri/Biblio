@@ -3,10 +3,8 @@ package com.example.biblio.ui.components
 import androidx.compose.animation.AnimatedContentScope
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionScope
-import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -24,12 +22,9 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.colorResource
@@ -39,33 +34,26 @@ import androidx.compose.ui.unit.*
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.example.biblio.R
-import com.example.biblio.data.model.Buku
+import com.example.biblio.data.model.Book
 import com.example.biblio.ibmplexsans
-import com.example.biblio.viewmodel.BukuViewModel
 
 @OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 fun BookItem(
-    book: Buku,
+    book: Book,
     navController: NavController? = null,
-    viewModel: BukuViewModel,
+    sectionId: String,
+    onClick: () -> Unit,
     sharedTransitionScope: SharedTransitionScope,
     animatedContentScope: AnimatedContentScope,
     coverHeight: Dp = 180.dp,
     coverWidth: Dp = 120.dp,
+    isFavorite: Boolean,
+    onToggleFavorite: (String) -> Unit,
 ) {
-    val favoriteIds by viewModel.favoriteIds.collectAsState(initial = emptySet())
-    val isFavorite = favoriteIds.contains(book.id.toString())
-
     Column(
         modifier = Modifier
             .width(coverWidth)
-            .clickable(
-                interactionSource = remember { MutableInteractionSource() },
-                indication = LocalIndication.current
-            ) {
-                navController?.navigate("buku/${book.id}")
-            }
     ) {
         Box(
             modifier = Modifier
@@ -77,15 +65,12 @@ fun BookItem(
                     modifier = Modifier
                         .background(Color.Transparent)
                         .fillMaxSize()
+                        .clickable(onClick = onClick)
                         .sharedElement(
-                            state = rememberSharedContentState(key = "cover-${book.id}"),
-                            animatedVisibilityScope = animatedContentScope,
-                            boundsTransform = { _, _ ->
-                                spring(
-                                    dampingRatio = Spring.DampingRatioLowBouncy,
-                                    stiffness = Spring.StiffnessMediumLow
-                                )
-                            }
+                            state = rememberSharedContentState(
+                                key = "cover-${sectionId}-${book.id}" // ← unique key
+                            ),
+                            animatedVisibilityScope = animatedContentScope
                         ),
                     shape = RoundedCornerShape(8.dp),
                     elevation = CardDefaults.cardElevation(3.dp)
@@ -109,7 +94,7 @@ fun BookItem(
                 shadowElevation = 2.dp
             ) {
                 IconButton(
-                    onClick = { viewModel.toggleFavorite(book.id) },
+                    onClick = { onToggleFavorite(book.id) },
                     modifier = Modifier.size(32.dp)
                 ) {
                     Icon(
@@ -127,7 +112,7 @@ fun BookItem(
         with(sharedTransitionScope) {
             Text(
                 color = colorResource(id = R.color.colorOnBackground),
-                text = book.judul,
+                text = book.title,
                 lineHeight = 1.25.em,
                 fontSize = 14.sp,
                 fontFamily = ibmplexsans,
@@ -137,7 +122,7 @@ fun BookItem(
                 modifier = Modifier
                     .fillMaxWidth()
                     .sharedBounds(
-                        sharedContentState = rememberSharedContentState(key = "title-${book.id}"),
+                        sharedContentState = rememberSharedContentState(key = "title-${sectionId}-${book.id}"),
                         animatedVisibilityScope = animatedContentScope,
                         boundsTransform = { _, _ ->
                             spring(
@@ -155,7 +140,7 @@ fun BookItem(
 
         with(sharedTransitionScope) {
             Text(
-                text = book.penulis,
+                text = book.author,
                 fontSize = 12.sp,
                 fontWeight = FontWeight.Normal,
                 color = Color.Gray,
@@ -164,7 +149,7 @@ fun BookItem(
                 modifier = Modifier
                     .fillMaxWidth()
                     .sharedBounds(
-                        sharedContentState = rememberSharedContentState(key = "author-${book.id}"),
+                        sharedContentState = rememberSharedContentState(key = "author-${sectionId}-${book.id}"),
                         animatedVisibilityScope = animatedContentScope,
                         boundsTransform = { _, _ ->
                             spring(

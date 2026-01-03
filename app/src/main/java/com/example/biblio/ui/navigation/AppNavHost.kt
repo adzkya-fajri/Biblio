@@ -25,7 +25,7 @@ import com.example.biblio.ui.auth.RegisterScreen
 import com.example.biblio.ui.auth.WelcomeScreen
 import com.example.biblio.ui.screens.AboutBiblioScreen
 import com.example.biblio.ui.screens.BerandaScreen
-import com.example.biblio.ui.screens.BookReaderScreen
+//import com.example.biblio.ui.screens.BookReaderScreen
 import com.example.biblio.ui.screens.EditNameScreen
 import com.example.biblio.ui.screens.KoleksiScreen
 import com.example.biblio.ui.screens.ManageProfileScreen

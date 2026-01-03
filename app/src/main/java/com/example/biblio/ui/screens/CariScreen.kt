@@ -3,9 +3,13 @@ package com.example.biblio.ui.screens
 import androidx.compose.animation.AnimatedContentScope
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionScope
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -13,85 +17,57 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.biblio.R
-import com.example.biblio.data.model.Section
-import com.example.biblio.data.repository.BukuRepository
-import com.example.biblio.data.repository.FavoriteRepository
 import com.example.biblio.ui.components.*
 import com.example.biblio.ui.components.SearchBar
 //import com.example.biblio.ui.components.SearchHeader
 import com.example.biblio.ui.components.CategoryChips
-import com.example.biblio.viewmodel.BukuViewModel
-import com.example.biblio.viewmodel.BukuViewModelFactory
+import com.example.biblio.viewmodel.BookViewModel
+import com.example.biblio.viewmodel.BookViewModelFactory
 import androidx.navigation.NavController
+import coil.compose.AsyncImage
+import com.example.biblio.data.model.Book
+import com.example.biblio.data.repository.FirebaseBookRepository
+import com.example.biblio.data.repository.FirebaseFavoriteRepository
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
 
 @OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 fun CariScreen(
     navController: NavController? = null,
     bottomPadding: Dp,
-    viewModel: BukuViewModel = viewModel(
-        factory = BukuViewModelFactory (
-            BukuRepository(LocalContext.current),
-            FavoriteRepository(LocalContext.current)  // ← TAMBAHAN
+    viewModel: BookViewModel = viewModel(
+        factory = BookViewModelFactory(
+            bookRepository = FirebaseBookRepository(),
+            favoriteRepository = FirebaseFavoriteRepository(
+                auth = FirebaseAuth.getInstance(),
+                firestore = FirebaseFirestore.getInstance()
+            )
         )
     ),
     sharedTransitionScope: SharedTransitionScope,
     animatedContentScope: AnimatedContentScope,
 ) {
     var searchQuery by remember { mutableStateOf("") }
-    var selectedCategory by remember { mutableStateOf("Semua") }
 
-    val bookDatabase by viewModel.bookDatabase.collectAsState()
-    val isLoading by viewModel.isLoading.collectAsState()
+    val searchResults by viewModel.searchResults.collectAsState()
+    val isSearching by viewModel.isSearching.collectAsState()
 
-    // Ambil semua buku dari semua section
-    val allBooks = remember(bookDatabase) {
-        bookDatabase?.sections?.flatMap { it.books } ?: emptyList()
-    }
-
-    // Filter berdasarkan search query (kategori hanya dekorasi)
-    val filteredBooks = remember(searchQuery, allBooks) {
-        if (searchQuery.isEmpty()) {
-            allBooks
-        } else {
-            allBooks.filter { book ->
-                book.judul.contains(searchQuery, ignoreCase = true) ||
-                        book.penulis.contains(searchQuery, ignoreCase = true) ||
-                        book.isbn.contains(searchQuery, ignoreCase = true)
-            }
-        }
-    }
-
-    // Section populer (take 6)
-    val bigSection = remember(filteredBooks) {
-        if (filteredBooks.isNotEmpty()) {
-            listOf(Section(id = 0, title = "Populer", books = filteredBooks.take(6)))
-        } else {
-            emptyList()
-        }
-    }
-
-    // Sections berdasarkan data asli (tapi filtered)
-    val sections = remember(filteredBooks, bookDatabase) {
-        bookDatabase?.sections?.mapNotNull { section ->
-            val sectionBooks = section.books.filter { book ->
-                filteredBooks.contains(book)
-            }
-            if (sectionBooks.isNotEmpty()) {
-                section.copy(books = sectionBooks.take(5))
-            } else {
-                null
-            }
-        } ?: emptyList()
+    // Trigger search dengan debounce dari ViewModel
+    LaunchedEffect(searchQuery) {
+        viewModel.searchBooks(searchQuery)
     }
 
     LazyColumn(
@@ -99,10 +75,11 @@ fun CariScreen(
         contentPadding = PaddingValues(bottom = bottomPadding, top = 10.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
+        // Header
         item {
-            Box (
+            Box(
                 modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
-            ){
+            ) {
                 Text(
                     "Mau nyari apa ya?",
                     style = MaterialTheme.typography.headlineLarge,
@@ -111,7 +88,7 @@ fun CariScreen(
             }
         }
 
-        // HEADER ITEMS - gunakan `item` bukan `items`
+        // Search Bar
         item {
             SearchBar(
                 query = searchQuery,
@@ -120,15 +97,8 @@ fun CariScreen(
             )
         }
 
-        item {
-            CategoryChips(
-                selectedCategory = selectedCategory,
-                onCategorySelected = { selectedCategory = it }
-            )
-        }
-
-        // LOADING STATE
-        if (isLoading) {
+        // Loading State
+        if (isSearching) {
             item {
                 Box(
                     modifier = Modifier
@@ -140,8 +110,8 @@ fun CariScreen(
                 }
             }
         }
-        // KONDISI: Belum ada input DAN kategori "Semua"
-        else if (searchQuery.isEmpty() && selectedCategory == "Semua") {
+        // Empty State - belum search
+        else if (searchQuery.isEmpty()) {
             item {
                 Box(
                     modifier = Modifier
@@ -165,7 +135,7 @@ fun CariScreen(
                         )
                         Spacer(modifier = Modifier.height(8.dp))
                         Text(
-                            "Mulai ketik atau pilih kategori",
+                            "Mulai ketik judul, penulis, atau ISBN",
                             fontSize = 14.sp,
                             color = colorResource(id = R.color.colorOnBackground).copy(alpha = 0.6f)
                         )
@@ -173,8 +143,8 @@ fun CariScreen(
                 }
             }
         }
-        // KONDISI: Ada input TAPI tidak ada hasil
-        else if (filteredBooks.isEmpty()) {
+        // No Results
+        else if (searchResults.isEmpty()) {
             item {
                 Box(
                     modifier = Modifier
@@ -198,7 +168,7 @@ fun CariScreen(
                         )
                         Spacer(modifier = Modifier.height(4.dp))
                         Text(
-                            "Coba kata kunci atau kategori lain",
+                            "Coba kata kunci lain",
                             fontSize = 14.sp,
                             color = colorResource(id = R.color.colorOnBackground).copy(alpha = 0.6f)
                         )
@@ -206,36 +176,87 @@ fun CariScreen(
                 }
             }
         }
-        // ✅ PERBAIKAN: Kondisi final yang bersih (ada hasil)
+        // Results
         else {
-            // SECTION POPULER
-            if (bigSection.isNotEmpty()) {
-                items(
-                    items = bigSection,
-                    key = { section -> section.id }
-                ) { section ->
-                    BigSectionItem(
-                        section = section,
-                        navController = navController,
-                        viewModel = viewModel,
-                        sharedTransitionScope = sharedTransitionScope,
-                        animatedContentScope = animatedContentScope
-                    )
-                }
-            }
-
-            // SECTION LAINNYA
             items(
-                items = sections,
-                key = { section -> section.id }
-            ) { section ->
-                SectionItem(
-                    section = section,
-                    navController = navController,
-                    viewModel = viewModel,
+                items = searchResults,
+                key = { it.id }
+            ) { book ->
+                SearchBookCard(
+                    book = book,
+                    onClick = {
+                        navController?.navigate("detail/${book.id}")
+                    },
                     sharedTransitionScope = sharedTransitionScope,
                     animatedContentScope = animatedContentScope
                 )
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalSharedTransitionApi::class)
+@Composable
+fun SearchBookCard(
+    book: Book,
+    onClick: () -> Unit,
+    sharedTransitionScope: SharedTransitionScope,
+    animatedContentScope: AnimatedContentScope
+) {
+    with(sharedTransitionScope) {
+        Card(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp)
+                .clickable(onClick = onClick),
+            elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+        ) {
+            Row(
+                modifier = Modifier.padding(12.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                AsyncImage(
+                    model = book.cover,
+                    contentDescription = book.title,
+                    modifier = Modifier
+                        .size(60.dp, 90.dp)
+                        .clip(RoundedCornerShape(4.dp))
+                        .sharedElement(
+                            state = rememberSharedContentState(key = "book-${book.id}"),
+                            animatedVisibilityScope = animatedContentScope
+                        ),
+                    contentScale = ContentScale.Crop
+                )
+
+                Spacer(Modifier.width(12.dp))
+
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = book.title,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 16.sp,
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis,
+                        color = colorResource(id = R.color.colorOnBackground)
+                    )
+
+                    Spacer(Modifier.height(4.dp))
+
+                    Text(
+                        text = book.author,
+                        fontSize = 14.sp,
+                        color = colorResource(id = R.color.colorOnBackground).copy(alpha = 0.7f)
+                    )
+
+                    if (book.isbn.isNotEmpty()) {
+                        Spacer(Modifier.height(2.dp))
+                        Text(
+                            text = "ISBN: ${book.isbn}",
+                            fontSize = 12.sp,
+                            color = colorResource(id = R.color.colorOnBackground).copy(alpha = 0.5f)
+                        )
+                    }
+                }
             }
         }
     }
