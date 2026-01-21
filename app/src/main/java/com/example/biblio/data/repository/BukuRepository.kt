@@ -5,6 +5,8 @@ import android.util.Log
 import com.example.biblio.data.model.Buku
 import com.example.biblio.data.model.BukuDatabase
 import com.example.biblio.data.model.Section
+import com.example.biblio.data.remote.ApiClient
+import com.example.biblio.data.remote.dto.toBuku
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.encodeToString
@@ -15,6 +17,20 @@ class BukuRepository(private val context: Context) {
         ignoreUnknownKeys = true
         prettyPrint = true
     }
+    private val api = ApiClient.api
+
+    /** Muat katalog dari Laravel API (data Oracle Cloud via Filament). */
+    suspend fun loadBooksFromApi(): BukuDatabase {
+        val genres = api.getGenresWithBooks()
+        val sections = genres.map { genre ->
+            Section(
+                id = genre.id,
+                title = genre.name,
+                books = genre.books.map { it.toBuku() }
+            )
+        }
+        return BukuDatabase(sections)
+    }
 
     fun loadBooksFromAssets(): BukuDatabase {
         return try {
@@ -23,8 +39,8 @@ class BukuRepository(private val context: Context) {
                 .use { reader -> reader.readText() }
             json.decodeFromString<BukuDatabase>(jsonString)
         } catch (e: Exception) {
-            Log.e("BookRepository", "Error loading books", e)
-            BukuDatabase(emptyList())
+            Log.e(TAG, "Error loading books from assets", e)
+            generateDummyData()
         }
     }
 
@@ -39,7 +55,8 @@ class BukuRepository(private val context: Context) {
                         isbn = "978-0${String.format("%09d", i)}",
                         judul = "Novel Fiksi ${i + 1}",
                         penulis = "Penulis ${(i % 5) + 1}",
-                        cover = "https://picsum.photos/seed/fiction$i/300/450"
+                        cover = "https://picsum.photos/seed/fiction$i/300/450",
+                        price = if (i % 3 == 0) 0 else 25000
                     )
                 }
             ),
@@ -52,25 +69,12 @@ class BukuRepository(private val context: Context) {
                         isbn = "978-1${String.format("%09d", i)}",
                         judul = "Buku Non-Fiksi ${i + 1}",
                         penulis = "Ahli ${(i % 3) + 1}",
-                        cover = "https://picsum.photos/seed/nonfiction$i/300/450"
-                    )
-                }
-            ),
-            Section(
-                id = 3,
-                title = "Sains & Teknologi",
-                books = List(12) { i ->
-                    Buku(
-                        id = "science_$i",
-                        isbn = "978-2${String.format("%09d", i)}",
-                        judul = "Buku Sains ${i + 1}",
-                        penulis = "Ilmuwan ${(i % 4) + 1}",
-                        cover = "https://picsum.photos/seed/science$i/300/450"
+                        cover = "https://picsum.photos/seed/nonfiction$i/300/450",
+                        price = 15000
                     )
                 }
             )
         )
-
         return BukuDatabase(sections)
     }
 
@@ -81,5 +85,9 @@ class BukuRepository(private val context: Context) {
                 output.write(jsonString.toByteArray())
             }
         }
+    }
+
+    companion object {
+        private const val TAG = "BukuRepository"
     }
 }

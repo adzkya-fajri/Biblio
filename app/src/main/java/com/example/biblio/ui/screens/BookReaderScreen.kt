@@ -1,5 +1,7 @@
 package com.example.biblio.ui.screens
 
+import android.webkit.WebView
+import android.webkit.WebViewClient
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -17,10 +19,10 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.biblio.R
-import com.example.biblio.data.model.Buku
 import com.example.biblio.data.repository.BookContentRepository
 import com.example.biblio.fraunces
 import com.example.biblio.ibmplexsans
@@ -28,13 +30,12 @@ import com.example.biblio.ui.components.ReaderSettingsSheet
 import com.example.biblio.ui.components.TableOfContentsSheet
 import com.example.biblio.viewmodel.BookReaderViewModel
 import com.example.biblio.viewmodel.BookReaderViewModelFactory
-import kotlinx.serialization.json.Json
-import java.net.URLDecoder
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BookReaderScreen(
-    bookJson: String,
+    bookId: String,
+    preview: Boolean,
     navController: NavController,
     viewModel: BookReaderViewModel = viewModel(
         factory = BookReaderViewModelFactory(
@@ -42,38 +43,39 @@ fun BookReaderScreen(
         )
     )
 ) {
-    // Decode dan parse book object
-    val book = remember(bookJson) {
-        try {
-            val decoded = URLDecoder.decode(bookJson, "UTF-8")
-            Json.decodeFromString<Buku>(decoded)
-        } catch (e: Exception) {
-            null
-        }
+    LaunchedEffect(bookId, preview) {
+        viewModel.loadBook(bookId, preview)
     }
 
-    LaunchedEffect(book) {
-        book?.let { viewModel.loadBook(it) }
-    }
-
+    val bookInfo by viewModel.bookInfo.collectAsState()
     val bookContent by viewModel.bookContent.collectAsState()
+    val fileUrl by viewModel.fileUrl.collectAsState()
+    val errorMessage by viewModel.errorMessage.collectAsState()
     val currentChapterIndex by viewModel.currentChapterIndex.collectAsState()
     val settings by viewModel.settings.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
 
     var showTableOfContents by remember { mutableStateOf(false) }
     var showSettings by remember { mutableStateOf(false) }
+    val snackbarHostState = remember { SnackbarHostState() }
 
-    val backgroundColor = if (settings.isDarkMode) Color(0xFF1A1A1A) else colorResource(R.color.colorBackground)
-    val textColor = if (settings.isDarkMode) Color(0xFFE0E0E0) else colorResource(R.color.colorOnBackground)
+    LaunchedEffect(errorMessage) {
+        errorMessage?.let { snackbarHostState.showSnackbar(it) }
+    }
+
+    val backgroundColor =
+        if (settings.isDarkMode) Color(0xFF1A1A1A) else colorResource(R.color.colorBackground)
+    val textColor =
+        if (settings.isDarkMode) Color(0xFFE0E0E0) else colorResource(R.color.colorOnBackground)
 
     Scaffold(
         containerColor = backgroundColor,
+        snackbarHost = { SnackbarHost(snackbarHostState) },
         bottomBar = {
             BottomAppBar(
-                containerColor = if (settings.isDarkMode) Color(0xFF2A2A2A) else colorResource(R.color.colorBackground),
+                containerColor = if (settings.isDarkMode) Color(0xFF2A2A2A)
+                else colorResource(R.color.colorBackground),
             ) {
-                // BACK BUTTON
                 IconButton(onClick = { navController.navigateUp() }) {
                     Icon(
                         painter = painterResource(R.drawable.arrow_back_24px),
@@ -81,17 +83,14 @@ fun BookReaderScreen(
                         tint = textColor
                     )
                 }
-
-                // DARK MODE TOGGLE
                 IconButton(onClick = { viewModel.toggleDarkMode() }) {
                     Icon(
-                        imageVector = if (settings.isDarkMode) Icons.Default.LightMode else Icons.Default.DarkMode,
+                        imageVector = if (settings.isDarkMode) Icons.Default.LightMode
+                        else Icons.Default.DarkMode,
                         contentDescription = "Toggle Dark Mode",
                         tint = textColor
                     )
                 }
-
-                // TABLE OF CONTENTS
                 IconButton(onClick = { showTableOfContents = true }) {
                     Icon(
                         imageVector = Icons.Default.List,
@@ -99,10 +98,7 @@ fun BookReaderScreen(
                         tint = textColor
                     )
                 }
-
                 Spacer(Modifier.weight(1f))
-
-                // MORE OPTIONS
                 IconButton(onClick = { showSettings = true }) {
                     Icon(
                         imageVector = Icons.Default.MoreVert,
@@ -118,12 +114,38 @@ fun BookReaderScreen(
                 .fillMaxSize()
                 .padding(padding)
         ) {
-            if (isLoading) {
-                CircularProgressIndicator(
-                    modifier = Modifier.align(Alignment.Center)
-                )
-            } else {
-                bookContent?.let { content ->
+            when {
+                isLoading -> CircularProgressIndicator(Modifier.align(Alignment.Center))
+                !fileUrl.isNullOrBlank() -> {
+                    Column(Modifier.fillMaxSize()) {
+                        bookInfo?.let { book ->
+                            Text(
+                                text = book.judul,
+                                modifier = Modifier.padding(16.dp),
+                                fontFamily = fraunces,
+                                fontSize = 18.sp,
+                                color = textColor
+                            )
+                        }
+                        AndroidView(
+                            factory = { ctx ->
+                                WebView(ctx).apply {
+                                    webViewClient = WebViewClient()
+                                    val webSettings = this.settings
+                                    @Suppress("SetJavaScriptEnabled")
+                                    webSettings.javaScriptEnabled = true
+                                    webSettings.builtInZoomControls = true
+                                    webSettings.displayZoomControls = false
+                                    loadUrl(fileUrl!!)
+                                }
+                            },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .weight(1f)
+                        )
+                    }
+                }
+                else -> bookContent?.let { content ->
                     val currentChapter = content.chapters.getOrNull(currentChapterIndex)
                     currentChapter?.let { chapter ->
                         Column(
@@ -132,19 +154,15 @@ fun BookReaderScreen(
                                 .verticalScroll(rememberScrollState())
                                 .padding(horizontal = 24.dp, vertical = 16.dp)
                         ) {
-                            // Page indicator
                             Text(
-                                text = "${currentChapterIndex + 1} dari ${content.chapters.size} • Chapter ${chapter.id}: ${chapter.title}",
+                                text = "${currentChapterIndex + 1} dari ${content.chapters.size} • ${chapter.title}",
                                 fontSize = 12.sp,
                                 fontFamily = ibmplexsans,
                                 color = textColor.copy(alpha = 0.6f),
                                 textAlign = TextAlign.Center,
                                 modifier = Modifier.fillMaxWidth()
                             )
-
                             Spacer(modifier = Modifier.height(24.dp))
-
-                            // Chapter Title
                             Text(
                                 text = chapter.title,
                                 fontSize = (settings.fontSize + 4).sp,
@@ -153,10 +171,7 @@ fun BookReaderScreen(
                                 color = textColor,
                                 lineHeight = (settings.fontSize + 4).sp * settings.lineSpacing
                             )
-
                             Spacer(modifier = Modifier.height(16.dp))
-
-                            // Chapter Content
                             Text(
                                 text = chapter.content,
                                 fontSize = settings.fontSize.sp,
@@ -165,37 +180,33 @@ fun BookReaderScreen(
                                 lineHeight = settings.fontSize.sp * settings.lineSpacing,
                                 textAlign = TextAlign.Justify
                             )
-
-                            Spacer(modifier = Modifier.height(48.dp))
-
-                            // Navigation buttons
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.SpaceBetween
-                            ) {
-                                Button(
-                                    onClick = { viewModel.previousChapter() },
-                                    enabled = currentChapterIndex > 0
+                            if (content.chapters.size > 1) {
+                                Spacer(modifier = Modifier.height(48.dp))
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.SpaceBetween
                                 ) {
-                                    Text("← Previous", fontFamily = ibmplexsans)
-                                }
-
-                                Button(
-                                    onClick = { viewModel.nextChapter() },
-                                    enabled = currentChapterIndex < content.chapters.size - 1
-                                ) {
-                                    Text("Next →", fontFamily = ibmplexsans)
+                                    Button(
+                                        onClick = { viewModel.previousChapter() },
+                                        enabled = currentChapterIndex > 0
+                                    ) {
+                                        Text("← Sebelumnya", fontFamily = ibmplexsans)
+                                    }
+                                    Button(
+                                        onClick = { viewModel.nextChapter() },
+                                        enabled = currentChapterIndex < content.chapters.size - 1
+                                    ) {
+                                        Text("Selanjutnya →", fontFamily = ibmplexsans)
+                                    }
                                 }
                             }
-
-                            Spacer(modifier = Modifier.height(48.dp))
                         }
                     }
                 }
             }
         }
     }
-    // Table of Contents Bottom Sheet
+
     if (showTableOfContents) {
         TableOfContentsSheet(
             chapters = bookContent?.chapters ?: emptyList(),
@@ -209,7 +220,6 @@ fun BookReaderScreen(
         )
     }
 
-    // Settings Bottom Sheet
     if (showSettings) {
         ReaderSettingsSheet(
             fontSize = settings.fontSize,

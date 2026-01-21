@@ -45,9 +45,6 @@ import com.example.biblio.ui.components.SectionItem
 import com.example.biblio.viewmodel.BukuViewModel
 import com.example.biblio.viewmodel.BukuViewModelFactory
 import kotlinx.coroutines.delay
-import kotlinx.serialization.encodeToString
-import kotlinx.serialization.json.Json
-import java.net.URLEncoder
 
 @OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
@@ -75,7 +72,7 @@ fun BukuScreen(
     val book = remember(bookId, bookDatabase) {
         bookDatabase?.sections
             ?.flatMap { it.books }
-            ?.find { it.id.toString() == bookId }
+            ?.find { it.id == bookId }
             ?.also { cachedBook = it }
             ?: cachedBook
     }
@@ -211,6 +208,23 @@ fun BukuScreen(
                 }
 
                 item {
+                    val priceLabel = when {
+                        book == null -> ""
+                        book.isFree -> "Gratis"
+                        else -> "Rp ${String.format("%,d", book.price)}"
+                    }
+                    if (priceLabel.isNotEmpty()) {
+                        Text(
+                            text = priceLabel,
+                            fontFamily = ibmplexsans,
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.SemiBold,
+                            color = colorResource(id = R.color.colorPrimaryVariant)
+                        )
+                    }
+                }
+
+                item {
                     Text(
                         text = "ISBN ${book?.isbn ?: "-"}",
                         fontFamily = ibmplexmono,
@@ -275,7 +289,8 @@ fun BukuScreen(
                 item {
                     Text(
                         color = colorResource(id = R.color.colorOnBackground),
-                        text = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut eleifend semper fringilla. Vestibulum convallis rutrum arcu, et dapibus arcu sollicitudin eu. Duis gravida faucibus maximus.",
+                        text = book?.description?.takeIf { it.isNotBlank() }
+                            ?: "Sinopsis belum tersedia.",
                         fontSize = 14.sp,
                         lineHeight = 1.5.em,
                         fontFamily = ibmplexsans,
@@ -295,23 +310,42 @@ fun BukuScreen(
                             .padding(horizontal = 16.dp),
                         verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        Button(
-                            onClick = {
-                                book?.let {
-                                    val bookJson = Json.encodeToString(it)
-                                    val encoded = URLEncoder.encode(bookJson, "UTF-8")
-                                    navController.navigate("reader/$encoded")
-                                }
-                            },
-                            modifier = Modifier.fillMaxWidth()
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
-                            Icon(
-                                painter = painterResource(R.drawable.book_5_24px),
-                                contentDescription = null,
-                                modifier = Modifier.size(20.dp)
-                            )
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Text("Beli & Baca", fontFamily = ibmplexsans)
+                            OutlinedButton(
+                                onClick = {
+                                    book?.let { b ->
+                                        navController.navigate("reader/${b.id}/preview")
+                                    }
+                                },
+                                modifier = Modifier.weight(1f),
+                                enabled = book != null
+                            ) {
+                                Text("Baca Saja", fontFamily = ibmplexsans)
+                            }
+
+                            Button(
+                                onClick = {
+                                    book?.let { b ->
+                                        navController.navigate("reader/${b.id}/full")
+                                    }
+                                },
+                                modifier = Modifier.weight(1f),
+                                enabled = book != null
+                            ) {
+                                Icon(
+                                    painter = painterResource(R.drawable.book_5_24px),
+                                    contentDescription = null,
+                                    modifier = Modifier.size(20.dp)
+                                )
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Text(
+                                    if (book?.isFree == true) "Baca Gratis" else "Beli & Baca",
+                                    fontFamily = ibmplexsans
+                                )
+                            }
                         }
 
                         OutlinedButton(

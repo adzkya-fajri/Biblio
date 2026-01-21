@@ -8,5 +8,11 @@ data class Buku(
     val isbn: String,
     val judul: String,
     val penulis: String,
-    val cover: String
-)
+    val cover: String,
+    val price: Int = 0,
+    val description: String? = null,
+    val format: String = "",
+    val pageCount: Int? = null
+) {
+    val isFree: Boolean get() = price == 0
+}

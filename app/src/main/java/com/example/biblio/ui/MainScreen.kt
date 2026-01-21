@@ -46,6 +46,7 @@ import com.example.biblio.ibmplexsans
 import com.example.biblio.ui.components.BottomBar
 import com.example.biblio.ui.components.NowReadingBar
 import com.example.biblio.ui.screens.*
+import com.example.biblio.viewmodel.AuthViewModel
 import com.example.biblio.viewmodel.BukuViewModel
 import com.example.biblio.viewmodel.BukuViewModelFactory
 import com.google.firebase.Firebase
@@ -65,13 +66,14 @@ fun MainScreen(navController: NavController) {
             FavoriteRepository(context)
         )
     )
+    val authViewModel: AuthViewModel = viewModel()
 
     // Track current route
     val navBackStackEntry by innerNavController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
 
     // Dynamic UI visibility
-    val isReaderScreen = currentRoute == "reader/{bookJson}"
+    val isReaderScreen = currentRoute?.startsWith("reader/") == true
 
     val showBottomBar = !isReaderScreen
     val showMiniPlayer = remember(currentRoute) {
@@ -95,6 +97,10 @@ fun MainScreen(navController: NavController) {
         if (user == null) {
             navController.navigate("welcome") {
                 popUpTo("main") { inclusive = true }
+            }
+        } else {
+            authViewModel.ensureApiToken {
+                sharedViewModel.loadBooks(forceRefresh = true)
             }
         }
     }
@@ -175,16 +181,18 @@ fun MainScreen(navController: NavController) {
                     )
                 }
 
-                // READER - Pindah dari AppNavHost
                 composable(
-                    route = "reader/{bookJson}",
+                    route = "reader/{bookId}/{mode}",
                     arguments = listOf(
-                        navArgument("bookJson") { type = NavType.StringType }
+                        navArgument("bookId") { type = NavType.StringType },
+                        navArgument("mode") { type = NavType.StringType }
                     )
                 ) { backStackEntry ->
-                    val bookJson = backStackEntry.arguments?.getString("bookJson") ?: ""
+                    val bookId = backStackEntry.arguments?.getString("bookId") ?: ""
+                    val mode = backStackEntry.arguments?.getString("mode") ?: "full"
                     BookReaderScreen(
-                        bookJson = bookJson,
+                        bookId = bookId,
+                        preview = mode == "preview",
                         navController = innerNavController
                     )
                 }

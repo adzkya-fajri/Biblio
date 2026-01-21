@@ -1,13 +1,12 @@
 package com.example.biblio.viewmodel
 
+import android.app.Application
 import android.content.Context
-import android.net.Uri
 import android.util.Log
-import android.util.Log.e
 import androidx.credentials.CredentialManager
 import androidx.credentials.CustomCredential
 import androidx.credentials.GetCredentialRequest
-import androidx.lifecycle.ViewModel
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.biblio.BuildConfig
 import com.example.biblio.data.model.User
@@ -15,16 +14,12 @@ import com.example.biblio.data.repository.AuthRepository
 import com.google.android.libraries.identity.googleid.GetGoogleIdOption
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.auth.UserProfileChangeRequest
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.tasks.await
-import kotlin.fold
 
-// State autentikasi provider email
 sealed class AuthState {
     object Idle : AuthState()
     object Loading : AuthState()
@@ -32,7 +27,6 @@ sealed class AuthState {
     data class Error(val message: String) : AuthState()
 }
 
-// State autentikasi provider Google
 sealed class GoogleAuthState {
     object Idle : GoogleAuthState()
     object Loading : GoogleAuthState()
@@ -40,21 +34,29 @@ sealed class GoogleAuthState {
     data class Error(val message: String) : GoogleAuthState()
 }
 
+class AuthViewModel(application: Application) : AndroidViewModel(application) {
 
-class AuthViewModel(private val repository: AuthRepository = AuthRepository()) : ViewModel() {
+    private val repository = AuthRepository(application)
 
-    // State autentikasi provider email
     private val _authState = MutableStateFlow<AuthState>(AuthState.Idle)
     val authState: StateFlow<AuthState> = _authState
 
-    // State autentikasi provider Google
     private val _googleAuthState = MutableStateFlow<GoogleAuthState>(GoogleAuthState.Idle)
     val googleAuthState: StateFlow<GoogleAuthState> = _googleAuthState
 
     private val _updateState = MutableStateFlow<UpdateState>(UpdateState.Idle)
     val updateState = _updateState.asStateFlow()
 
-    private val auth = FirebaseAuth.getInstance()
+    /** Sinkronkan token jika user sudah login Firebase (mis. saat buka app). */
+    fun ensureApiToken(onReady: (() -> Unit)? = null) {
+        viewModelScope.launch {
+            if (repository.currentUser != null) {
+                repository.ensureTokenLoaded()
+                repository.syncSanctumToken()
+            }
+            onReady?.invoke()
+        }
+    }
 
     fun login(email: String, password: String) {
         viewModelScope.launch {
@@ -72,24 +74,21 @@ class AuthViewModel(private val repository: AuthRepository = AuthRepository()) :
             _googleAuthState.value = GoogleAuthState.Loading
             try {
                 val credentialManager = CredentialManager.create(context)
-
                 val googleIdOption = GetGoogleIdOption.Builder()
                     .setFilterByAuthorizedAccounts(false)
                     .setServerClientId(BuildConfig.WEB_CLIENT_ID)
                     .build()
-
                 val request = GetCredentialRequest.Builder()
                     .addCredentialOption(googleIdOption)
                     .build()
-
                 val result = credentialManager.getCredential(context, request)
                 val credential = result.credential
-
                 if (credential is CustomCredential &&
-                    credential.type == GoogleIdTokenCredential.TYPE_GOOGLE_ID_TOKEN_CREDENTIAL) {
-                    val googleIdTokenCredential = GoogleIdTokenCredential.createFrom(credential.data)
+                    credential.type == GoogleIdTokenCredential.TYPE_GOOGLE_ID_TOKEN_CREDENTIAL
+                ) {
+                    val googleIdTokenCredential =
+                        GoogleIdTokenCredential.createFrom(credential.data)
                     val idToken = googleIdTokenCredential.idToken
-
                     val authResult = repository.googleLogin(idToken)
                     _googleAuthState.value = authResult.fold(
                         onSuccess = { GoogleAuthState.Success(it) },
@@ -97,7 +96,8 @@ class AuthViewModel(private val repository: AuthRepository = AuthRepository()) :
                     )
                 }
             } catch (e: Exception) {
-                _googleAuthState.value = GoogleAuthState.Error(e.message ?: "Google sign in failed")
+                _googleAuthState.value =
+                    GoogleAuthState.Error(e.message ?: "Google sign in failed")
             }
         }
     }
@@ -114,33 +114,34 @@ class AuthViewModel(private val repository: AuthRepository = AuthRepository()) :
     }
 
     fun logout() {
-        Log.d("AuthViewModel", "Logout called")
         repository.logout()
         _authState.value = AuthState.Idle
-        Log.d("AuthViewModel", "AuthState set to Idle")
+        Log.d("AuthViewModel", "Logged out")
     }
 
-    // Update name only
     fun updateName(
         newName: String,
         onSuccess: () -> Unit,
         onError: (String) -> Unit
     ) {
-        val user = auth.currentUser
+        val user = FirebaseAuth.getInstance().currentUser
         if (user == null) {
             onError("User not logged in")
             return
         }
-
         _updateState.value = UpdateState.Loading
-
         val profileUpdates = UserProfileChangeRequest.Builder()
             .setDisplayName(newName)
             .build()
-
         user.updateProfile(profileUpdates)
-            .addOnSuccessListener { onSuccess() }
-            .addOnFailureListener { e -> onError(e.message ?: "Update failed") }
+            .addOnSuccessListener {
+                _updateState.value = UpdateState.Success
+                onSuccess()
+            }
+            .addOnFailureListener { e ->
+                _updateState.value = UpdateState.Error(e.message ?: "Update failed")
+                onError(e.message ?: "Update failed")
+            }
     }
 
     fun resetState() {

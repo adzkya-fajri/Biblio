@@ -55,7 +55,7 @@ fun BookItem(
     coverWidth: Dp = 120.dp,
 ) {
     val favoriteIds by viewModel.favoriteIds.collectAsState(initial = emptySet())
-    val isFavorite = favoriteIds.contains(book.id.toString())
+    val isFavorite = favoriteIds.contains(book.id)
 
     Column(
         modifier = Modifier

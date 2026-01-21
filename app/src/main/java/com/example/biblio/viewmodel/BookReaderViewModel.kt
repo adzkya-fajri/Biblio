@@ -4,7 +4,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.biblio.data.model.BookContent
 import com.example.biblio.data.model.Buku
-import com.example.biblio.data.model.Chapter
 import com.example.biblio.data.repository.BookContentRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -27,6 +26,12 @@ class BookReaderViewModel(
     private val _bookContent = MutableStateFlow<BookContent?>(null)
     val bookContent: StateFlow<BookContent?> = _bookContent.asStateFlow()
 
+    private val _fileUrl = MutableStateFlow<String?>(null)
+    val fileUrl: StateFlow<String?> = _fileUrl.asStateFlow()
+
+    private val _errorMessage = MutableStateFlow<String?>(null)
+    val errorMessage: StateFlow<String?> = _errorMessage.asStateFlow()
+
     private val _currentChapterIndex = MutableStateFlow(0)
     val currentChapterIndex: StateFlow<Int> = _currentChapterIndex.asStateFlow()
 
@@ -36,14 +41,18 @@ class BookReaderViewModel(
     private val _isLoading = MutableStateFlow(true)
     val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
 
-    fun loadBook(book: Buku) {
+    fun loadBook(bookId: String, preview: Boolean) {
         viewModelScope.launch {
             _isLoading.value = true
-            _bookInfo.value = book
+            _errorMessage.value = null
+            _fileUrl.value = null
 
-            val content = contentRepository.loadBookContent(book.id)
-            _bookContent.value = content
-
+            val result = contentRepository.loadFromApi(bookId, preview)
+            _bookInfo.value = result.book
+            _bookContent.value = result.content
+            _fileUrl.value = result.fileUrl
+            _errorMessage.value = result.errorMessage
+            _currentChapterIndex.value = 0
             _isLoading.value = false
         }
     }

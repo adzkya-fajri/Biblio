@@ -53,9 +53,13 @@ class BukuViewModel(
             _isLoading.value = true
             delay(300)
             _bookDatabase.value = try {
-                repository.loadBooksFromAssets()
+                repository.loadBooksFromApi()
             } catch (e: Exception) {
-                repository.generateDummyData()
+                try {
+                    repository.loadBooksFromAssets()
+                } catch (_: Exception) {
+                    repository.generateDummyData()
+                }
             }
             _isLoading.value = false
         }
