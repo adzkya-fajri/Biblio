@@ -24,6 +24,10 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import kotlin.fold
 
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.viewmodel.CreationExtras
+import com.example.biblio.di.AppModule
+
 // State autentikasi provider email
 sealed class AuthState {
     object Idle : AuthState()
@@ -41,7 +45,17 @@ sealed class GoogleAuthState {
 }
 
 
-class AuthViewModel(private val repository: AuthRepository = AuthRepository()) : ViewModel() {
+class AuthViewModel(private val repository: AuthRepository) : ViewModel() {
+
+    companion object {
+        val Factory: ViewModelProvider.Factory = object : ViewModelProvider.Factory {
+            @Suppress("UNCHECKED_CAST")
+            override fun <T : ViewModel> create(modelClass: Class<T>, extras: CreationExtras): T {
+                val application = checkNotNull(extras[ViewModelProvider.AndroidViewModelFactory.APPLICATION_KEY])
+                return AuthViewModel(AppModule.provideAuthRepository(application)) as T
+            }
+        }
+    }
 
     // State autentikasi provider email
     private val _authState = MutableStateFlow<AuthState>(AuthState.Idle)
@@ -114,10 +128,12 @@ class AuthViewModel(private val repository: AuthRepository = AuthRepository()) :
     }
 
     fun logout() {
-        Log.d("AuthViewModel", "Logout called")
-        repository.logout()
-        _authState.value = AuthState.Idle
-        Log.d("AuthViewModel", "AuthState set to Idle")
+        viewModelScope.launch {
+            Log.d("AuthViewModel", "Logout called")
+            repository.logout()
+            _authState.value = AuthState.Idle
+            Log.d("AuthViewModel", "AuthState set to Idle")
+        }
     }
 
     // Update name only
