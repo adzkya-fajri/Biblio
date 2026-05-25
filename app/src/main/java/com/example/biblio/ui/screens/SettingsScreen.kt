@@ -40,7 +40,7 @@ import java.time.format.TextStyle
 @Composable
 fun SettingsScreen(navController: NavController) {
 
-    val viewModel: AuthViewModel = viewModel()
+    val viewModel: AuthViewModel = viewModel(factory = AuthViewModel.Factory)
     val openLogoutDialog = remember { mutableStateOf(false) }
 
     val list = listOf(

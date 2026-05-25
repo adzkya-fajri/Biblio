@@ -58,7 +58,7 @@ import kotlin.Unit
 fun WelcomeScreen(
     onLoginSuccess: () -> Unit,
     navController: NavController? = null,
-    viewModel: AuthViewModel = viewModel(),
+    viewModel: AuthViewModel = viewModel(factory = AuthViewModel.Factory),
     ) {
 
     val context = LocalContext.current

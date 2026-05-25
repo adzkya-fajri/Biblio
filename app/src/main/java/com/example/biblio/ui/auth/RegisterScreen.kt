@@ -55,7 +55,7 @@ import com.example.biblio.viewmodel.AuthViewModel
 @Composable
 fun RegisterScreen(
     onLoginSuccess: () -> Unit,
-    viewModel: AuthViewModel = viewModel(),
+    viewModel: AuthViewModel = viewModel(factory = AuthViewModel.Factory),
     navController: NavController? = null,
 ) {
     var displayName by remember { mutableStateOf("") }

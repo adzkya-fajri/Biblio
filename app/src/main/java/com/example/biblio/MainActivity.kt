@@ -39,12 +39,6 @@ private lateinit var auth: FirebaseAuth
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge(
-//            navigationBarStyle = SystemBarStyle.auto(
-//                lightScrim = getColor(R.color.colorBackground), // warna navbar
-//                darkScrim = getColor(R.color.colorBackground)
-//            )
-        )
 
         // Inisialisasi Firebase auth
         auth = Firebase.auth

@@ -43,7 +43,7 @@ import com.google.firebase.auth.auth
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProfileScreen(
-    viewModel: AuthViewModel = viewModel(),
+    viewModel: AuthViewModel = viewModel(factory = AuthViewModel.Factory),
     navController: NavController
 ) {
 

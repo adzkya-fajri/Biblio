@@ -56,7 +56,7 @@ import kotlinx.coroutines.tasks.await
 @Composable
 fun LoginScreen(
     onLoginSuccess: () -> Unit,
-    viewModel: AuthViewModel = viewModel(),
+    viewModel: AuthViewModel = viewModel(factory = AuthViewModel.Factory),
     navController: NavController? = null,
 ) {
     var email by remember { mutableStateOf("") }
