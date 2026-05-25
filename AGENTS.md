@@ -1,5 +1,5 @@
 # About Biblio
-An application online book, it uses Firebase (auth) and Laravel (auth through firebase, databases, cdns).
+An application about online book, it uses Firebase (auth) and Laravel (auth through firebase, databases, cdns).
 
 ## Notes
 - Keep this rule (AGENTS.md) as high-signal, and READ ONLY
