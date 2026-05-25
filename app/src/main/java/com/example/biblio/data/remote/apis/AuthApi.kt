@@ -10,6 +10,7 @@ import com.example.biblio.models.ApiMessageResponse
 import com.example.biblio.models.FirebaseLogin
 import com.example.biblio.models.UserCredentialsResponse
 import com.example.biblio.models.ValidationErrorResponse
+import retrofit2.Response
 
 interface AuthApi {
     /**
@@ -24,7 +25,7 @@ interface AuthApi {
      * @return [Call]<[UserCredentialsResponse]>
      */
     @POST("auth/firebase")
-    fun authFirebase(@Body firebaseLogin: FirebaseLogin): Call<UserCredentialsResponse>
+    suspend fun authFirebase(@Body firebaseLogin: FirebaseLogin): Response<UserCredentialsResponse>
 
     /**
      * POST auth/logout
@@ -37,6 +38,6 @@ interface AuthApi {
      * @return [Call]<[ApiMessageResponse]>
      */
     @POST("auth/logout")
-    fun authLogout(): Call<ApiMessageResponse>
+    suspend fun authLogout(): Response<ApiMessageResponse>
 
 }
