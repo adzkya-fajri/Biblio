@@ -1,4 +1,4 @@
-package com.example.biblio.apis
+package com.example.biblio.data.remote.apis
 
 import com.example.biblio.infrastructure.CollectionFormats.*
 import retrofit2.http.*
