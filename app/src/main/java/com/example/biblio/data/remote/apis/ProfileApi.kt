@@ -5,10 +5,11 @@ import retrofit2.Call
 
 import com.example.biblio.data.remote.dto.ApiMessageResponse
 import com.example.biblio.data.remote.dto.AvatarResponse
+import com.example.biblio.data.remote.dto.User
 
 import okhttp3.MultipartBody
 
-interface AvatarApi {
+interface ProfileApi {
     /**
      * DELETE profile/avatar
      * Hapus avatar user
@@ -21,6 +22,19 @@ interface AvatarApi {
      */
     @DELETE("profile/avatar")
     fun deleteAvatar(): Call<ApiMessageResponse>
+
+    /**
+     * GET profile
+     * Get profil user yang sedang login
+     *
+     * Responses:
+     *  - 200: OK
+     *  - 401: Unauthenticated
+     *
+     * @return [Call]<[User]>
+     */
+    @GET("profile")
+    fun getProfile(): Call<User>
 
     /**
      * POST profile/avatar
