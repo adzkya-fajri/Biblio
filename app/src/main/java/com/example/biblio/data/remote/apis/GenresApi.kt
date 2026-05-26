@@ -34,10 +34,10 @@ interface GenresApi {
      *  - 200: OK
      *  - 401: Unauthenticated
      *
-     * @return [Call]<[GenreWithBooksResponse]>
+     * @return [Call]<[kotlin.collections.List<GenreWithBooksResponse>]>
      */
     @GET("genres/with-books")
-    fun getGenreWithBooks(): Call<GenreWithBooksResponse>
+    fun getGenreWithBooks(): Call<kotlin.collections.List<GenreWithBooksResponse>>
 
     /**
      * GET genres
