@@ -1,8 +1,5 @@
 package com.example.biblio.ui.screens
 
-import androidx.compose.animation.core.FastOutSlowInEasing
-import androidx.compose.animation.core.tween
-
 import androidx.compose.animation.AnimatedContentScope
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionScope
@@ -11,7 +8,6 @@ import androidx.compose.animation.core.spring
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
@@ -19,11 +15,9 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -36,14 +30,10 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.example.biblio.R
-import com.example.biblio.data.repository.BukuRepository
-import com.example.biblio.data.repository.FavoriteRepository
 import com.example.biblio.fraunces
 import com.example.biblio.ibmplexmono
 import com.example.biblio.ibmplexsans
-import com.example.biblio.ui.components.SectionItem
 import com.example.biblio.viewmodel.BukuViewModel
-import com.example.biblio.viewmodel.BukuViewModelFactory
 import kotlinx.coroutines.delay
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
@@ -59,11 +49,18 @@ fun BukuScreen(
     animatedContentScope: AnimatedContentScope,
     coverHeight: Dp = 225.dp,
     coverWidth: Dp = 150.dp,
-    viewModel: BukuViewModel
+    viewModel: BukuViewModel = viewModel(factory = BukuViewModel.Factory)
 ) {
     val bookDatabase by viewModel.bookDatabase.collectAsState()
+    val currentBook by viewModel.currentBook.collectAsState()
+    val isLoading by viewModel.isLoading.collectAsState()
+    val errorMessage by viewModel.errorMessage.collectAsState()
     var cachedBook by remember { mutableStateOf<com.example.biblio.data.model.Buku?>(null) }
     var isTimeout by remember { mutableStateOf(false) }
+
+    LaunchedEffect(bookId) {
+        bookId?.let { viewModel.fetchBookDetails(it) }
+    }
 
     LaunchedEffect(bookId, bookDatabase) {
         if (bookDatabase == null) {
@@ -72,7 +69,7 @@ fun BukuScreen(
         }
     }
 
-    val book = remember(bookId, bookDatabase) {
+    val book = currentBook ?: remember(bookId, bookDatabase) {
         bookDatabase?.sections
             ?.flatMap { it.books }
             ?.find { it.id.toString() == bookId }
@@ -80,7 +77,20 @@ fun BukuScreen(
             ?: cachedBook
     }
 
-    if (book == null && isTimeout) {
+    if (book == null && !isLoading && errorMessage != null) {
+        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Text(
+                    text = errorMessage ?: "Gagal memuat buku",
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.padding(16.dp)
+                )
+                Button(onClick = { bookId?.let { viewModel.fetchBookDetails(it) } }) {
+                    Text("Coba Lagi")
+                }
+            }
+        }
+    } else if (book == null && isTimeout) {
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             Text("Buku tidak ditemukan")
         }
@@ -174,7 +184,7 @@ fun BukuScreen(
                                 )
                                 .skipToLookaheadSize(),
                             color = colorResource(id = R.color.colorOnBackground),
-                            text = book?.judul ?: "",
+                            text = book?.title ?: "",
                             fontSize = 24.sp,
                             fontFamily = fraunces,
                             textAlign = TextAlign.Center
@@ -187,7 +197,7 @@ fun BukuScreen(
                 item {
                     with(sharedTransitionScope) {
                         Text(
-                            text = book?.penulis ?: "",
+                            text = book?.author ?: "",
                             modifier = Modifier
                                 .padding(horizontal = 16.dp)
                                 .sharedBounds(
@@ -250,7 +260,7 @@ fun BukuScreen(
                             Spacer(modifier = Modifier.width(8.dp))
                             Column {
                                 Text("Halaman", fontSize = 12.sp, color = Color.Gray, fontFamily = ibmplexsans, lineHeight = 1.25.em)
-                                Text("350", color = colorResource(id = R.color.colorOnBackground), fontSize = 14.sp, fontFamily = ibmplexsans, fontWeight = FontWeight.Bold)
+                                Text(book?.page.toString() ?: "-" , color = colorResource(id = R.color.colorOnBackground), fontSize = 14.sp, fontFamily = ibmplexsans, fontWeight = FontWeight.Bold)
                             }
                         }
 
@@ -275,7 +285,7 @@ fun BukuScreen(
                 item {
                     Text(
                         color = colorResource(id = R.color.colorOnBackground),
-                        text = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut eleifend semper fringilla. Vestibulum convallis rutrum arcu, et dapibus arcu sollicitudin eu. Duis gravida faucibus maximus.",
+                        text = book?.description ?: "-",
                         fontSize = 14.sp,
                         lineHeight = 1.5.em,
                         fontFamily = ibmplexsans,

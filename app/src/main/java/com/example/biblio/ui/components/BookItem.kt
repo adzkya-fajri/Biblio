@@ -3,10 +3,8 @@ package com.example.biblio.ui.components
 import androidx.compose.animation.AnimatedContentScope
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionScope
-import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -29,7 +27,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.colorResource
@@ -127,7 +124,7 @@ fun BookItem(
         with(sharedTransitionScope) {
             Text(
                 color = colorResource(id = R.color.colorOnBackground),
-                text = book.judul,
+                text = book.title,
                 lineHeight = 1.25.em,
                 fontSize = 14.sp,
                 fontFamily = ibmplexsans,
@@ -155,7 +152,7 @@ fun BookItem(
 
         with(sharedTransitionScope) {
             Text(
-                text = book.penulis,
+                text = book.author,
                 fontSize = 12.sp,
                 fontWeight = FontWeight.Normal,
                 color = Color.Gray,

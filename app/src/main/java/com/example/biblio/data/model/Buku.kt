@@ -6,7 +6,9 @@ import kotlinx.serialization.Serializable
 data class Buku(
     val id: String,
     val isbn: String,
-    val judul: String,
-    val penulis: String,
+    val title: String,
+    val description: String,
+    val author: String,
+    val page: Int,
     val cover: String
 )
