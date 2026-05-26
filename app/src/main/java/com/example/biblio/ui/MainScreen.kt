@@ -60,10 +60,7 @@ fun MainScreen(navController: NavController) {
     val tabs = listOf("beranda", "cari", "koleksi")
 
     val sharedViewModel: BukuViewModel = viewModel(
-        factory = BukuViewModelFactory(
-            BukuRepository(context),
-            FavoriteRepository(context)
-        )
+        factory = BukuViewModel.Factory
     )
 
     // Track current route

@@ -12,7 +12,6 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
@@ -21,23 +20,15 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import com.example.biblio.data.model.Buku
-import com.example.biblio.data.repository.BukuRepository
-import com.example.biblio.data.repository.FavoriteRepository
 import com.example.biblio.fraunces
 import com.example.biblio.viewmodel.BukuViewModel
-import com.example.biblio.viewmodel.BukuViewModelFactory
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun KoleksiScreen(
     bottomPadding: Dp,
     onBookClick: (String) -> Unit,
-    viewModel: BukuViewModel = viewModel(          // <— tambahkan factory
-        factory = BukuViewModelFactory(
-            BukuRepository(LocalContext.current),
-            FavoriteRepository(LocalContext.current)
-        )
-    )
+    viewModel: BukuViewModel = viewModel(factory = BukuViewModel.Factory)
 ) {
     val list by viewModel.favoriteBooks.collectAsStateWithLifecycle()
 
@@ -114,7 +105,7 @@ private fun KoleksiCard(buku: Buku, onBookClick: () -> Unit) {
         ) {
             AsyncImage(
                 model = buku.cover,
-                contentDescription = buku.judul,
+                contentDescription = buku.title,
                 modifier = Modifier
                     .width(60.dp)
                     .aspectRatio(2f / 3f),
@@ -122,8 +113,8 @@ private fun KoleksiCard(buku: Buku, onBookClick: () -> Unit) {
             )
             Spacer(Modifier.width(12.dp))
             Column(Modifier.weight(1f)) {
-                Text(buku.judul, fontWeight = FontWeight.SemiBold)
-                Text(buku.penulis, style = MaterialTheme.typography.bodySmall)
+                Text(buku.title, fontWeight = FontWeight.SemiBold)
+                Text(buku.author, style = MaterialTheme.typography.bodySmall)
             }
             IconButton(onClick = { /* toggle langsung di detail */ }) {
                 Icon(Icons.Default.Favorite, contentDescription = "Favorit")

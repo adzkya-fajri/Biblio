@@ -34,6 +34,12 @@ import com.example.biblio.viewmodel.BukuViewModelFactory
 import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
 
+import androidx.compose.material3.Button
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.ui.text.style.TextAlign
+import com.example.biblio.ibmplexsans
+
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalSharedTransitionApi::class)
 @Composable
 fun BerandaScreen(
@@ -41,18 +47,12 @@ fun BerandaScreen(
     bottomPadding: Dp,
     sharedTransitionScope: SharedTransitionScope,
     animatedContentScope: AnimatedContentScope,
-    viewModel: BukuViewModel = viewModel(
-        factory = BukuViewModelFactory(
-            BukuRepository(LocalContext.current),
-            FavoriteRepository(LocalContext.current)
-        )
-    ),
+    viewModel: BukuViewModel = viewModel(factory = BukuViewModel.Factory),
 ) {
     val bookDatabase by viewModel.bookDatabase.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
+    val errorMessage by viewModel.errorMessage.collectAsState()
     val state = rememberPullToRefreshState()
-    // Di BerandaScreen
-    val sections = bookDatabase?.sections?.take(1) ?: emptyList() // Load 1 section dulu
 
     PullToRefreshBox(
         isRefreshing = isLoading,
@@ -111,6 +111,29 @@ fun BerandaScreen(
                             sharedTransitionScope = sharedTransitionScope,
                             animatedContentScope = animatedContentScope
                         )
+                    }
+                } else if (!isLoading && errorMessage != null) {
+                    item {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 64.dp, horizontal = 16.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.Center
+                        ) {
+                            Text(
+                                text = errorMessage ?: "Terjadi kesalahan yang tidak diketahui",
+                                color = colorResource(R.color.colorOnBackground),
+                                textAlign = TextAlign.Center,
+                                fontFamily = ibmplexsans,
+                                modifier = Modifier.padding(bottom = 16.dp)
+                            )
+                            Button(
+                                onClick = { viewModel.loadBooks(forceRefresh = true) }
+                            ) {
+                                Text("Coba Lagi", fontFamily = ibmplexsans)
+                            }
+                        }
                     }
                 }
             }

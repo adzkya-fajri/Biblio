@@ -13,7 +13,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -23,14 +22,11 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.biblio.R
 import com.example.biblio.data.model.Section
-import com.example.biblio.data.repository.BukuRepository
-import com.example.biblio.data.repository.FavoriteRepository
 import com.example.biblio.ui.components.*
 import com.example.biblio.ui.components.SearchBar
 //import com.example.biblio.ui.components.SearchHeader
 import com.example.biblio.ui.components.CategoryChips
 import com.example.biblio.viewmodel.BukuViewModel
-import com.example.biblio.viewmodel.BukuViewModelFactory
 import androidx.navigation.NavController
 
 @OptIn(ExperimentalSharedTransitionApi::class)
@@ -38,12 +34,7 @@ import androidx.navigation.NavController
 fun CariScreen(
     navController: NavController? = null,
     bottomPadding: Dp,
-    viewModel: BukuViewModel = viewModel(
-        factory = BukuViewModelFactory (
-            BukuRepository(LocalContext.current),
-            FavoriteRepository(LocalContext.current)  // ← TAMBAHAN
-        )
-    ),
+    viewModel: BukuViewModel = viewModel(factory = BukuViewModel.Factory),
     sharedTransitionScope: SharedTransitionScope,
     animatedContentScope: AnimatedContentScope,
 ) {
@@ -64,8 +55,8 @@ fun CariScreen(
             allBooks
         } else {
             allBooks.filter { book ->
-                book.judul.contains(searchQuery, ignoreCase = true) ||
-                        book.penulis.contains(searchQuery, ignoreCase = true) ||
+                book.title.contains(searchQuery, ignoreCase = true) ||
+                        book.author.contains(searchQuery, ignoreCase = true) ||
                         book.isbn.contains(searchQuery, ignoreCase = true)
             }
         }
