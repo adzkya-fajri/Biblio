@@ -50,6 +50,7 @@ class AuthRepository(
             val sanctumToken = response.body()?.token
                 ?: return Result.failure(Exception("Token kosong"))
             tokenPreferences.saveToken(sanctumToken)
+            com.example.biblio.di.AppModule.setToken(sanctumToken)
             val user = User(
                 firebaseUser.uid,
                 firebaseUser.email ?: "",
