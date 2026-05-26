@@ -1,18 +1,14 @@
 package com.example.biblio.data.remote.apis
 
-import com.example.biblio.infrastructure.CollectionFormats.*
 import retrofit2.http.*
 import retrofit2.Call
-import okhttp3.RequestBody
-import com.squareup.moshi.Json
 
-import com.example.biblio.models.ApiMessageResponse
-import com.example.biblio.models.Readlist
-import com.example.biblio.models.ReadlistBookRequest
-import com.example.biblio.models.ReadlistDetail
-import com.example.biblio.models.ReadlistRequest
-import com.example.biblio.models.UpdateReadlistRequest
-import com.example.biblio.models.ValidationErrorResponse
+import com.example.biblio.data.remote.dto.ApiMessageResponse
+import com.example.biblio.data.remote.dto.Readlist
+import com.example.biblio.data.remote.dto.ReadlistBookRequest
+import com.example.biblio.data.remote.dto.ReadlistDetail
+import com.example.biblio.data.remote.dto.ReadlistRequest
+import com.example.biblio.data.remote.dto.UpdateReadlistRequest
 
 interface ReadlistsApi {
     /**

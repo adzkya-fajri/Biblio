@@ -1,4 +1,4 @@
-package com.example.biblio.auth
+package com.example.biblio.data.remote.auth
 
 import java.io.IOException
 

@@ -5,10 +5,9 @@ import com.google.firebase.auth.FirebaseUser
 import com.example.biblio.data.model.User
 import com.example.biblio.data.preferences.TokenPreferences
 import com.example.biblio.data.remote.apis.AuthApi
-import com.example.biblio.models.FirebaseLogin
+import com.example.biblio.data.remote.dto.FirebaseLogin
 import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.auth.UserProfileChangeRequest
-import com.google.firebase.auth.userProfileChangeRequest
 import kotlinx.coroutines.tasks.await
 
 class AuthRepository(

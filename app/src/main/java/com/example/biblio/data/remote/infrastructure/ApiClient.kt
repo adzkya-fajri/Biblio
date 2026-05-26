@@ -1,6 +1,7 @@
-package com.example.biblio.infrastructure
+package com.example.biblio.data.remote.infrastructure
 
-import com.example.biblio.auth.HttpBearerAuth
+import com.example.biblio.data.remote.auth.HttpBearerAuth
+import com.example.biblio.infrastructure.Serializer
 
 import okhttp3.Call
 import okhttp3.Interceptor

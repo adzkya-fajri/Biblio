@@ -21,11 +21,11 @@
     "unused"
 )
 
-package com.example.biblio.models
+package com.example.biblio.data.remote.dto
 
 
 import com.squareup.moshi.Json
-import com.squareup.moshi.JsonClass
+import java.util.UUID
 
 /**
  * 
@@ -37,7 +37,7 @@ import com.squareup.moshi.JsonClass
 data class ReadlistBookRequest (
 
     @Json(name = "book_id")
-    val bookId: java.util.UUID
+    val bookId: UUID
 
 ) {
 

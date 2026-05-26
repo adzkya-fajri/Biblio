@@ -8,7 +8,7 @@ import com.example.biblio.data.model.Section
 import com.example.biblio.data.preferences.TokenPreferences
 import com.example.biblio.data.remote.apis.BooksApi
 import com.example.biblio.data.remote.apis.GenresApi
-import com.example.biblio.models.Book
+import com.example.biblio.data.remote.dto.Book
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.withContext

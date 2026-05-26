@@ -1,5 +1,6 @@
-package com.example.biblio.infrastructure
+package com.example.biblio.data.remote.infrastructure
 
+import com.example.biblio.infrastructure.Serializer
 import com.squareup.moshi.JsonDataException
 import com.squareup.moshi.Moshi
 import retrofit2.Response

@@ -21,11 +21,10 @@
     "unused"
 )
 
-package com.example.biblio.models
+package com.example.biblio.data.remote.dto
 
 
 import com.squareup.moshi.Json
-import com.squareup.moshi.JsonClass
 
 /**
  * 
@@ -38,10 +37,10 @@ import com.squareup.moshi.JsonClass
 data class ValidationErrorResponse (
 
     @Json(name = "message")
-    val message: kotlin.String? = null,
+    val message: String? = null,
 
     @Json(name = "errors")
-    val errors: kotlin.collections.Map<kotlin.String, kotlin.collections.List<kotlin.String>>? = null
+    val errors: Map<String, List<String>>? = null
 
 ) {
 

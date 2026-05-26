@@ -8,7 +8,7 @@ import com.example.biblio.data.remote.apis.BooksApi
 import com.example.biblio.data.remote.apis.GenresApi
 import com.example.biblio.data.repository.AuthRepository
 import com.example.biblio.data.repository.BukuRepository
-import com.example.biblio.infrastructure.ApiClient
+import com.example.biblio.data.remote.infrastructure.ApiClient
 import com.example.biblio.data.repository.FavoriteRepository
 
 object AppModule {

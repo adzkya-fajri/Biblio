@@ -1,4 +1,4 @@
-package com.example.biblio.infrastructure
+package com.example.biblio.data.remote.infrastructure
 
 import com.squareup.moshi.FromJson
 import com.squareup.moshi.ToJson

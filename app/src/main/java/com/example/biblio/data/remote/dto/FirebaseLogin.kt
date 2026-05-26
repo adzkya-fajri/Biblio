@@ -21,11 +21,10 @@
     "unused"
 )
 
-package com.example.biblio.models
+package com.example.biblio.data.remote.dto
 
 
 import com.squareup.moshi.Json
-import com.squareup.moshi.JsonClass
 
 /**
  * 
@@ -37,7 +36,7 @@ import com.squareup.moshi.JsonClass
 data class FirebaseLogin (
 
     @Json(name = "token")
-    val token: kotlin.String
+    val token: String
 
 ) {
 

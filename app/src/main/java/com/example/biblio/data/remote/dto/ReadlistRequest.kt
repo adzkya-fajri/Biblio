@@ -21,11 +21,10 @@
     "unused"
 )
 
-package com.example.biblio.models
+package com.example.biblio.data.remote.dto
 
 
 import com.squareup.moshi.Json
-import com.squareup.moshi.JsonClass
 
 /**
  * 
@@ -38,10 +37,10 @@ import com.squareup.moshi.JsonClass
 data class ReadlistRequest (
 
     @Json(name = "name")
-    val name: kotlin.String,
+    val name: String,
 
     @Json(name = "description")
-    val description: kotlin.String? = null
+    val description: String? = null
 
 ) {
 

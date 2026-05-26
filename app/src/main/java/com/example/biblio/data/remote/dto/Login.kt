@@ -21,11 +21,10 @@
     "unused"
 )
 
-package com.example.biblio.models
+package com.example.biblio.data.remote.dto
 
 
 import com.squareup.moshi.Json
-import com.squareup.moshi.JsonClass
 
 /**
  * 
@@ -38,10 +37,10 @@ import com.squareup.moshi.JsonClass
 data class Login (
 
     @Json(name = "email")
-    val email: kotlin.String,
+    val email: String,
 
     @Json(name = "password")
-    val password: kotlin.String
+    val password: String
 
 ) {
 

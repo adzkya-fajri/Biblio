@@ -21,12 +21,10 @@
     "unused"
 )
 
-package com.example.biblio.models
-
-import com.example.biblio.models.Genre
+package com.example.biblio.data.remote.dto
 
 import com.squareup.moshi.Json
-import com.squareup.moshi.JsonClass
+import java.math.BigDecimal
 
 /**
  * 
@@ -56,58 +54,58 @@ import com.squareup.moshi.JsonClass
 data class Book (
 
     @Json(name = "id")
-    val id: kotlin.String? = null,
+    val id: String? = null,
 
     @Json(name = "genre_id")
-    val genreId: kotlin.Int? = null,
+    val genreId: Int? = null,
 
     @Json(name = "title")
-    val title: kotlin.String? = null,
+    val title: String? = null,
 
     @Json(name = "isbn")
-    val isbn: kotlin.String? = null,
+    val isbn: String? = null,
 
     @Json(name = "description")
-    val description: kotlin.String? = null,
+    val description: String? = null,
 
     @Json(name = "author")
-    val author: kotlin.String? = null,
+    val author: String? = null,
 
     @Json(name = "publisher")
-    val publisher: kotlin.String? = null,
+    val publisher: String? = null,
 
     @Json(name = "lang")
-    val lang: kotlin.String? = null,
+    val lang: String? = null,
 
     @Json(name = "published_date")
-    val publishedDate: kotlin.String? = null,
+    val publishedDate: String? = null,
 
     @Json(name = "format")
-    val format: kotlin.String? = null,
+    val format: String? = null,
 
     @Json(name = "page_count")
-    val pageCount: kotlin.Int? = null,
+    val pageCount: Int? = null,
 
     @Json(name = "price")
-    val price: java.math.BigDecimal? = null,
+    val price: BigDecimal? = null,
 
     @Json(name = "cover_url")
-    val coverUrl: kotlin.String? = null,
+    val coverUrl: String? = null,
 
     @Json(name = "cover_sm")
-    val coverSm: kotlin.String? = null,
+    val coverSm: String? = null,
 
     @Json(name = "cover_md")
-    val coverMd: kotlin.String? = null,
+    val coverMd: String? = null,
 
     @Json(name = "cover_lg")
-    val coverLg: kotlin.String? = null,
+    val coverLg: String? = null,
 
     @Json(name = "created_at")
-    val createdAt: kotlin.String? = null,
+    val createdAt: String? = null,
 
     @Json(name = "updated_at")
-    val updatedAt: kotlin.String? = null,
+    val updatedAt: String? = null,
 
     @Json(name = "genre")
     val genre: Genre? = null

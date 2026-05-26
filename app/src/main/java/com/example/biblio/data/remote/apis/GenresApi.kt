@@ -1,14 +1,10 @@
 package com.example.biblio.data.remote.apis
 
-import com.example.biblio.infrastructure.CollectionFormats.*
 import retrofit2.http.*
 import retrofit2.Call
-import okhttp3.RequestBody
-import com.squareup.moshi.Json
 
-import com.example.biblio.models.ApiMessageResponse
-import com.example.biblio.models.Genre
-import com.example.biblio.models.GenreWithBooksResponse
+import com.example.biblio.data.remote.dto.Genre
+import com.example.biblio.data.remote.dto.GenreWithBooksResponse
 
 interface GenresApi {
     /**

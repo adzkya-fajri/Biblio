@@ -1,15 +1,11 @@
 package com.example.biblio.data.remote.apis
 
-import com.example.biblio.infrastructure.CollectionFormats.*
 import retrofit2.http.*
 import retrofit2.Call
-import okhttp3.RequestBody
-import com.squareup.moshi.Json
 
-import com.example.biblio.models.ApiMessageResponse
-import com.example.biblio.models.FirebaseLogin
+import com.example.biblio.data.remote.dto.ApiMessageResponse
+import com.example.biblio.data.remote.dto.FirebaseLogin
 import com.example.biblio.models.UserCredentialsResponse
-import com.example.biblio.models.ValidationErrorResponse
 import retrofit2.Response
 
 interface AuthApi {

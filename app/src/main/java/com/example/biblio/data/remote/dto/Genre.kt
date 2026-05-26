@@ -21,11 +21,10 @@
     "unused"
 )
 
-package com.example.biblio.models
+package com.example.biblio.data.remote.dto
 
 
 import com.squareup.moshi.Json
-import com.squareup.moshi.JsonClass
 
 /**
  * 
@@ -40,16 +39,16 @@ import com.squareup.moshi.JsonClass
 data class Genre (
 
     @Json(name = "id")
-    val id: kotlin.Int? = null,
+    val id: Int? = null,
 
     @Json(name = "name")
-    val name: kotlin.String? = null,
+    val name: String? = null,
 
     @Json(name = "created_at")
-    val createdAt: kotlin.String? = null,
+    val createdAt: String? = null,
 
     @Json(name = "updated_at")
-    val updatedAt: kotlin.String? = null
+    val updatedAt: String? = null
 
 ) {
 

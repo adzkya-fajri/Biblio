@@ -23,23 +23,22 @@
 
 package com.example.biblio.models
 
-import com.example.biblio.models.UserCredentialsResponseUser
+import com.example.biblio.data.remote.dto.User
 
 import com.squareup.moshi.Json
-import com.squareup.moshi.JsonClass
 
 /**
- * 
  *
- * @param user 
- * @param token 
+ *
+ * @param user
+ * @param token
  */
 
 
 data class UserCredentialsResponse (
 
     @Json(name = "user")
-    val user: UserCredentialsResponseUser? = null,
+    val user: User? = null,
 
     @Json(name = "token")
     val token: kotlin.String? = null
@@ -48,4 +47,3 @@ data class UserCredentialsResponse (
 
 
 }
-

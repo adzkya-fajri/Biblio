@@ -21,12 +21,9 @@
     "unused"
 )
 
-package com.example.biblio.models
-
-import com.example.biblio.models.Book
+package com.example.biblio.data.remote.dto
 
 import com.squareup.moshi.Json
-import com.squareup.moshi.JsonClass
 
 /**
  * 
@@ -49,40 +46,40 @@ import com.squareup.moshi.JsonClass
 data class BookPaginatedResponse (
 
     @Json(name = "current_page")
-    val currentPage: kotlin.Int? = null,
+    val currentPage: Int? = null,
 
     @Json(name = "data")
-    val `data`: kotlin.collections.List<Book>? = null,
+    val `data`: List<Book>? = null,
 
     @Json(name = "first_page_url")
-    val firstPageUrl: kotlin.String? = null,
+    val firstPageUrl: String? = null,
 
     @Json(name = "from")
-    val from: kotlin.Int? = null,
+    val from: Int? = null,
 
     @Json(name = "last_page")
-    val lastPage: kotlin.Int? = null,
+    val lastPage: Int? = null,
 
     @Json(name = "last_page_url")
-    val lastPageUrl: kotlin.String? = null,
+    val lastPageUrl: String? = null,
 
     @Json(name = "next_page_url")
-    val nextPageUrl: kotlin.String? = null,
+    val nextPageUrl: String? = null,
 
     @Json(name = "path")
-    val path: kotlin.String? = null,
+    val path: String? = null,
 
     @Json(name = "per_page")
-    val perPage: kotlin.Int? = null,
+    val perPage: Int? = null,
 
     @Json(name = "prev_page_url")
-    val prevPageUrl: kotlin.String? = null,
+    val prevPageUrl: String? = null,
 
     @Json(name = "to")
-    val to: kotlin.Int? = null,
+    val to: Int? = null,
 
     @Json(name = "total")
-    val total: kotlin.Int? = null
+    val total: Int? = null
 
 ) {
 

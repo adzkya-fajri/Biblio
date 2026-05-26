@@ -21,11 +21,10 @@
     "unused"
 )
 
-package com.example.biblio.models
+package com.example.biblio.data.remote.dto
 
 
 import com.squareup.moshi.Json
-import com.squareup.moshi.JsonClass
 
 /**
  * 
@@ -42,22 +41,22 @@ import com.squareup.moshi.JsonClass
 data class Readlist (
 
     @Json(name = "id")
-    val id: kotlin.String? = null,
+    val id: String? = null,
 
     @Json(name = "name")
-    val name: kotlin.String? = null,
+    val name: String? = null,
 
     @Json(name = "description")
-    val description: kotlin.String? = null,
+    val description: String? = null,
 
     @Json(name = "user_id")
-    val userId: kotlin.Int? = null,
+    val userId: Int? = null,
 
     @Json(name = "created_at")
-    val createdAt: kotlin.String? = null,
+    val createdAt: String? = null,
 
     @Json(name = "updated_at")
-    val updatedAt: kotlin.String? = null
+    val updatedAt: String? = null
 
 ) {
 
