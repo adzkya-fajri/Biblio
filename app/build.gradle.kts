@@ -29,6 +29,7 @@ android {
         properties.load(project.rootProject.file("local.properties").inputStream())
         buildConfigField("String", "WEB_CLIENT_ID", "\"${properties["WEB_CLIENT_ID"]}\"")
         buildConfigField("String", "BASE_URL", "\"${properties["BASE_URL"]}\"")
+        buildConfigField("String", "CDN_URL", "\"${properties["CDN_URL"]}\"")
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }

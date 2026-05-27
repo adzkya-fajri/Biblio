@@ -40,17 +40,54 @@ import com.example.biblio.viewmodel.UpdateState
 import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
 
+import com.example.biblio.utils.toAbsoluteUrl
+import com.example.biblio.viewmodel.ProfileViewModel
+import com.example.biblio.viewmodel.ProfileState
+import com.example.biblio.viewmodel.AvatarUpdateState
+import java.io.File
+import java.io.FileOutputStream
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProfileScreen(
     viewModel: AuthViewModel = viewModel(factory = AuthViewModel.Factory),
+    profileViewModel: ProfileViewModel = viewModel(factory = ProfileViewModel.Factory),
     navController: NavController
 ) {
-
+    val context = LocalContext.current
     var openNameDialog by remember { mutableStateOf(false) }
     var nameInput by remember { mutableStateOf("") }
     val openLogoutDialog = remember { mutableStateOf(false) }
+    
     val updateState by viewModel.updateState.collectAsState()
+    val profileState by profileViewModel.profileState.collectAsState()
+    val avatarUpdateState by profileViewModel.avatarUpdateState.collectAsState()
+    val avatarTimestamp by profileViewModel.avatarTimestamp.collectAsState()
+
+    val launcher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri: Uri? ->
+        uri?.let {
+            val file = uriToFile(it, context)
+            if (file != null) {
+                profileViewModel.uploadAvatar(file)
+            }
+        }
+    }
+
+    LaunchedEffect(avatarUpdateState) {
+        when (avatarUpdateState) {
+            is AvatarUpdateState.Success -> {
+                Toast.makeText(context, "Avatar updated successfully", Toast.LENGTH_SHORT).show()
+                profileViewModel.resetAvatarUpdateState()
+            }
+            is AvatarUpdateState.Error -> {
+                Toast.makeText(context, (avatarUpdateState as AvatarUpdateState.Error).message, Toast.LENGTH_SHORT).show()
+                profileViewModel.resetAvatarUpdateState()
+            }
+            else -> {}
+        }
+    }
 
     LaunchedEffect(updateState) {
         when (updateState) {
@@ -91,28 +128,74 @@ fun ProfileScreen(
                     .padding(vertical = 32.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-
-                val user = Firebase.auth.currentUser
-                user?.let {
-                    Profile(
-                        name = it.displayName ?: "Unknown",
-                        photoUrl = it.photoUrl.toString(),
-                        fontSize = 48.sp,
-                        modifier = Modifier.padding(horizontal = 16.dp),
-                        navController = navController,
-                        size = 96.dp
-                    )
-                    Spacer(modifier = Modifier.height(16.dp))
-                    Text(
-                        text = it.displayName ?: "Unknown",
-                        fontSize = 28.sp,
-                        fontWeight = FontWeight.Bold,
-                        fontFamily = fraunces,
-                        modifier = Modifier.padding(horizontal = 16.dp)
-                    )
+                when (val pState = profileState) {
+                    is ProfileState.Success -> {
+                        val user = pState.user
+                        Profile(
+                            name = user.name ?: "Unknown",
+                            photoUrl = if (user.avatar != null) "${user.avatar}?t=$avatarTimestamp" else null,
+                            fontSize = 48.sp,
+                            modifier = Modifier.padding(horizontal = 16.dp),
+                            navController = null, // Don't navigate to self
+                            size = 96.dp
+                        )
+                        Spacer(modifier = Modifier.height(16.dp))
+                        Text(
+                            text = user.name ?: "Unknown",
+                            fontSize = 28.sp,
+                            fontWeight = FontWeight.Bold,
+                            fontFamily = fraunces,
+                            modifier = Modifier.padding(horizontal = 16.dp)
+                        )
+                    }
+                    else -> {
+                        // Fallback
+                        val firebaseUser = Firebase.auth.currentUser
+                        firebaseUser?.let {
+                            Profile(
+                                name = it.displayName ?: "Unknown",
+                                photoUrl = it.photoUrl.toString(),
+                                fontSize = 48.sp,
+                                modifier = Modifier.padding(horizontal = 16.dp),
+                                navController = null,
+                                size = 96.dp
+                            )
+                            Spacer(modifier = Modifier.height(16.dp))
+                            Text(
+                                text = it.displayName ?: "Unknown",
+                                fontSize = 28.sp,
+                                fontWeight = FontWeight.Bold,
+                                fontFamily = fraunces,
+                                modifier = Modifier.padding(horizontal = 16.dp)
+                            )
+                        }
+                    }
                 }
 
                 Spacer(modifier = Modifier.height(16.dp))
+
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Button(
+                        onClick = { launcher.launch("image/*") },
+                        enabled = avatarUpdateState !is AvatarUpdateState.Loading
+                    ) {
+                        if (avatarUpdateState is AvatarUpdateState.Loading) {
+                            CircularProgressIndicator(modifier = Modifier.size(18.dp), color = Color.White)
+                        } else {
+                            Text("Update Avatar")
+                        }
+                    }
+                    
+                    OutlinedButton(
+                        onClick = { profileViewModel.deleteAvatar() },
+                        enabled = avatarUpdateState !is AvatarUpdateState.Loading,
+                        colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.error)
+                    ) {
+                        Text("Hapus Avatar")
+                    }
+                }
             }
 
             MenuItem(
@@ -341,4 +424,20 @@ fun dialogAlert(
             }
         }
     )
+}
+
+fun uriToFile(uri: Uri, context: android.content.Context): File? {
+    val contentResolver = context.contentResolver
+    val fileName = "avatar_${System.currentTimeMillis()}.jpg"
+    val file = File(context.cacheDir, fileName)
+    return try {
+        contentResolver.openInputStream(uri)?.use { inputStream ->
+            FileOutputStream(file).use { outputStream ->
+                inputStream.copyTo(outputStream)
+            }
+        }
+        file
+    } catch (e: Exception) {
+        null
+    }
 }

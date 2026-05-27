@@ -14,17 +14,37 @@ import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
+import com.example.biblio.data.local.dao.BookDao
+import com.example.biblio.data.local.entities.toBuku
+import com.example.biblio.data.local.entities.toEntity
+import com.example.biblio.data.local.entities.toSection
+import com.example.biblio.data.local.entities.GenreEntity
+import com.example.biblio.utils.toAbsoluteUrl
 import java.util.UUID
 
 class BukuRepository(
     private val context: Context,
     private val booksApi: BooksApi,
     private val genresApi: GenresApi,
-    private val tokenPreferences: TokenPreferences
+    private val tokenPreferences: TokenPreferences,
+    private val bookDao: BookDao
 ) {
     private val json = Json {
         ignoreUnknownKeys = true
         prettyPrint = true
+    }
+
+    suspend fun getCachedGenresWithBooks(): BukuDatabase? = withContext(Dispatchers.IO) {
+        val cachedGenres = bookDao.getAllGenres()
+        if (cachedGenres.isNotEmpty()) {
+            val sections = cachedGenres.map { genreEntity ->
+                val books = bookDao.getBooksByGenre(genreEntity.id)
+                genreEntity.toSection(books)
+            }
+            BukuDatabase(sections)
+        } else {
+            null
+        }
     }
 
     suspend fun getGenreWithBooks(): Result<BukuDatabase> = withContext(Dispatchers.IO) {
@@ -36,6 +56,17 @@ class BukuRepository(
             
             if (response.isSuccessful) {
                 val remoteGenres = response.body() ?: emptyList()
+                
+                // Refresh local database
+                val genreEntities = remoteGenres.map { 
+                    GenreEntity(id = it.id ?: 0, title = it.name ?: "Unknown")
+                }
+                val bookEntities = remoteGenres.flatMap { remoteGenre ->
+                    remoteGenre.books?.map { it.toBuku().toEntity(remoteGenre.id ?: 0) } ?: emptyList()
+                }
+                
+                bookDao.refreshDatabase(genreEntities, bookEntities)
+
                 val sections = remoteGenres.map { remoteGenre ->
                     Section(
                         id = remoteGenre.id ?: 0,
@@ -45,15 +76,37 @@ class BukuRepository(
                 }
                 Result.success(BukuDatabase(sections))
             } else {
-                Result.failure(Exception("Gagal mengambil data: ${response.code()}"))
+                // If remote fails, try to return cached data as ultimate fallback
+                val cachedGenres = bookDao.getAllGenres()
+                if (cachedGenres.isNotEmpty()) {
+                    val sections = cachedGenres.map { genreEntity ->
+                        val books = bookDao.getBooksByGenre(genreEntity.id)
+                        genreEntity.toSection(books)
+                    }
+                    Result.success(BukuDatabase(sections))
+                } else {
+                    Result.failure(Exception("Gagal mengambil data: ${response.code()}"))
+                }
             }
         } catch (e: Exception) {
             Log.e("BukuRepository", "Error fetching genres with books", e)
-            Result.failure(e)
+            
+            // Fallback to cache on exception
+            val cachedGenres = bookDao.getAllGenres()
+            if (cachedGenres.isNotEmpty()) {
+                val sections = cachedGenres.map { genreEntity ->
+                    val books = bookDao.getBooksByGenre(genreEntity.id)
+                    genreEntity.toSection(books)
+                }
+                Result.success(BukuDatabase(sections))
+            } else {
+                Result.failure(e)
+            }
         }
     }
 
     suspend fun getBookDetails(bookId: String): Result<Buku> = withContext(Dispatchers.IO) {
+        val cachedBook = bookDao.getBookById(bookId)
         try {
             tokenPreferences.token.firstOrNull()?.let {
                 com.example.biblio.di.AppModule.setToken(it)
@@ -66,6 +119,8 @@ class BukuRepository(
             }
 
             if (uuid == null) {
+                // If not UUID, it might be a cached dummy ID or invalid
+                cachedBook?.let { return@withContext Result.success(it.toBuku()) }
                 return@withContext Result.failure(Exception("Invalid Book ID format"))
             }
 
@@ -73,12 +128,21 @@ class BukuRepository(
             
             if (response.isSuccessful) {
                 val remoteBook = response.body() ?: return@withContext Result.failure(Exception("Buku tidak ditemukan"))
-                Result.success(remoteBook.toBuku())
+                val buku = remoteBook.toBuku()
+                
+                // Update specific book in cache if we know its genreId (preserving it if already exists)
+                cachedBook?.let { 
+                    bookDao.insertBooks(listOf(buku.toEntity(it.genreId)))
+                }
+
+                Result.success(buku)
             } else {
+                cachedBook?.let { return@withContext Result.success(it.toBuku()) }
                 Result.failure(Exception("Gagal mengambil detail buku: ${response.code()}"))
             }
         } catch (e: Exception) {
             Log.e("BukuRepository", "Error fetching book details", e)
+            cachedBook?.let { return@withContext Result.success(it.toBuku()) }
             Result.failure(e)
         }
     }
@@ -95,18 +159,6 @@ class BukuRepository(
         )
     }
 
-    private fun String?.toAbsoluteUrl(): String {
-        if (this.isNullOrBlank()) return ""
-        if (this.startsWith("http")) return this
-        
-        // Ambil base URL dari BuildConfig, buang "/api" jika ada untuk akses file statis/storage
-        val baseUrl = com.example.biblio.BuildConfig.BASE_URL
-            .removeSuffix("/")
-            .removeSuffix("/api")
-            
-        return "$baseUrl/${this.removePrefix("/")}"
-    }
-
     fun loadBooksFromAssets(): BukuDatabase {
         return try {
             val jsonString = context.assets.open("buku.json")
@@ -118,52 +170,6 @@ class BukuRepository(
             BukuDatabase(emptyList())
         }
     }
-
-//    fun generateDummyData(): BukuDatabase {
-//        val sections = listOf(
-//            Section(
-//                id = 1,
-//                title = "Fiksi",
-//                books = List(20) { i ->
-//                    Buku(
-//                        id = "fiction_$i",
-//                        isbn = "978-0${String.format("%09d", i)}",
-//                        title = "Novel Fiksi ${i + 1}",
-//                        author = "Penulis ${(i % 5) + 1}",
-//                        cover = "https://picsum.photos/seed/fiction$i/300/450"
-//                    )
-//                }
-//            ),
-//            Section(
-//                id = 2,
-//                title = "Non-Fiksi",
-//                books = List(15) { i ->
-//                    Buku(
-//                        id = "nonfiction_$i",
-//                        isbn = "978-1${String.format("%09d", i)}",
-//                        title = "Buku Non-Fiksi ${i + 1}",
-//                        author = "Ahli ${(i % 3) + 1}",
-//                        cover = "https://picsum.photos/seed/nonfiction$i/300/450"
-//                    )
-//                }
-//            ),
-//            Section(
-//                id = 3,
-//                title = "Sains & Teknologi",
-//                books = List(12) { i ->
-//                    Buku(
-//                        id = "science_$i",
-//                        isbn = "978-2${String.format("%09d", i)}",
-//                        title = "Buku Sains ${i + 1}",
-//                        author = "Ilmuwan ${(i % 4) + 1}",
-//                        cover = "https://picsum.photos/seed/science$i/300/450"
-//                    )
-//                }
-//            )
-//        )
-//
-//        return BukuDatabase(sections)
-//    }
 
     suspend fun saveBooksToFile(database: BukuDatabase) {
         withContext(Dispatchers.IO) {

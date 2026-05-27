@@ -77,8 +77,13 @@ class BukuViewModel(
             _isLoading.value = true
             _errorMessage.value = null
             
+            // Step 1: Muat dari Cache dulu agar UI langsung tampil (jika ada)
+            repository.getCachedGenresWithBooks()?.let {
+                _bookDatabase.value = it
+            }
+
             try {
-                // Timeout 20 detik
+                // Step 2: Ambil data terbaru dari Network
                 val result = withTimeout(20_000) {
                     repository.getGenreWithBooks()
                 }
@@ -87,12 +92,17 @@ class BukuViewModel(
                     _bookDatabase.value = it
                     _errorMessage.value = null
                 }.onFailure { e ->
-                    _errorMessage.value = "Gagal memuat buku: ${e.localizedMessage}"
+                    // Jika gagal dan cache masih kosong, tampilkan error
+                    if (_bookDatabase.value == null) {
+                        _errorMessage.value = "Gagal memuat buku: ${e.localizedMessage}"
+                    }
                 }
             } catch (e: Exception) {
-                _errorMessage.value = when (e) {
-                    is kotlinx.coroutines.TimeoutCancellationException -> "Koneksi lambat (Timeout 20 detik). Silakan coba lagi."
-                    else -> "Terjadi kesalahan: ${e.localizedMessage}"
+                if (_bookDatabase.value == null) {
+                    _errorMessage.value = when (e) {
+                        is kotlinx.coroutines.TimeoutCancellationException -> "Koneksi lambat (Timeout 20 detik). Silakan coba lagi."
+                        else -> "Terjadi kesalahan: ${e.localizedMessage}"
+                    }
                 }
             } finally {
                 _isLoading.value = false

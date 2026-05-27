@@ -40,6 +40,11 @@ import androidx.compose.material3.Text
 import androidx.compose.ui.text.style.TextAlign
 import com.example.biblio.ibmplexsans
 
+import androidx.compose.ui.draw.clip
+import com.example.biblio.utils.toAbsoluteUrl
+import com.example.biblio.viewmodel.ProfileViewModel
+import com.example.biblio.viewmodel.ProfileState
+
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalSharedTransitionApi::class)
 @Composable
 fun BerandaScreen(
@@ -48,15 +53,21 @@ fun BerandaScreen(
     sharedTransitionScope: SharedTransitionScope,
     animatedContentScope: AnimatedContentScope,
     viewModel: BukuViewModel = viewModel(factory = BukuViewModel.Factory),
+    profileViewModel: ProfileViewModel = viewModel(factory = ProfileViewModel.Factory)
 ) {
     val bookDatabase by viewModel.bookDatabase.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
     val errorMessage by viewModel.errorMessage.collectAsState()
+    val profileState by profileViewModel.profileState.collectAsState()
+    val avatarTimestamp by profileViewModel.avatarTimestamp.collectAsState()
     val state = rememberPullToRefreshState()
 
     PullToRefreshBox(
         isRefreshing = isLoading,
-        onRefresh = { viewModel.loadBooks(forceRefresh = true) },
+        onRefresh = { 
+            viewModel.loadBooks(forceRefresh = true)
+            profileViewModel.fetchProfile()
+        },
         state = state,
         indicator = {
             Indicator(
@@ -86,15 +97,41 @@ fun BerandaScreen(
                 contentPadding = PaddingValues(bottom = bottomPadding, top = 10.dp)
             ) {
                 item {
-                    val user = Firebase.auth.currentUser
-                    user?.let {
-                        Profile(
-                            name = it.displayName ?: "Unknown",
-                            photoUrl = it.photoUrl.toString(),
-                            modifier = Modifier.padding(horizontal = 16.dp),
-                            navController = navController
-                        )
-                        Spacer(modifier = Modifier.height(16.dp))
+                    when (val pState = profileState) {
+                        is ProfileState.Success -> {
+                            val user = pState.user
+                            Profile(
+                                name = user.name ?: "Unknown",
+                                photoUrl = if (user.avatar != null) "${user.avatar}?t=$avatarTimestamp" else null,
+                                modifier = Modifier.padding(horizontal = 16.dp),
+                                navController = navController
+                            )
+                            Spacer(modifier = Modifier.height(16.dp))
+                        }
+                        is ProfileState.Loading -> {
+                            // Optionally show a placeholder
+                            Box(
+                                modifier = Modifier
+                                    .padding(horizontal = 16.dp)
+                                    .size(48.dp)
+                                    .clip(androidx.compose.foundation.shape.CircleShape)
+                                    .background(colorResource(id = R.color.colorPrimaryVariant))
+                            )
+                            Spacer(modifier = Modifier.height(16.dp))
+                        }
+                        else -> {
+                            // Fallback to Firebase if backend profile fails or is idle
+                            val firebaseUser = Firebase.auth.currentUser
+                            firebaseUser?.let {
+                                Profile(
+                                    name = it.displayName ?: "Unknown",
+                                    photoUrl = it.photoUrl.toString(),
+                                    modifier = Modifier.padding(horizontal = 16.dp),
+                                    navController = navController
+                                )
+                                Spacer(modifier = Modifier.height(16.dp))
+                            }
+                        }
                     }
                 }
 

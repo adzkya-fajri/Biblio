@@ -48,6 +48,7 @@ import com.example.biblio.ui.components.NowReadingBar
 import com.example.biblio.ui.screens.*
 import com.example.biblio.viewmodel.BukuViewModel
 import com.example.biblio.viewmodel.BukuViewModelFactory
+import com.example.biblio.viewmodel.ProfileViewModel
 import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
 
@@ -61,6 +62,10 @@ fun MainScreen(navController: NavController) {
 
     val sharedViewModel: BukuViewModel = viewModel(
         factory = BukuViewModel.Factory
+    )
+
+    val profileViewModel: ProfileViewModel = viewModel(
+        factory = ProfileViewModel.Factory
     )
 
     // Track current route
@@ -132,7 +137,8 @@ fun MainScreen(navController: NavController) {
                         bottomPadding = bottomPadding,
                         sharedTransitionScope = this@SharedTransitionLayout,
                         animatedContentScope = this@composable,
-                        viewModel = sharedViewModel
+                        viewModel = sharedViewModel,
+                        profileViewModel = profileViewModel
                     )
                 }
 
@@ -187,7 +193,12 @@ fun MainScreen(navController: NavController) {
                 }
 
                 composable("settings") { SettingsScreen(navController = navController) }
-                composable("profile") { ProfileScreen(navController = navController) }
+                composable("profile") { 
+                    ProfileScreen(
+                        navController = navController,
+                        profileViewModel = profileViewModel
+                    ) 
+                }
             }
         }
 
