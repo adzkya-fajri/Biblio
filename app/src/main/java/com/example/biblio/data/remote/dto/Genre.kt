@@ -29,26 +29,30 @@ import com.squareup.moshi.Json
 /**
  * 
  *
- * @param id 
- * @param name 
- * @param createdAt 
- * @param updatedAt 
+ * @param id
+ * @param name
+ * @param createdAt
+ * @param updatedAt
+ * @param booksCount
  */
 
 
 data class Genre (
 
     @Json(name = "id")
-    val id: Int? = null,
+    val id: kotlin.Int? = null,
 
     @Json(name = "name")
-    val name: String? = null,
+    val name: kotlin.String? = null,
 
     @Json(name = "created_at")
-    val createdAt: String? = null,
+    val createdAt: kotlin.String? = null,
 
     @Json(name = "updated_at")
-    val updatedAt: String? = null
+    val updatedAt: kotlin.String? = null,
+
+    @Json(name = "books_count")
+    val booksCount: kotlin.Int? = null
 
 ) {
 

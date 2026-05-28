@@ -29,14 +29,18 @@ import com.squareup.moshi.Json
 /**
  * 
  *
- * @param token 
+ * @param token
+ * @param displayName
  */
 
 
 data class FirebaseLogin (
 
     @Json(name = "token")
-    val token: String
+    val token: String,
+
+    @Json(name = "display_name")
+    val displayName: String? = null
 
 ) {
 
