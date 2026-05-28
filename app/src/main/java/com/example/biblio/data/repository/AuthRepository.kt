@@ -1,5 +1,6 @@
 package com.example.biblio.data.repository
 
+import android.content.Context
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.example.biblio.data.model.User
@@ -9,10 +10,17 @@ import com.example.biblio.data.remote.dto.FirebaseLogin
 import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.auth.UserProfileChangeRequest
 import kotlinx.coroutines.tasks.await
+import coil.imageLoader
+import coil.annotation.ExperimentalCoilApi
+import com.example.biblio.data.local.BiblioDatabase
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 class AuthRepository(
+    private val context: Context,
     private val authApi: AuthApi,
-    private val tokenPreferences: TokenPreferences
+    private val tokenPreferences: TokenPreferences,
+    private val database: BiblioDatabase
 ) {
     private val auth = FirebaseAuth.getInstance()
     val currentUser: FirebaseUser? get() = auth.currentUser
@@ -21,7 +29,7 @@ class AuthRepository(
         return try {
             val result = auth.signInWithEmailAndPassword(email, password).await()
             val firebaseUser = result.user ?: return Result.failure(Exception("Login failed"))
-            exchangeFirebaseToken(firebaseUser)
+            exchangeFirebaseCredentials(firebaseUser, firebaseUser.displayName)
         } catch (e: Exception) {
             Result.failure(e)
         }
@@ -32,18 +40,18 @@ class AuthRepository(
             val credential = GoogleAuthProvider.getCredential(idToken, null)
             val result = auth.signInWithCredential(credential).await()
             val firebaseUser = result.user ?: return Result.failure(Exception("Google login failed"))
-            exchangeFirebaseToken(firebaseUser)
+            exchangeFirebaseCredentials(firebaseUser, firebaseUser.displayName)
         } catch (e: Exception) {
             Result.failure(e)
         }
     }
 
     // Ambil Firebase ID token → kirim ke Laravel → simpan Sanctum token
-    private suspend fun exchangeFirebaseToken(firebaseUser: FirebaseUser): Result<User> {
+    private suspend fun exchangeFirebaseCredentials(firebaseUser: FirebaseUser, displayName: String?): Result<User> {
         val firebaseToken = firebaseUser.getIdToken(false).await().token
             ?: return Result.failure(Exception("Gagal ambil Firebase token"))
 
-        val response = authApi.authFirebase(FirebaseLogin(token = firebaseToken))
+        val response = authApi.authFirebase(FirebaseLogin(token = firebaseToken, displayName = displayName))
 
         return if (response.isSuccessful) {
             val sanctumToken = response.body()?.token
@@ -71,15 +79,25 @@ class AuthRepository(
                     .setDisplayName(displayName)
                     .build()
             ).await()
-            exchangeFirebaseToken(firebaseUser)
+            exchangeFirebaseCredentials(firebaseUser, displayName = displayName)
         } catch (e: Exception) {
             Result.failure(e)
         }
     }
 
+    @OptIn(ExperimentalCoilApi::class)
     suspend fun logout() {
-        auth.signOut()
-        tokenPreferences.clearToken()
-        authApi.authLogout()
+        withContext(Dispatchers.IO) {
+            auth.signOut()
+            tokenPreferences.clearToken()
+            try {
+                authApi.authLogout()
+            } catch (_: Exception) {
+                // Ignore logout error if user already unauthenticated
+            }
+            context.imageLoader.diskCache?.clear()
+            context.imageLoader.memoryCache?.clear()
+            database.clearAllTables()
+        }
     }
 }

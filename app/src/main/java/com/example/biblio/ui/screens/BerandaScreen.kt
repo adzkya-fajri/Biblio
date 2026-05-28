@@ -24,6 +24,8 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import coil.annotation.ExperimentalCoilApi
+import coil.imageLoader
 import com.example.biblio.R
 import com.example.biblio.data.repository.BukuRepository
 import com.example.biblio.data.repository.FavoriteRepository
@@ -44,8 +46,15 @@ import androidx.compose.ui.draw.clip
 import com.example.biblio.utils.toAbsoluteUrl
 import com.example.biblio.viewmodel.ProfileViewModel
 import com.example.biblio.viewmodel.ProfileState
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Star
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.sp
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalSharedTransitionApi::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalSharedTransitionApi::class, ExperimentalCoilApi::class)
 @Composable
 fun BerandaScreen(
     navController: NavController,
@@ -57,22 +66,29 @@ fun BerandaScreen(
 ) {
     val bookDatabase by viewModel.bookDatabase.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
+    val isRefreshingBuku by viewModel.isRefreshing.collectAsState()
+    val isRefreshingProfile by profileViewModel.isRefreshing.collectAsState()
+    val isRefreshing = isRefreshingBuku || isRefreshingProfile
+    
     val errorMessage by viewModel.errorMessage.collectAsState()
     val profileState by profileViewModel.profileState.collectAsState()
     val avatarTimestamp by profileViewModel.avatarTimestamp.collectAsState()
+    val context = LocalContext.current
     val state = rememberPullToRefreshState()
 
     PullToRefreshBox(
-        isRefreshing = isLoading,
+        isRefreshing = isRefreshing,
         onRefresh = { 
+            context.imageLoader.diskCache?.clear()
+            context.imageLoader.memoryCache?.clear()
             viewModel.loadBooks(forceRefresh = true)
-            profileViewModel.fetchProfile()
+            profileViewModel.fetchProfile(forceRefresh = true)
         },
         state = state,
         indicator = {
             Indicator(
                 modifier = Modifier.align(Alignment.TopCenter),
-                isRefreshing = isLoading,
+                isRefreshing = isRefreshing,
                 containerColor = colorResource(R.color.colorSecondary),
                 color = colorResource(R.color.colorOnSecondary),
                 state = state
@@ -100,12 +116,41 @@ fun BerandaScreen(
                     when (val pState = profileState) {
                         is ProfileState.Success -> {
                             val user = pState.user
-                            Profile(
-                                name = user.name ?: "Unknown",
-                                photoUrl = if (user.avatar != null) "${user.avatar}?t=$avatarTimestamp" else null,
-                                modifier = Modifier.padding(horizontal = 16.dp),
-                                navController = navController
-                            )
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 16.dp),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Profile(
+                                    name = user.name ?: "Unknown",
+                                    photoUrl = if (user.avatar != null) "${user.avatar}?t=$avatarTimestamp" else null,
+                                    navController = navController
+                                )
+                                
+                                if (user.isSubscribed != true) {
+                                    Button(
+                                        onClick = { /* TODO: Navigate to Premium Screen */ },
+                                        contentPadding = PaddingValues(horizontal = 12.dp, vertical = 4.dp),
+                                        colors = ButtonDefaults.buttonColors(
+                                            containerColor = colorResource(R.color.colorSecondary),
+                                            contentColor = colorResource(R.color.colorOnSecondary)
+                                        )
+                                    ) {
+                                        Icon(
+                                            painter = painterResource(R.drawable.ic_biblio_plus),
+                                            contentDescription = null,
+                                            modifier = Modifier.height(16.dp)
+                                        )
+                                        Spacer(modifier = Modifier.width(8.dp))
+                                        Text(
+                                            "Upgrade Biblio+",
+                                            fontFamily = ibmplexsans,
+                                        )
+                                    }
+                                }
+                            }
                             Spacer(modifier = Modifier.height(16.dp))
                         }
                         is ProfileState.Loading -> {
@@ -123,12 +168,19 @@ fun BerandaScreen(
                             // Fallback to Firebase if backend profile fails or is idle
                             val firebaseUser = Firebase.auth.currentUser
                             firebaseUser?.let {
-                                Profile(
-                                    name = it.displayName ?: "Unknown",
-                                    photoUrl = it.photoUrl.toString(),
-                                    modifier = Modifier.padding(horizontal = 16.dp),
-                                    navController = navController
-                                )
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(horizontal = 16.dp),
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Profile(
+                                        name = it.displayName ?: "Unknown",
+                                        photoUrl = it.photoUrl.toString(),
+                                        navController = navController
+                                    )
+                                }
                                 Spacer(modifier = Modifier.height(16.dp))
                             }
                         }

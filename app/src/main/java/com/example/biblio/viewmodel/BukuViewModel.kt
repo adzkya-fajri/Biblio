@@ -40,6 +40,9 @@ class BukuViewModel(
     private val _isLoading = MutableStateFlow(true)
     val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
 
+    private val _isRefreshing = MutableStateFlow(false)
+    val isRefreshing: StateFlow<Boolean> = _isRefreshing.asStateFlow()
+
     private val _errorMessage = MutableStateFlow<String?>(null)
     val errorMessage: StateFlow<String?> = _errorMessage.asStateFlow()
 
@@ -74,7 +77,7 @@ class BukuViewModel(
 
     fun loadBooks(forceRefresh: Boolean = false) {
         viewModelScope.launch {
-            _isLoading.value = true
+            if (forceRefresh) _isRefreshing.value = true else _isLoading.value = true
             _errorMessage.value = null
             
             // Step 1: Muat dari Cache dulu agar UI langsung tampil (jika ada)
@@ -106,14 +109,17 @@ class BukuViewModel(
                 }
             } finally {
                 _isLoading.value = false
+                _isRefreshing.value = false
             }
         }
     }
 
-    fun fetchBookDetails(bookId: String) {
+    fun fetchBookDetails(bookId: String, forceRefresh: Boolean = false) {
         viewModelScope.launch {
-            _currentBook.value = null // Bersihkan data lama agar tidak muncul saat transisi ke buku baru
-            _isLoading.value = true
+            if (forceRefresh) _isRefreshing.value = true else {
+                _currentBook.value = null // Bersihkan data lama agar tidak muncul saat transisi ke buku baru
+                _isLoading.value = true
+            }
             _errorMessage.value = null
             try {
                 val result = withTimeout(20_000) {
@@ -131,6 +137,7 @@ class BukuViewModel(
                 }
             } finally {
                 _isLoading.value = false
+                _isRefreshing.value = false
             }
         }
     }

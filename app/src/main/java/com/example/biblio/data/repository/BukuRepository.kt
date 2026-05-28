@@ -19,6 +19,7 @@ import com.example.biblio.data.local.entities.toBuku
 import com.example.biblio.data.local.entities.toEntity
 import com.example.biblio.data.local.entities.toSection
 import com.example.biblio.data.local.entities.GenreEntity
+import com.example.biblio.di.AppModule
 import com.example.biblio.utils.toAbsoluteUrl
 import java.util.UUID
 
@@ -50,7 +51,7 @@ class BukuRepository(
     suspend fun getGenreWithBooks(): Result<BukuDatabase> = withContext(Dispatchers.IO) {
         try {
             tokenPreferences.token.firstOrNull()?.let {
-                com.example.biblio.di.AppModule.setToken(it)
+                AppModule.setToken(it)
             }
             val response = genresApi.getGenreWithBooks().execute()
             
@@ -109,7 +110,7 @@ class BukuRepository(
         val cachedBook = bookDao.getBookById(bookId)
         try {
             tokenPreferences.token.firstOrNull()?.let {
-                com.example.biblio.di.AppModule.setToken(it)
+                AppModule.setToken(it)
             }
             // Check if bookId is a valid UUID
             val uuid = try {
@@ -155,7 +156,8 @@ class BukuRepository(
             description = this.description ?: "Description",
             page = this.pageCount ?: 0,
             author = this.author ?: "Unknown Author",
-            cover = (this.coverLg ?: this.coverMd ?: this.coverSm ?: this.coverUrl).toAbsoluteUrl()
+            cover = (this.coverLg ?: this.coverMd ?: this.coverSm ?: this.coverUrl).toAbsoluteUrl(),
+            price = this.price
         )
     }
 

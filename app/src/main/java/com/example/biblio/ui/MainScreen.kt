@@ -174,7 +174,8 @@ fun MainScreen(navController: NavController) {
                         bottomPadding = bottomPadding,
                         sharedTransitionScope = this@SharedTransitionLayout,
                         animatedContentScope = this@composable,
-                        viewModel = sharedViewModel
+                        viewModel = sharedViewModel,
+                        profileViewModel = profileViewModel
                     )
                 }
 

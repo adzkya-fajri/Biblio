@@ -12,6 +12,9 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.*
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults.Indicator
+import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -34,12 +37,17 @@ import com.example.biblio.fraunces
 import com.example.biblio.ibmplexmono
 import com.example.biblio.ibmplexsans
 import com.example.biblio.viewmodel.BukuViewModel
+import com.example.biblio.viewmodel.ProfileState
+import com.example.biblio.viewmodel.ProfileViewModel
 import kotlinx.coroutines.delay
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import java.net.URLEncoder
+import java.math.BigDecimal
+import java.text.NumberFormat
+import java.util.Locale
 
-@OptIn(ExperimentalSharedTransitionApi::class)
+@OptIn(ExperimentalSharedTransitionApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun BukuScreen(
     bookId: String?,
@@ -49,12 +57,21 @@ fun BukuScreen(
     animatedContentScope: AnimatedContentScope,
     coverHeight: Dp = 225.dp,
     coverWidth: Dp = 150.dp,
-    viewModel: BukuViewModel = viewModel(factory = BukuViewModel.Factory)
+    viewModel: BukuViewModel = viewModel(factory = BukuViewModel.Factory),
+    profileViewModel: ProfileViewModel = viewModel(factory = ProfileViewModel.Factory)
 ) {
     val bookDatabase by viewModel.bookDatabase.collectAsState()
     val currentBook by viewModel.currentBook.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
+    val isRefreshingBuku by viewModel.isRefreshing.collectAsState()
+    val isRefreshingProfile by profileViewModel.isRefreshing.collectAsState()
+    val isRefreshing = isRefreshingBuku || isRefreshingProfile
+    
     val errorMessage by viewModel.errorMessage.collectAsState()
+    val profileState by profileViewModel.profileState.collectAsState()
+    
+    val isSubscribed = (profileState as? ProfileState.Success)?.user?.isSubscribed ?: false
+
     var cachedBook by remember { mutableStateOf<com.example.biblio.data.model.Buku?>(null) }
     var isTimeout by remember { mutableStateOf(false) }
 
@@ -95,18 +112,38 @@ fun BukuScreen(
             Text("Buku tidak ditemukan")
         }
     } else {
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(
-                    brush = Brush.verticalGradient(
-                        colors = listOf(
-                            colorResource(id = R.color.colorBackground),
-                            colorResource(id = R.color.colorBackgroundVariant)
+        val refreshState = rememberPullToRefreshState()
+        
+        PullToRefreshBox(
+            isRefreshing = isRefreshing,
+            onRefresh = {
+                bookId?.let { viewModel.fetchBookDetails(it, forceRefresh = true) }
+                profileViewModel.fetchProfile(forceRefresh = true)
+            },
+            state = refreshState,
+            indicator = {
+                Indicator(
+                    modifier = Modifier.align(Alignment.TopCenter),
+                    isRefreshing = isLoading,
+                    containerColor = colorResource(R.color.colorSecondary),
+                    color = colorResource(R.color.colorOnSecondary),
+                    state = refreshState
+                )
+            },
+            modifier = Modifier.fillMaxSize()
+        ) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(
+                        brush = Brush.verticalGradient(
+                            colors = listOf(
+                                colorResource(id = R.color.colorBackground),
+                                colorResource(id = R.color.colorBackgroundVariant)
+                            )
                         )
                     )
-                )
-        ) {
+            ) {
             // Loading overlay
             if (bookDatabase == null && !isTimeout && cachedBook != null) {
                 Box(
@@ -307,21 +344,38 @@ fun BukuScreen(
                     ) {
                         Button(
                             onClick = {
-                                book?.let {
-                                    val bookJson = Json.encodeToString(it)
-                                    val encoded = URLEncoder.encode(bookJson, "UTF-8")
-                                    navController.navigate("reader/$encoded")
+                                if (isSubscribed) {
+                                    book?.let {
+                                        val bookJson = Json.encodeToString(it)
+                                        val encoded = URLEncoder.encode(bookJson, "UTF-8")
+                                        navController.navigate("reader/$encoded")
+                                    }
+                                } else {
+                                    // TODO: Navigate to Premium/Subscription Screen
                                 }
                             },
                             modifier = Modifier.fillMaxWidth()
                         ) {
                             Icon(
-                                painter = painterResource(R.drawable.book_5_24px),
+                                painter = if (isSubscribed) painterResource(R.drawable.book_5_24px) else painterResource(R.drawable.ic_biblio_plus),
                                 contentDescription = null,
                                 modifier = Modifier.size(20.dp)
                             )
                             Spacer(modifier = Modifier.width(8.dp))
-                            Text("Beli & Baca", fontFamily = ibmplexsans)
+                            Text(
+                                text = if (isSubscribed) {
+                                    "Baca Sekarang"
+                                } else {
+                                    val price = book?.price
+                                    if (price == null || price <= BigDecimal.ZERO) {
+                                        "Baca Sekarang"
+                                    } else {
+                                        val formatter = NumberFormat.getCurrencyInstance(Locale("id", "ID"))
+                                        "Beli ${formatter.format(price)}"
+                                    }
+                                },
+                                fontFamily = ibmplexsans
+                            )
                         }
 
                         OutlinedButton(
@@ -359,4 +413,5 @@ fun BukuScreen(
             }
         }
     }
+}
 }

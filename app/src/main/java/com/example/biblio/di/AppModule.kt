@@ -43,8 +43,10 @@ object AppModule {
     fun provideAuthRepository(context: Context): AuthRepository {
         return authRepository ?: synchronized(this) {
             authRepository ?: AuthRepository(
+                context = context.applicationContext,
                 authApi = provideAuthApi(),
-                tokenPreferences = TokenPreferences(context)
+                tokenPreferences = TokenPreferences(context),
+                database = provideDatabase(context)
             ).also { authRepository = it }
         }
     }

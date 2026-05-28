@@ -76,6 +76,13 @@ dependencies {
     implementation(libs.androidx.activity)
     implementation(libs.androidx.constraintlayout)
 
+    // Readium
+    implementation("org.readium.kotlin-toolkit:readium-shared:3.2.0")
+    implementation("org.readium.kotlin-toolkit:readium-streamer:3.2.0")
+    implementation("org.readium.kotlin-toolkit:readium-navigator:3.2.0")
+    implementation("org.readium.kotlin-toolkit:readium-opds:3.2.0")
+    implementation("org.readium.kotlin-toolkit:readium-lcp:3.2.0")
+
     // API
     implementation("androidx.datastore:datastore-preferences:1.1.1")
     implementation("com.squareup.retrofit2:retrofit:2.11.0")

@@ -32,6 +32,9 @@ class ProfileViewModel(private val repository: ProfileRepository) : ViewModel() 
     private val _profileState = MutableStateFlow<ProfileState>(ProfileState.Idle)
     val profileState: StateFlow<ProfileState> = _profileState.asStateFlow()
 
+    private val _isRefreshing = MutableStateFlow(false)
+    val isRefreshing: StateFlow<Boolean> = _isRefreshing.asStateFlow()
+
     private val _avatarUpdateState = MutableStateFlow<AvatarUpdateState>(AvatarUpdateState.Idle)
     val avatarUpdateState: StateFlow<AvatarUpdateState> = _avatarUpdateState.asStateFlow()
 
@@ -43,9 +46,9 @@ class ProfileViewModel(private val repository: ProfileRepository) : ViewModel() 
         fetchProfile()
     }
 
-    fun fetchProfile() {
+    fun fetchProfile(forceRefresh: Boolean = false) {
         viewModelScope.launch {
-            _profileState.value = ProfileState.Loading
+            if (forceRefresh) _isRefreshing.value = true else _profileState.value = ProfileState.Loading
             
             // Step 1: Muat dari cache
             repository.getCachedProfile()?.let {
@@ -61,6 +64,7 @@ class ProfileViewModel(private val repository: ProfileRepository) : ViewModel() 
                     }
                 }
             )
+            _isRefreshing.value = false
         }
     }
 

@@ -3,6 +3,7 @@ package com.example.biblio.data.local.entities
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import com.example.biblio.data.model.Buku
+import java.math.BigDecimal
 
 @Entity(tableName = "books")
 data class BookEntity(
@@ -13,7 +14,8 @@ data class BookEntity(
     val author: String,
     val page: Int,
     val cover: String,
-    val genreId: Int
+    val genreId: Int,
+    val price: String?
 )
 
 fun BookEntity.toBuku() = Buku(
@@ -23,7 +25,8 @@ fun BookEntity.toBuku() = Buku(
     description = description,
     author = author,
     page = page,
-    cover = cover
+    cover = cover,
+    price = price?.let { BigDecimal(it) }
 )
 
 fun Buku.toEntity(genreId: Int) = BookEntity(
@@ -34,5 +37,6 @@ fun Buku.toEntity(genreId: Int) = BookEntity(
     author = author,
     page = page,
     cover = cover,
-    genreId = genreId
+    genreId = genreId,
+    price = price?.toString()
 )
