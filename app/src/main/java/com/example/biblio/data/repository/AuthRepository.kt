@@ -97,6 +97,17 @@ class AuthRepository(
             }
             context.imageLoader.diskCache?.clear()
             context.imageLoader.memoryCache?.clear()
+
+            // Hapus file buku (.epub dan .pdf) dari cache
+            context.cacheDir.listFiles()?.forEach { file ->
+                if (file.name.endsWith(".epub") || file.name.endsWith(".pdf")) {
+                    file.delete()
+                }
+            }
+
+            // Hapus metadata buku
+            context.deleteFile("buku.json")
+
             database.clearAllTables()
         }
     }

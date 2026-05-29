@@ -75,8 +75,8 @@ fun BookItem(
                         .background(Color.Transparent)
                         .fillMaxSize()
                         .sharedElement(
-                            sharedContentState = rememberSharedContentState(key = "cover-${book.id}"),
-                            animatedVisibilityScope = animatedContentScope,
+                            rememberSharedContentState(key = "cover-${book.id}"),
+                            animatedContentScope,
                             boundsTransform = { _, _ ->
                                 spring(
                                     dampingRatio = Spring.DampingRatioLowBouncy,
@@ -134,8 +134,8 @@ fun BookItem(
                 modifier = Modifier
                     .fillMaxWidth()
                     .sharedBounds(
-                        sharedContentState = rememberSharedContentState(key = "title-${book.id}"),
-                        animatedVisibilityScope = animatedContentScope,
+                        rememberSharedContentState(key = "title-${book.id}"),
+                        animatedContentScope,
                         boundsTransform = { _, _ ->
                             spring(
                                 dampingRatio = Spring.DampingRatioLowBouncy,
@@ -161,8 +161,8 @@ fun BookItem(
                 modifier = Modifier
                     .fillMaxWidth()
                     .sharedBounds(
-                        sharedContentState = rememberSharedContentState(key = "author-${book.id}"),
-                        animatedVisibilityScope = animatedContentScope,
+                        rememberSharedContentState(key = "author-${book.id}"),
+                        animatedContentScope,
                         boundsTransform = { _, _ ->
                             spring(
                                 dampingRatio = Spring.DampingRatioLowBouncy,

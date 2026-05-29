@@ -16,12 +16,14 @@ import com.example.biblio.data.repository.ProfileRepository
 import com.example.biblio.data.remote.infrastructure.ApiClient
 import com.example.biblio.data.repository.FavoriteRepository
 import com.example.biblio.data.repository.ReadingProgressRepository
+import com.example.biblio.data.preferences.ReaderPreferencesManager
 
 object AppModule {
     private var authRepository: AuthRepository? = null
     private var bukuRepository: BukuRepository? = null
     private var favoriteRepository: FavoriteRepository? = null
     private var profileRepository: ProfileRepository? = null
+    private var readerPreferencesManager: ReaderPreferencesManager? = null
     private var database: BiblioDatabase? = null
 
     private val apiClient by lazy {
@@ -86,6 +88,12 @@ object AppModule {
     fun provideReadingProgressRepository(context: Context): ReadingProgressRepository {
         val db = provideDatabase(context) // pakai ini, bukan AppDatabase.getInstance()
         return ReadingProgressRepository(db.readingProgressDao(), provideProgressApi(), db.profileDao())
+    }
+
+    fun provideReaderPreferencesManager(context: Context): ReaderPreferencesManager {
+        return readerPreferencesManager ?: synchronized(this) {
+            readerPreferencesManager ?: ReaderPreferencesManager(context.applicationContext).also { readerPreferencesManager = it }
+        }
     }
 
     private fun provideAuthApi(): AuthApi {

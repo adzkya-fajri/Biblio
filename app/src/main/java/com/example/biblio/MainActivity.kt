@@ -38,6 +38,11 @@ private lateinit var auth: FirebaseAuth
 
 class MainActivity : FragmentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
+        // Hapus state fragment sebelum super.onCreate untuk mencegah crash saat restorasi
+        // (Readium fragments butuh Factory yang hanya ada di BookReaderScreen)
+        if (savedInstanceState != null) {
+            savedInstanceState.remove("android:support:fragments")
+        }
         super.onCreate(savedInstanceState)
 
         // Inisialisasi Firebase auth

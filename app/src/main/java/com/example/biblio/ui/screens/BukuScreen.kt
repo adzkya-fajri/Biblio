@@ -179,8 +179,8 @@ fun BukuScreen(
                                     .height(coverHeight)
                                     .width(coverWidth)
                                     .sharedElement(
-                                        sharedContentState = rememberSharedContentState(key = "cover-${book?.id}"),
-                                        animatedVisibilityScope = animatedContentScope,
+                                        rememberSharedContentState(key = "cover-${book?.id}"),
+                                        animatedContentScope,
                                         boundsTransform = { _, _ ->
                                             spring(
                                                 dampingRatio = Spring.DampingRatioLowBouncy,
@@ -209,8 +209,8 @@ fun BukuScreen(
                                 modifier = Modifier
                                     .padding(horizontal = 16.dp)
                                     .sharedBounds(
-                                        sharedContentState = rememberSharedContentState(key = "title-${book?.id}"),
-                                        animatedVisibilityScope = animatedContentScope,
+                                        rememberSharedContentState(key = "title-${book?.id}"),
+                                        animatedContentScope,
                                         boundsTransform = { _, _ ->
                                             spring(
                                                 dampingRatio = Spring.DampingRatioLowBouncy,
@@ -238,8 +238,8 @@ fun BukuScreen(
                                 modifier = Modifier
                                     .padding(horizontal = 16.dp)
                                     .sharedBounds(
-                                        sharedContentState = rememberSharedContentState(key = "author-${book?.id}"),
-                                        animatedVisibilityScope = animatedContentScope,
+                                        rememberSharedContentState(key = "author-${book?.id}"),
+                                        animatedContentScope,
                                         boundsTransform = { _, _ ->
                                             spring(
                                                 dampingRatio = Spring.DampingRatioLowBouncy,

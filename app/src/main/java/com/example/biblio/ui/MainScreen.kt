@@ -278,13 +278,24 @@ fun MainScreen(navController: NavController) {
         AnimatedVisibility(
             visible = showMiniPlayer && showBottomBar,
             enter = slideInVertically(
-                initialOffsetY = { it }
-            ) + fadeIn(),
+                initialOffsetY = { it },
+                animationSpec = tween(
+                    durationMillis = 300,
+                    easing = FastOutSlowInEasing,
+                    delayMillis = 500,
+                )
+            ) + fadeIn(
+                animationSpec = tween(
+                    durationMillis = 300,
+                    easing = FastOutSlowInEasing,
+                    delayMillis = 500,
+                )
+            ),
             exit = slideOutVertically(
                 targetOffsetY = { it },
                 animationSpec = tween(
                     durationMillis = 300,
-                    easing = FastOutSlowInEasing
+                    easing = FastOutSlowInEasing,
                 )
             ) + fadeOut(
                 animationSpec = tween(
@@ -318,15 +329,21 @@ fun MainScreen(navController: NavController) {
         AnimatedVisibility(
             visible = showBottomBar,
             enter = slideInVertically(
-                initialOffsetY = { it }
-            ) + fadeIn(),
-            exit = slideOutVertically(
-                targetOffsetY = { it },
+                initialOffsetY = { it },
                 animationSpec = tween(
                     durationMillis = 300,
-                    easing = FastOutSlowInEasing
+                    easing = FastOutSlowInEasing,
+                    delayMillis = 500,
                 )
-            ) + fadeOut(
+            ) + fadeIn(
+                animationSpec = tween(
+                    durationMillis = 300,
+                    easing = FastOutSlowInEasing,
+                    delayMillis = 500,
+                )
+            ),
+            exit = slideOutVertically(
+                targetOffsetY = { it },
                 animationSpec = tween(
                     durationMillis = 300,
                     easing = FastOutSlowInEasing

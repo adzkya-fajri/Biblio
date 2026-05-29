@@ -8,13 +8,14 @@ import com.example.biblio.data.model.Buku
 import com.example.biblio.data.repository.BukuRepository
 import com.example.biblio.data.repository.ProfileRepository
 import com.example.biblio.data.repository.ReadingProgressRepository
+import com.example.biblio.data.preferences.ReaderPreferencesManager
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.readium.adapter.pdfium.document.PdfiumDocumentFactory
+import org.readium.r2.navigator.epub.EpubPreferences
+import org.readium.r2.navigator.preferences.Theme
 import org.readium.r2.shared.ExperimentalReadiumApi
 import org.readium.r2.shared.publication.Locator
 import org.readium.r2.shared.publication.Publication
@@ -24,45 +25,56 @@ import org.readium.r2.shared.util.getOrElse
 import org.readium.r2.shared.util.http.DefaultHttpClient
 import org.readium.r2.streamer.PublicationOpener
 import org.readium.r2.streamer.parser.DefaultPublicationParser
-import org.readium.r2.streamer.parser.epub.EpubParser
 import java.io.File
 import java.net.URL
 
+enum class ReaderTheme {
+    LIGHT, DARK, SEPIA, AUTO
+}
+
 data class ReaderSettings(
-    val isDarkMode: Boolean = false,
-    val fontSize: Int = 16,
-    val lineSpacing: Float = 1.5f
-)
+    val theme: ReaderTheme = ReaderTheme.AUTO,
+    val fontSize: Double = 1.0, // 1.0 = 100%
+    val isSystemDark: Boolean = false
+) {
+    val resolvedTheme: ReaderTheme get() = 
+        if (theme == ReaderTheme.AUTO) {
+            if (isSystemDark) ReaderTheme.DARK else ReaderTheme.LIGHT
+        } else theme
+
+    val isDarkMode: Boolean get() = resolvedTheme == ReaderTheme.DARK
+}
 
 class BookReaderViewModel(
     application: Application,
     private val bukuRepository: BukuRepository,
     private val progressRepository: ReadingProgressRepository,
-    private val profileRepository: ProfileRepository
+    private val profileRepository: ProfileRepository,
+    private val readerPreferences: ReaderPreferencesManager
 ) : AndroidViewModel(application) {
-
 
     private var currentBookId: String? = null
     val currentLocator = MutableStateFlow<Locator?>(null)
 
     val readingProgress = MutableStateFlow<Pair<Int, Int>?>(null) // page to total
 
+    private var locatorObservationJob: kotlinx.coroutines.Job? = null
+
     @OptIn(ExperimentalReadiumApi::class)
     fun observeLocator(locatorFlow: StateFlow<Locator>) {
-        viewModelScope.launch {
+        locatorObservationJob?.cancel()
+        locatorObservationJob = viewModelScope.launch {
             locatorFlow.collect { locator ->
                 onLocatorChanged(locator)
             }
         }
     }
 
-    // Panggil ini saat locator berubah (dari listener)
     fun onLocatorChanged(locator: Locator) {
         val page = locator.locations.position ?: 0
         val total = publication.value?.readingOrder?.size ?: 1
         readingProgress.value = Pair(page, total)
 
-        // simpan ke Room
         currentBookId?.let { bookId ->
             viewModelScope.launch {
                 progressRepository.saveLocator(bookId, locator)
@@ -82,6 +94,19 @@ class BookReaderViewModel(
     private val _error = MutableStateFlow<String?>(null)
     val error: StateFlow<String?> = _error.asStateFlow()
 
+    init {
+        // Load persisted settings
+        combine(readerPreferences.theme, readerPreferences.fontSize) { theme, fontSize ->
+            Pair(theme, fontSize)
+        }.onEach { (theme, fontSize) ->
+            _settings.value = _settings.value.copy(theme = theme, fontSize = fontSize)
+        }.launchIn(viewModelScope)
+    }
+
+    fun updateSystemTheme(isDark: Boolean) {
+        _settings.value = _settings.value.copy(isSystemDark = isDark)
+    }
+
     private val httpClient = DefaultHttpClient()
     private val assetRetriever = AssetRetriever(application.contentResolver, httpClient)
     private val publicationOpener = PublicationOpener(
@@ -92,6 +117,7 @@ class BookReaderViewModel(
             pdfFactory = PdfiumDocumentFactory(application)
         )
     )
+
     fun loadBook(book: Buku, forceRefresh: Boolean = false) {
         currentBookId = book.id
         viewModelScope.launch {
@@ -100,7 +126,6 @@ class BookReaderViewModel(
 
             currentLocator.value = progressRepository.getLocator(book.id)
 
-            // 1. Cek apakah sudah ada di cache
             val cachedFile = getCachedFile(book.id)
             if (cachedFile != null && !forceRefresh) {
                 Log.d("ReaderVM", "Loading from cache: ${cachedFile.path}")
@@ -109,7 +134,6 @@ class BookReaderViewModel(
                 return@launch
             }
 
-            // 2. Jika tidak ada di cache, cek apakah user premium
             val user = profileRepository.getCachedProfile()
             val isSubscribed = user?.isSubscribed == true
 
@@ -119,7 +143,6 @@ class BookReaderViewModel(
                 return@launch
             }
 
-            // 3. Jika premium, download
             bukuRepository.downloadBook(book.id).fold(
                 onSuccess = { urlString ->
                     try {
@@ -162,12 +185,6 @@ class BookReaderViewModel(
         return null
     }
 
-    fun toggleDarkMode() {
-        _settings.value = _settings.value.copy(
-            isDarkMode = !_settings.value.isDarkMode
-        )
-    }
-
     private suspend fun downloadToCache(urlString: String, bookId: String): File {
         return withContext(Dispatchers.IO) {
             val url = URL(urlString)
@@ -175,32 +192,52 @@ class BookReaderViewModel(
             val cacheFile = File(getApplication<Application>().cacheDir, "$bookId.$ext")
 
             if (cacheFile.exists()) {
-                Log.d("ReaderVM", "Using cache: ${cacheFile.path}, size: ${cacheFile.length()}")
                 if (cacheFile.length() == 0L) {
-                    Log.d("ReaderVM", "Cache corrupted, re-downloading")
                     cacheFile.delete()
                 } else {
                     return@withContext cacheFile
                 }
             }
 
-            Log.d("ReaderVM", "Downloading: $urlString")
             url.openStream().use { input ->
                 cacheFile.outputStream().use { output ->
                     input.copyTo(output)
                 }
             }
-            Log.d("ReaderVM", "Downloaded: ${cacheFile.length()} bytes")
             cacheFile
         }
     }
 
-    fun updateFontSize(size: Int) {
-        _settings.value = _settings.value.copy(fontSize = size)
+    fun updateTheme(theme: ReaderTheme) {
+        viewModelScope.launch {
+            readerPreferences.setTheme(theme)
+        }
     }
 
-    fun updateLineSpacing(spacing: Float) {
-        _settings.value = _settings.value.copy(lineSpacing = spacing)
+    fun updateFontSize(size: Double) {
+        viewModelScope.launch {
+            readerPreferences.setFontSize(size)
+        }
+    }
+
+    fun toggleDarkMode() {
+        val currentResolved = settings.value.resolvedTheme
+        val nextTheme = if (currentResolved == ReaderTheme.DARK) ReaderTheme.LIGHT else ReaderTheme.DARK
+        updateTheme(nextTheme)
+    }
+
+    @OptIn(ExperimentalReadiumApi::class)
+    fun createEpubPreferences(isSystemDark: Boolean): EpubPreferences {
+        val readiumTheme = when (_settings.value.theme) {
+            ReaderTheme.LIGHT -> Theme.LIGHT
+            ReaderTheme.DARK -> Theme.DARK
+            ReaderTheme.SEPIA -> Theme.SEPIA
+            ReaderTheme.AUTO -> if (isSystemDark) Theme.DARK else Theme.LIGHT
+        }
+        return EpubPreferences(
+            theme = readiumTheme,
+            fontSize = _settings.value.fontSize
+        )
     }
 
     override fun onCleared() {
