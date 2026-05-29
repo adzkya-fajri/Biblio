@@ -24,6 +24,7 @@
 package com.example.biblio.data.remote.dto
 
 import com.squareup.moshi.Json
+import com.squareup.moshi.JsonClass
 import java.math.BigDecimal
 
 /**
@@ -51,6 +52,7 @@ import java.math.BigDecimal
  */
 
 
+@JsonClass(generateAdapter = true)
 data class Book (
 
     @Json(name = "id")

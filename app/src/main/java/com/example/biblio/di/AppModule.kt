@@ -9,11 +9,13 @@ import com.example.biblio.data.remote.apis.AuthApi
 import com.example.biblio.data.remote.apis.BooksApi
 import com.example.biblio.data.remote.apis.GenresApi
 import com.example.biblio.data.remote.apis.ProfileApi
+import com.example.biblio.data.remote.apis.ProgressApi
 import com.example.biblio.data.repository.AuthRepository
 import com.example.biblio.data.repository.BukuRepository
 import com.example.biblio.data.repository.ProfileRepository
 import com.example.biblio.data.remote.infrastructure.ApiClient
 import com.example.biblio.data.repository.FavoriteRepository
+import com.example.biblio.data.repository.ReadingProgressRepository
 
 object AppModule {
     private var authRepository: AuthRepository? = null
@@ -81,6 +83,11 @@ object AppModule {
         }
     }
 
+    fun provideReadingProgressRepository(context: Context): ReadingProgressRepository {
+        val db = provideDatabase(context) // pakai ini, bukan AppDatabase.getInstance()
+        return ReadingProgressRepository(db.readingProgressDao(), provideProgressApi(), db.profileDao())
+    }
+
     private fun provideAuthApi(): AuthApi {
         return apiClient.createService(AuthApi::class.java)
     }
@@ -95,5 +102,9 @@ object AppModule {
 
     private fun provideProfileApi(): ProfileApi {
         return apiClient.createService(ProfileApi::class.java)
+    }
+
+    private fun provideProgressApi(): ProgressApi {
+        return apiClient.createService(ProgressApi::class.java)
     }
 }

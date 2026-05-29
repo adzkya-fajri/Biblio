@@ -26,22 +26,23 @@ package com.example.biblio.data.remote.dto
 
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
+import java.util.UUID
 
 /**
  * 
  *
- * @param email 
- * @param password 
+ * @param bookId 
+ * @param lastPage 
  */
 
 @JsonClass(generateAdapter = true)
-data class Login (
+data class UpsertProgressRequest (
 
-    @Json(name = "email")
-    val email: String,
+    @Json(name = "book_id")
+    val bookId: UUID,
 
-    @Json(name = "password")
-    val password: String
+    @Json(name = "last_page")
+    val lastPage: Int
 
 ) {
 

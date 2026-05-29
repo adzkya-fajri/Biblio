@@ -9,7 +9,9 @@ import com.example.biblio.data.remote.dto.ApiMessageResponse
 import com.example.biblio.data.remote.dto.AvatarResponse
 import com.example.biblio.data.remote.dto.User
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
@@ -21,6 +23,8 @@ class ProfileRepository(
     private val tokenPreferences: TokenPreferences,
     private val profileDao: ProfileDao
 ) {
+    val profileFlow: Flow<User?> = profileDao.getProfileFlow().map { it?.toUser() }
+
     suspend fun getCachedProfile(): User? = withContext(Dispatchers.IO) {
         profileDao.getProfile()?.toUser()
     }

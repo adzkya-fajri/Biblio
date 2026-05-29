@@ -1,5 +1,6 @@
 import org.gradle.kotlin.dsl.implementation
 import java.util.Properties
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 val localProperties = Properties()
 localProperties.load(project.rootProject.file("local.properties").inputStream())
@@ -11,7 +12,12 @@ plugins {
     alias(libs.plugins.ksp)
     alias(libs.plugins.kotlin.serialization)
     id("com.google.gms.google-services")
-    id("kotlin-kapt")
+}
+
+kotlin {
+    compilerOptions {
+        jvmTarget.set(JvmTarget.JVM_17)
+    }
 }
 
 android {
@@ -56,11 +62,9 @@ android {
         }
     }
     compileOptions {
+        isCoreLibraryDesugaringEnabled = true
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
-    }
-    kotlinOptions {
-        jvmTarget = "17"
     }
 
     buildFeatures {
@@ -75,12 +79,14 @@ dependencies {
     implementation(libs.androidx.appcompat)
     implementation(libs.androidx.activity)
     implementation(libs.androidx.constraintlayout)
+    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.5")
 
     // Readium
     implementation("org.readium.kotlin-toolkit:readium-shared:3.2.0")
     implementation("org.readium.kotlin-toolkit:readium-streamer:3.2.0")
     implementation("org.readium.kotlin-toolkit:readium-navigator:3.2.0")
     implementation("org.readium.kotlin-toolkit:readium-opds:3.2.0")
+    implementation("org.readium.kotlin-toolkit:readium-adapter-pdfium:3.2.0")
     implementation("org.readium.kotlin-toolkit:readium-lcp:3.2.0")
 
     // API
@@ -92,7 +98,7 @@ dependencies {
     implementation("com.squareup.moshi:moshi-kotlin:1.15.2")
     implementation("com.squareup.okhttp3:logging-interceptor:4.12.0")
     implementation("com.squareup.retrofit2:converter-scalars:2.11.0")
-    kapt("com.squareup.moshi:moshi-kotlin-codegen:1.15.2")
+    ksp("com.squareup.moshi:moshi-kotlin-codegen:1.15.2")
 
     // ViewModel & Lifecycle
     val lifecycleVersion = "2.8.7"
@@ -153,10 +159,10 @@ dependencies {
     implementation("com.google.firebase:firebase-auth")
 
     // Room Database
-    val roomVersion = "2.6.1"
+    val roomVersion = "2.8.4"
     implementation("androidx.room:room-runtime:$roomVersion")
     implementation("androidx.room:room-ktx:$roomVersion")
-    kapt("androidx.room:room-compiler:$roomVersion")
+    ksp("androidx.room:room-compiler:$roomVersion")
 
     implementation("androidx.credentials:credentials:1.3.0")
     implementation("androidx.credentials:credentials-play-services-auth:1.3.0")

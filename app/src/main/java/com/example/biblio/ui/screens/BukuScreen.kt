@@ -89,7 +89,7 @@ fun BukuScreen(
     val book = currentBook ?: remember(bookId, bookDatabase) {
         bookDatabase?.sections
             ?.flatMap { it.books }
-            ?.find { it.id.toString() == bookId }
+            ?.find { it.id == bookId }
             ?.also { cachedBook = it }
             ?: cachedBook
     }
@@ -124,7 +124,7 @@ fun BukuScreen(
             indicator = {
                 Indicator(
                     modifier = Modifier.align(Alignment.TopCenter),
-                    isRefreshing = isLoading,
+                    isRefreshing = isRefreshing,
                     containerColor = colorResource(R.color.colorSecondary),
                     color = colorResource(R.color.colorOnSecondary),
                     state = refreshState
@@ -144,274 +144,258 @@ fun BukuScreen(
                         )
                     )
             ) {
-            // Loading overlay
-            if (bookDatabase == null && !isTimeout && cachedBook != null) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(Color.Black.copy(alpha = 0.3f)),
-                    contentAlignment = Alignment.Center
+                // Loading overlay
+                if (bookDatabase == null && !isTimeout && cachedBook != null) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(Color.Black.copy(alpha = 0.3f)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        CircularProgressIndicator(color = Color.White)
+                    }
+                }
+
+                LazyColumn(
+                    modifier = Modifier.fillMaxSize(),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    contentPadding = PaddingValues(bottom = bottomPadding, top = 10.dp)
                 ) {
-                    CircularProgressIndicator(color = Color.White)
-                }
-            }
-
-            LazyColumn(
-                modifier = Modifier.fillMaxSize(),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                contentPadding = PaddingValues(bottom = bottomPadding, top = 10.dp)
-            ) {
-                item {
-                    Row(modifier = Modifier.fillMaxWidth()) {
-                        IconButton(onClick = { navController.navigateUp() }) {
-                            Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+                    item {
+                        Row(modifier = Modifier.fillMaxWidth()) {
+                            IconButton(onClick = { navController.navigateUp() }) {
+                                Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+                            }
                         }
                     }
-                }
 
-                item { Spacer(modifier = Modifier.height(24.dp)) }
+                    item { Spacer(modifier = Modifier.height(24.dp)) }
 
-                item {
-                    with(sharedTransitionScope) {
-                        Card(
-                            modifier = Modifier
-                                .background(Color.Transparent)
-                                .height(coverHeight)
-                                .width(coverWidth)
-                                .sharedElement(
-                                    state = rememberSharedContentState(key = "cover-${book?.id}"),
-                                    animatedVisibilityScope = animatedContentScope,
-                                    boundsTransform = { _, _ ->
-                                        spring(
-                                            dampingRatio = Spring.DampingRatioLowBouncy,
-                                            stiffness = Spring.StiffnessMediumLow
-                                        )
-                                    }
-                                ),
-                            shape = RoundedCornerShape(8.dp),
-                            elevation = CardDefaults.cardElevation(3.dp)
-                        ) {
-                            AsyncImage(
-                                model = book?.cover,
-                                contentDescription = "Book Cover",
-                                contentScale = ContentScale.Crop,
-                                modifier = Modifier.fillMaxSize()
-                            )
-                        }
-                    }
-                }
-
-                item { Spacer(modifier = Modifier.height(24.dp)) }
-
-                item {
-                    with(sharedTransitionScope) {
-                        Text(
-                            modifier = Modifier
-                                .padding(horizontal = 16.dp)
-                                .sharedBounds(
-                                    sharedContentState = rememberSharedContentState(key = "title-${book?.id}"),
-                                    animatedVisibilityScope = animatedContentScope,
-                                    boundsTransform = { _, _ ->
-                                        spring(
-                                            dampingRatio = Spring.DampingRatioLowBouncy,
-                                            stiffness = Spring.StiffnessMediumLow
-                                        )
-                                    },
-                                    resizeMode = SharedTransitionScope.ResizeMode.ScaleToBounds()
+                    item {
+                        with(sharedTransitionScope) {
+                            Card(
+                                modifier = Modifier
+                                    .background(Color.Transparent)
+                                    .height(coverHeight)
+                                    .width(coverWidth)
+                                    .sharedElement(
+                                        sharedContentState = rememberSharedContentState(key = "cover-${book?.id}"),
+                                        animatedVisibilityScope = animatedContentScope,
+                                        boundsTransform = { _, _ ->
+                                            spring(
+                                                dampingRatio = Spring.DampingRatioLowBouncy,
+                                                stiffness = Spring.StiffnessMediumLow
+                                            )
+                                        }
+                                    ),
+                                shape = RoundedCornerShape(8.dp),
+                                elevation = CardDefaults.cardElevation(3.dp)
+                            ) {
+                                AsyncImage(
+                                    model = book?.cover,
+                                    contentDescription = "Book Cover",
+                                    contentScale = ContentScale.Crop,
+                                    modifier = Modifier.fillMaxSize()
                                 )
-                                .skipToLookaheadSize(),
-                            color = colorResource(id = R.color.colorOnBackground),
-                            text = book?.title ?: "",
-                            fontSize = 24.sp,
-                            fontFamily = fraunces,
-                            textAlign = TextAlign.Center
-                        )
-                    }
-                }
-
-                item { Spacer(modifier = Modifier.height(8.dp)) }
-
-                item {
-                    with(sharedTransitionScope) {
-                        Text(
-                            text = book?.author ?: "",
-                            modifier = Modifier
-                                .padding(horizontal = 16.dp)
-                                .sharedBounds(
-                                    sharedContentState = rememberSharedContentState(key = "author-${book?.id}"),
-                                    animatedVisibilityScope = animatedContentScope,
-                                    boundsTransform = { _, _ ->
-                                        spring(
-                                            dampingRatio = Spring.DampingRatioLowBouncy,
-                                            stiffness = Spring.StiffnessMediumLow
-                                        )
-                                    },
-                                    resizeMode = SharedTransitionScope.ResizeMode.ScaleToBounds()
-                                )
-                                .skipToLookaheadSize(),
-                            fontSize = 14.sp,
-                            fontFamily = ibmplexsans,
-                            color = Color.Gray,
-                            textAlign = TextAlign.Center
-                        )
-                    }
-                }
-
-                item {
-                    Text(
-                        text = "ISBN ${book?.isbn ?: "-"}",
-                        fontFamily = ibmplexmono,
-                        fontSize = 14.sp,
-                        color = Color.Gray
-                    )
-                }
-
-                item { Spacer(modifier = Modifier.height(24.dp)) }
-
-                item {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceEvenly
-                    ) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Icon(
-                                painter = painterResource(R.drawable.star_24px),
-                                contentDescription = null,
-                                tint = colorResource(R.color.colorPrimaryVariant),
-                                modifier = Modifier.size(24.dp)
-                            )
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Column {
-                                Text("Ulasan", fontSize = 12.sp, color = Color.Gray, fontFamily = ibmplexsans, lineHeight = 1.25.em)
-                                Text("4.5", color = colorResource(id = R.color.colorOnBackground), fontSize = 14.sp, fontFamily = ibmplexsans, fontWeight = FontWeight.Bold)
-                            }
-                        }
-
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Icon(
-                                painter = painterResource(R.drawable.book_24px),
-                                contentDescription = null,
-                                tint = colorResource(R.color.colorPrimaryVariant),
-                                modifier = Modifier.size(24.dp)
-                            )
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Column {
-                                Text("Halaman", fontSize = 12.sp, color = Color.Gray, fontFamily = ibmplexsans, lineHeight = 1.25.em)
-                                Text(book?.page.toString() ?: "-" , color = colorResource(id = R.color.colorOnBackground), fontSize = 14.sp, fontFamily = ibmplexsans, fontWeight = FontWeight.Bold)
-                            }
-                        }
-
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Icon(
-                                painter = painterResource(R.drawable.timer_24px),
-                                contentDescription = null,
-                                tint = colorResource(R.color.colorPrimaryVariant),
-                                modifier = Modifier.size(24.dp)
-                            )
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Column {
-                                Text("Durasi", fontSize = 12.sp, color = Color.Gray, fontFamily = ibmplexsans, lineHeight = 1.25.em)
-                                Text("5j 30m*", color = colorResource(id = R.color.colorOnBackground), fontSize = 14.sp, fontFamily = ibmplexsans, fontWeight = FontWeight.Bold)
                             }
                         }
                     }
-                }
 
-                item { Spacer(modifier = Modifier.height(24.dp)) }
+                    item { Spacer(modifier = Modifier.height(24.dp)) }
 
-                item {
-                    Text(
-                        color = colorResource(id = R.color.colorOnBackground),
-                        text = book?.description ?: "-",
-                        fontSize = 14.sp,
-                        lineHeight = 1.5.em,
-                        fontFamily = ibmplexsans,
-                        textAlign = TextAlign.Start,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 16.dp)
-                    )
-                }
-
-                item { Spacer(modifier = Modifier.height(24.dp)) }
-
-                item {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 16.dp),
-                        verticalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        Button(
-                            onClick = {
-                                if (isSubscribed) {
-                                    book?.let {
-                                        val bookJson = Json.encodeToString(it)
-                                        val encoded = URLEncoder.encode(bookJson, "UTF-8")
-                                        navController.navigate("reader/$encoded")
-                                    }
-                                } else {
-                                    // TODO: Navigate to Premium/Subscription Screen
-                                }
-                            },
-                            modifier = Modifier.fillMaxWidth()
-                        ) {
-                            Icon(
-                                painter = if (isSubscribed) painterResource(R.drawable.book_5_24px) else painterResource(R.drawable.ic_biblio_plus),
-                                contentDescription = null,
-                                modifier = Modifier.size(20.dp)
-                            )
-                            Spacer(modifier = Modifier.width(8.dp))
+                    item {
+                        with(sharedTransitionScope) {
                             Text(
-                                text = if (isSubscribed) {
-                                    "Baca Sekarang"
-                                } else {
-                                    val price = book?.price
-                                    if (price == null || price <= BigDecimal.ZERO) {
-                                        "Baca Sekarang"
+                                modifier = Modifier
+                                    .padding(horizontal = 16.dp)
+                                    .sharedBounds(
+                                        sharedContentState = rememberSharedContentState(key = "title-${book?.id}"),
+                                        animatedVisibilityScope = animatedContentScope,
+                                        boundsTransform = { _, _ ->
+                                            spring(
+                                                dampingRatio = Spring.DampingRatioLowBouncy,
+                                                stiffness = Spring.StiffnessMediumLow
+                                            )
+                                        },
+                                        resizeMode = SharedTransitionScope.ResizeMode.ScaleToBounds()
+                                    )
+                                    .skipToLookaheadSize(),
+                                color = colorResource(id = R.color.colorOnBackground),
+                                text = book?.title ?: "",
+                                fontSize = 24.sp,
+                                fontFamily = fraunces,
+                                textAlign = TextAlign.Center
+                            )
+                        }
+                    }
+
+                    item { Spacer(modifier = Modifier.height(8.dp)) }
+
+                    item {
+                        with(sharedTransitionScope) {
+                            Text(
+                                text = book?.author ?: "",
+                                modifier = Modifier
+                                    .padding(horizontal = 16.dp)
+                                    .sharedBounds(
+                                        sharedContentState = rememberSharedContentState(key = "author-${book?.id}"),
+                                        animatedVisibilityScope = animatedContentScope,
+                                        boundsTransform = { _, _ ->
+                                            spring(
+                                                dampingRatio = Spring.DampingRatioLowBouncy,
+                                                stiffness = Spring.StiffnessMediumLow
+                                            )
+                                        },
+                                        resizeMode = SharedTransitionScope.ResizeMode.ScaleToBounds()
+                                    )
+                                    .skipToLookaheadSize(),
+                                fontSize = 14.sp,
+                                fontFamily = ibmplexsans,
+                                color = Color.Gray,
+                                textAlign = TextAlign.Center
+                            )
+                        }
+                    }
+
+                    item {
+                        Text(
+                            text = "ISBN ${book?.isbn ?: "-"}",
+                            fontFamily = ibmplexmono,
+                            fontSize = 14.sp,
+                            color = Color.Gray
+                        )
+                    }
+
+                    item { Spacer(modifier = Modifier.height(24.dp)) }
+
+                    item {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceEvenly
+                        ) {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Icon(
+                                    painter = painterResource(R.drawable.star_24px),
+                                    contentDescription = null,
+                                    tint = colorResource(R.color.colorPrimaryVariant),
+                                    modifier = Modifier.size(24.dp)
+                                )
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Column {
+                                    Text("Ulasan", fontSize = 12.sp, color = Color.Gray, fontFamily = ibmplexsans, lineHeight = 1.25.em)
+                                    Text("4.5", color = colorResource(id = R.color.colorOnBackground), fontSize = 14.sp, fontFamily = ibmplexsans, fontWeight = FontWeight.Bold)
+                                }
+                            }
+
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Icon(
+                                    painter = painterResource(R.drawable.book_24px),
+                                    contentDescription = null,
+                                    tint = colorResource(R.color.colorPrimaryVariant),
+                                    modifier = Modifier.size(24.dp)
+                                )
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Column {
+                                    Text("Halaman", fontSize = 12.sp, color = Color.Gray, fontFamily = ibmplexsans, lineHeight = 1.25.em)
+                                    Text(book?.page.toString() ?: "-" , color = colorResource(id = R.color.colorOnBackground), fontSize = 14.sp, fontFamily = ibmplexsans, fontWeight = FontWeight.Bold)
+                                }
+                            }
+
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Icon(
+                                    painter = painterResource(R.drawable.timer_24px),
+                                    contentDescription = null,
+                                    tint = colorResource(R.color.colorPrimaryVariant),
+                                    modifier = Modifier.size(24.dp)
+                                )
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Column {
+                                    Text("Durasi", fontSize = 12.sp, color = Color.Gray, fontFamily = ibmplexsans, lineHeight = 1.25.em)
+                                    Text("5j 30m*", color = colorResource(id = R.color.colorOnBackground), fontSize = 14.sp, fontFamily = ibmplexsans, fontWeight = FontWeight.Bold)
+                                }
+                            }
+                        }
+                    }
+
+                    item { Spacer(modifier = Modifier.height(24.dp)) }
+
+                    item {
+                        Text(
+                            color = colorResource(id = R.color.colorOnBackground),
+                            text = book?.description ?: "-",
+                            fontSize = 14.sp,
+                            lineHeight = 1.5.em,
+                            fontFamily = ibmplexsans,
+                            textAlign = TextAlign.Start,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 16.dp)
+                        )
+                    }
+
+                    item { Spacer(modifier = Modifier.height(24.dp)) }
+
+                    item {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 16.dp),
+                            verticalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            Button(
+                                onClick = {
+                                    if (isSubscribed) {
+                                        book?.let {
+                                            val bookJson = Json.encodeToString(it)
+                                            val encoded = URLEncoder.encode(bookJson, "UTF-8")
+                                            navController.navigate("reader/$encoded")
+                                        }
                                     } else {
-                                        val formatter = NumberFormat.getCurrencyInstance(Locale("id", "ID"))
-                                        "Beli ${formatter.format(price)}"
+                                        // TODO: Navigate to Premium/Subscription Screen
                                     }
                                 },
-                                fontFamily = ibmplexsans
-                            )
-                        }
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
+                                Icon(
+                                    painter = if (isSubscribed) painterResource(R.drawable.book_5_24px) else painterResource(R.drawable.ic_biblio_plus),
+                                    contentDescription = null,
+                                    modifier = Modifier.size(20.dp)
+                                )
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Text(
+                                    text = if (isSubscribed) {
+                                        "Baca Sekarang"
+                                    } else {
+                                        val price = book?.price
+                                        if (price == null || price <= BigDecimal.ZERO) {
+                                            "Baca Sekarang"
+                                        } else {
+                                            val formatter = NumberFormat.getCurrencyInstance(Locale("id", "ID"))
+                                            "Beli ${formatter.format(price)}"
+                                        }
+                                    },
+                                    fontFamily = ibmplexsans
+                                )
+                            }
 
-                        OutlinedButton(
-                            onClick = { book?.let { viewModel.toggleFavorite(it.id) } },
-                            modifier = Modifier.fillMaxWidth()
-                        ) {
-                            Icon(
-                                painter = painterResource(R.drawable.newsstand_24px),
-                                contentDescription = null,
-                                modifier = Modifier.size(20.dp)
-                            )
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Text("Tambahkan ke Koleksi", fontFamily = ibmplexsans)
+                            OutlinedButton(
+                                onClick = { book?.let { viewModel.toggleFavorite(it.id) } },
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
+                                Icon(
+                                    painter = painterResource(R.drawable.newsstand_24px),
+                                    contentDescription = null,
+                                    modifier = Modifier.size(20.dp)
+                                )
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Text("Tambahkan ke Koleksi", fontFamily = ibmplexsans)
+                            }
                         }
                     }
+
+                    item { Spacer(modifier = Modifier.height(16.dp)) }
                 }
-
-                item { Spacer(modifier = Modifier.height(16.dp)) }
-
-//                val sections = bookDatabase?.sections ?: emptyList()
-//                if (sections.isNotEmpty()) {
-//                    items(
-//                        items = sections,
-//                        key = { section -> section.id }
-//                    ) { section ->
-//                        SectionItem(
-//                            section = section,
-//                            navController = navController,
-//                            viewModel = viewModel,
-//                            sharedTransitionScope = sharedTransitionScope,
-//                            animatedContentScope = animatedContentScope
-//                        )
-//                    }
-//                }
             }
         }
     }
-}
 }

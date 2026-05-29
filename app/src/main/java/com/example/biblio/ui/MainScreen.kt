@@ -1,5 +1,7 @@
 package com.example.biblio.ui
 
+import android.util.Log
+import androidx.activity.compose.LocalActivity
 import androidx.compose.animation.AnimatedContentTransitionScope
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ContentTransform
@@ -21,6 +23,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -32,6 +35,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.fragment.app.FragmentActivity
+import androidx.lifecycle.ViewModelStoreOwner
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavType
@@ -41,6 +46,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.example.biblio.data.repository.BukuRepository
+import com.example.biblio.data.repository.BukuRepository.Companion.toBuku
 import com.example.biblio.data.repository.FavoriteRepository
 import com.example.biblio.ibmplexsans
 import com.example.biblio.ui.components.BottomBar
@@ -49,8 +55,13 @@ import com.example.biblio.ui.screens.*
 import com.example.biblio.viewmodel.BukuViewModel
 import com.example.biblio.viewmodel.BukuViewModelFactory
 import com.example.biblio.viewmodel.ProfileViewModel
+import com.example.biblio.viewmodel.ProfileState
+import com.example.biblio.viewmodel.ReadingProgressViewModel
+import com.example.biblio.viewmodel.ReadingProgressViewModelFactory
 import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
+import kotlinx.serialization.json.Json
+import java.net.URLEncoder
 
 // MainScreen.kt - REFACTORED
 @OptIn(ExperimentalSharedTransitionApi::class)
@@ -59,6 +70,15 @@ fun MainScreen(navController: NavController) {
     val innerNavController = rememberNavController()
     val context = LocalContext.current
     val tabs = listOf("beranda", "cari", "koleksi")
+
+    val activity = LocalActivity.current!!
+    val readingStateViewModel: ReadingProgressViewModel = viewModel(
+        viewModelStoreOwner = activity as ViewModelStoreOwner,
+        factory = ReadingProgressViewModelFactory(activity.application)
+    )
+
+    val currentBook by readingStateViewModel.currentBook.collectAsState()
+    val currentPage by readingStateViewModel.currentPage.collectAsState()
 
     val sharedViewModel: BukuViewModel = viewModel(
         factory = BukuViewModel.Factory
@@ -76,15 +96,13 @@ fun MainScreen(navController: NavController) {
     val isReaderScreen = currentRoute == "reader/{bookJson}"
 
     val showBottomBar = !isReaderScreen
-    val showMiniPlayer = remember(currentRoute) {
-        mutableStateOf(!isReaderScreen)
-    }
+    val showMiniPlayer = currentBook != null && showBottomBar
 
-    val bottomPadding by remember {
+    val bottomPadding by remember(showMiniPlayer, showBottomBar) {
         derivedStateOf {
             when {
                 !showBottomBar -> 0.dp
-                showMiniPlayer.value -> 200.dp
+                showMiniPlayer -> 200.dp
                 else -> 108.dp
             }
         }
@@ -97,6 +115,32 @@ fun MainScreen(navController: NavController) {
         if (user == null) {
             navController.navigate("welcome") {
                 popUpTo("main") { inclusive = true }
+            }
+        }
+    }
+
+    // Sync progress dari remote jika lokal kosong
+    val profileState by profileViewModel.profileState.collectAsState()
+    val readingRepo = remember { com.example.biblio.di.AppModule.provideReadingProgressRepository(context) }
+    LaunchedEffect(profileState) {
+        val state = profileState
+        if (state is ProfileState.Success) {
+            val remoteProgressList = state.user.progress
+            if (!remoteProgressList.isNullOrEmpty() && currentBook == null) {
+                val latestRemote = remoteProgressList.first()
+                val bookDto = latestRemote.book
+                if (bookDto != null) {
+                    val remoteBookId = bookDto.id ?: ""
+                    val latestLocal = readingRepo.getLatestActiveLocalProgress()
+
+                    if (latestLocal != null && latestLocal.bookId == remoteBookId) {
+                         val buku = bookDto.toBuku()
+                         readingStateViewModel.updateProgress(buku, latestRemote.lastPage ?: 0)
+                    } else if (latestLocal == null) {
+                        val buku = bookDto.toBuku()
+                        readingStateViewModel.updateProgress(buku, latestRemote.lastPage ?: 0)
+                    }
+                }
             }
         }
     }
@@ -184,7 +228,31 @@ fun MainScreen(navController: NavController) {
                     route = "reader/{bookJson}",
                     arguments = listOf(
                         navArgument("bookJson") { type = NavType.StringType }
-                    )
+                    ),
+                    enterTransition = {
+                        slideInVertically(
+                            initialOffsetY = { it },
+                            animationSpec = tween(400, easing = FastOutSlowInEasing)
+                        ) + fadeIn(tween(300))
+                    },
+                    exitTransition = {
+                        slideOutVertically(
+                            targetOffsetY = { it },
+                            animationSpec = tween(300, easing = FastOutLinearInEasing)
+                        ) + fadeOut(tween(200))
+                    },
+                    popEnterTransition = {
+                        slideInVertically(
+                            initialOffsetY = { it },
+                            animationSpec = tween(400, easing = FastOutSlowInEasing)
+                        ) + fadeIn(tween(300))
+                    },
+                    popExitTransition = {
+                        slideOutVertically(
+                            targetOffsetY = { it },
+                            animationSpec = tween(300, easing = FastOutLinearInEasing)
+                        ) + fadeOut(tween(200))
+                    }
                 ) { backStackEntry ->
                     val bookJson = backStackEntry.arguments?.getString("bookJson") ?: ""
                     BookReaderScreen(
@@ -198,14 +266,17 @@ fun MainScreen(navController: NavController) {
                     ProfileScreen(
                         navController = navController,
                         profileViewModel = profileViewModel
-                    ) 
+                    )
                 }
             }
         }
 
+        // Di MainScreen
+        Log.d("ReadingBar", "currentBook=$currentBook, currentPage=$currentPage, showMiniPlayer=$showMiniPlayer")
+
         // Mini player - only show on main tabs
         AnimatedVisibility(
-            visible = showMiniPlayer.value && showBottomBar,
+            visible = showMiniPlayer && showBottomBar,
             enter = slideInVertically(
                 initialOffsetY = { it }
             ) + fadeIn(),
@@ -228,14 +299,18 @@ fun MainScreen(navController: NavController) {
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
                     .padding(bottom = 80.dp),
-                bookTitle = "Laskar Pelangi",
-                bookAuthor = "Andrea Hirata",
-                bookCover = "https://picsum.photos/43",
-                colorContainer = Color(0xFF6B4226),
-                currentPage = 265,
-                totalPages = 350,
-                onContinueReading = { },
-                onDismiss = { showMiniPlayer.value = false },
+                bookTitle = currentBook?.title ?: "",
+                bookAuthor = currentBook?.author ?: "",
+                bookCover = currentBook?.cover ?: "",
+                currentPage = currentPage,
+                totalPages = currentBook?.page ?: 0,
+                onContinueReading = {
+                    currentBook?.let { book ->
+                        val bookJson = URLEncoder.encode(Json.encodeToString(book), "UTF-8")
+                        innerNavController.navigate("reader/$bookJson")
+                    }
+                },
+                onDismiss = { readingStateViewModel.hideBar() },
             )
         }
 

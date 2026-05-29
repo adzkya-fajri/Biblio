@@ -26,6 +26,7 @@ package com.example.biblio.models
 import com.example.biblio.data.remote.dto.User
 
 import com.squareup.moshi.Json
+import com.squareup.moshi.JsonClass
 
 /**
  *
@@ -35,6 +36,7 @@ import com.squareup.moshi.Json
  */
 
 
+@JsonClass(generateAdapter = true)
 data class UserCredentialsResponse (
 
     @Json(name = "user")

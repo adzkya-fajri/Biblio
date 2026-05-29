@@ -1,9 +1,10 @@
 package com.example.biblio.ui.screens
 
+import android.app.Application
+import android.util.Log
+import androidx.activity.compose.LocalActivity
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
@@ -14,34 +15,49 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
+import androidx.compose.ui.viewinterop.AndroidView
+import androidx.fragment.app.FragmentActivity
+import androidx.lifecycle.ViewModelStoreOwner
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.biblio.R
 import com.example.biblio.data.model.Buku
-import com.example.biblio.data.repository.BookContentRepository
-import com.example.biblio.fraunces
-import com.example.biblio.ibmplexsans
-import com.example.biblio.ui.components.ReaderSettingsSheet
-import com.example.biblio.ui.components.TableOfContentsSheet
+import com.example.biblio.di.AppModule
+import com.example.biblio.ui.components.ImmersiveMode
 import com.example.biblio.viewmodel.BookReaderViewModel
 import com.example.biblio.viewmodel.BookReaderViewModelFactory
+import com.example.biblio.viewmodel.ReadingProgressViewModel
 import kotlinx.serialization.json.Json
+import org.readium.adapter.pdfium.navigator.PdfiumEngineProvider
+import org.readium.r2.navigator.epub.EpubNavigatorFactory
+import org.readium.r2.navigator.epub.EpubNavigatorFragment
+import org.readium.r2.navigator.pdf.PdfNavigatorFactory
+import org.readium.r2.navigator.pdf.PdfNavigatorFragment
+import org.readium.r2.shared.ExperimentalReadiumApi
+import org.readium.r2.shared.publication.Locator
+import org.readium.r2.shared.publication.Publication
+import org.readium.r2.shared.util.AbsoluteUrl
 import java.net.URLDecoder
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalReadiumApi::class)
 @Composable
 fun BookReaderScreen(
     bookJson: String,
     navController: NavController,
-    viewModel: BookReaderViewModel = viewModel(
+) {
+    ImmersiveMode()
+
+    val context = LocalContext.current
+    val viewModel: BookReaderViewModel = viewModel(
         factory = BookReaderViewModelFactory(
-            BookContentRepository(LocalContext.current)
+            context.applicationContext as Application,
+            AppModule.provideBukuRepository(context),
+            AppModule.provideReadingProgressRepository(context),
+            AppModule.provideProfileRepository(context)
         )
     )
-) {
+
     // Decode dan parse book object
     val book = remember(bookJson) {
         try {
@@ -52,66 +68,97 @@ fun BookReaderScreen(
         }
     }
 
+    val activity = LocalActivity.current!!
+    val fm = (activity as FragmentActivity).supportFragmentManager
+    val readingStateViewModel: ReadingProgressViewModel = viewModel(
+        viewModelStoreOwner = activity as ViewModelStoreOwner
+    )
+    val progress by viewModel.readingProgress.collectAsState()
+    val savedLocator by viewModel.currentLocator.collectAsState()
+
+    // Update progress ke shared ViewModel segera setelah locator tersedia atau saat book berubah
+    LaunchedEffect(savedLocator, book) {
+        val b = book ?: return@LaunchedEffect
+        val page = savedLocator?.locations?.position ?: 0
+        readingStateViewModel.updateProgress(b, page)
+    }
+
+    // Efek saat keluar dari reader: sinkronisasi ke remote DAN bersihkan fragment
+    DisposableEffect(Unit) {
+        onDispose {
+            readingStateViewModel.syncWithRemote()
+            
+            // Bersihkan fragment dari Activity's FragmentManager agar tidak crash saat recreation
+            val fragment = fm.findFragmentByTag("navigator")
+            if (fragment != null) {
+                try {
+                    fm.beginTransaction().remove(fragment).commitAllowingStateLoss()
+                } catch (e: Exception) {
+                    Log.e("BookReader", "Error removing fragment", e)
+                }
+            }
+        }
+    }
+
     LaunchedEffect(book) {
         book?.let { viewModel.loadBook(it) }
     }
 
-    val bookContent by viewModel.bookContent.collectAsState()
-    val currentChapterIndex by viewModel.currentChapterIndex.collectAsState()
+// Di BookReaderScreen - LaunchedEffect progress
+    LaunchedEffect(progress, book) {
+        Log.d("ReadingBar", "progress=$progress, book=$book")
+        progress?.let { (page, _) ->
+            book?.let {
+                Log.d("ReadingBar", "updateProgress page=$page, bookPage=${it.page}")
+                readingStateViewModel.updateProgress(it, page)
+            }
+        }
+    }
+
+    val publication by viewModel.publication.collectAsState()
     val settings by viewModel.settings.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
-
-    var showTableOfContents by remember { mutableStateOf(false) }
-    var showSettings by remember { mutableStateOf(false) }
+    val error by viewModel.error.collectAsState()
 
     val backgroundColor = if (settings.isDarkMode) Color(0xFF1A1A1A) else colorResource(R.color.colorBackground)
     val textColor = if (settings.isDarkMode) Color(0xFFE0E0E0) else colorResource(R.color.colorOnBackground)
 
     Scaffold(
         containerColor = backgroundColor,
-        bottomBar = {
-            BottomAppBar(
-                containerColor = if (settings.isDarkMode) Color(0xFF2A2A2A) else colorResource(R.color.colorBackground),
-            ) {
-                // BACK BUTTON
-                IconButton(onClick = { navController.navigateUp() }) {
-                    Icon(
-                        painter = painterResource(R.drawable.arrow_back_24px),
-                        contentDescription = "Kembali",
-                        tint = textColor
-                    )
-                }
-
-                // DARK MODE TOGGLE
-                IconButton(onClick = { viewModel.toggleDarkMode() }) {
-                    Icon(
-                        imageVector = if (settings.isDarkMode) Icons.Default.LightMode else Icons.Default.DarkMode,
-                        contentDescription = "Toggle Dark Mode",
-                        tint = textColor
-                    )
-                }
-
-                // TABLE OF CONTENTS
-                IconButton(onClick = { showTableOfContents = true }) {
-                    Icon(
-                        imageVector = Icons.Default.List,
-                        contentDescription = "Daftar Isi",
-                        tint = textColor
-                    )
-                }
-
-                Spacer(Modifier.weight(1f))
-
-                // MORE OPTIONS
-                IconButton(onClick = { showSettings = true }) {
-                    Icon(
-                        imageVector = Icons.Default.MoreVert,
-                        contentDescription = "Pengaturan",
-                        tint = textColor
-                    )
-                }
-            }
-        }
+//        bottomBar = {
+//            BottomAppBar(
+//                containerColor = if (settings.isDarkMode) Color(0xFF2A2A2A) else colorResource(R.color.colorBackground),
+//            ) {
+//                // BACK BUTTON
+//                IconButton(onClick = { navController.navigateUp() }) {
+//                    Icon(
+//                        painter = painterResource(R.drawable.arrow_back_24px),
+//                        contentDescription = "Kembali",
+//                        tint = textColor
+//                    )
+//                }
+//
+//                // DARK MODE TOGGLE
+//                IconButton(onClick = { viewModel.toggleDarkMode() }) {
+//                    Icon(
+//                        imageVector = if (settings.isDarkMode) Icons.Default.LightMode else Icons.Default.DarkMode,
+//                        contentDescription = "Toggle Dark Mode",
+//                        tint = textColor
+//                    )
+//                }
+//
+//                Spacer(Modifier.weight(1f))
+//
+//                // MORE OPTIONS
+//                IconButton(onClick = { /* showSettings = true */ }) {
+//                    Icon(
+//                        imageVector = Icons.Default.MoreVert,
+//                        contentDescription = "Pengaturan",
+//                        tint = textColor
+//                    )
+//                }
+//            }
+//        }
     ) { padding ->
         Box(
             modifier = Modifier
@@ -122,102 +169,76 @@ fun BookReaderScreen(
                 CircularProgressIndicator(
                     modifier = Modifier.align(Alignment.Center)
                 )
+            } else if (error != null) {
+                Column(
+                    modifier = Modifier.align(Alignment.Center),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text(text = error!!, color = Color.Red)
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Button(onClick = { book?.let { viewModel.loadBook(it) } }) {
+                        Text("Coba Lagi")
+                    }
+                }
             } else {
-                bookContent?.let { content ->
-                    val currentChapter = content.chapters.getOrNull(currentChapterIndex)
-                    currentChapter?.let { chapter ->
-                        Column(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .verticalScroll(rememberScrollState())
-                                .padding(horizontal = 24.dp, vertical = 16.dp)
-                        ) {
-                            // Page indicator
-                            Text(
-                                text = "${currentChapterIndex + 1} dari ${content.chapters.size} • Chapter ${chapter.id}: ${chapter.title}",
-                                fontSize = 12.sp,
-                                fontFamily = ibmplexsans,
-                                color = textColor.copy(alpha = 0.6f),
-                                textAlign = TextAlign.Center,
-                                modifier = Modifier.fillMaxWidth()
-                            )
+                publication?.let { pub ->
+                    val savedLocator by viewModel.currentLocator.collectAsState()
 
-                            Spacer(modifier = Modifier.height(24.dp))
+                    AndroidView(
+                        factory = { ctx ->
+                            val frameLayout = android.widget.FrameLayout(ctx).apply {
+                                id = R.id.reader_fragment_container
+                            }
+                            val activity = ctx as? FragmentActivity
+                            val fm = activity?.supportFragmentManager
+                            val isPdf = pub.conformsTo(Publication.Profile.PDF)
 
-                            // Chapter Title
-                            Text(
-                                text = chapter.title,
-                                fontSize = (settings.fontSize + 4).sp,
-                                fontFamily = fraunces,
-                                fontWeight = androidx.compose.ui.text.font.FontWeight.Bold,
-                                color = textColor,
-                                lineHeight = (settings.fontSize + 4).sp * settings.lineSpacing
-                            )
+                            val listener = object : EpubNavigatorFragment.Listener {
+                                override fun onExternalLinkActivated(url: AbsoluteUrl) {}
+                            }
 
-                            Spacer(modifier = Modifier.height(16.dp))
+                            val fragment = if (isPdf) {
+                                val factory = PdfNavigatorFactory(pub, PdfiumEngineProvider())
+                                val fragmentFactory = factory.createFragmentFactory(
+                                    initialLocator = savedLocator,
+                                    listener = null
+                                )
+                                fm?.fragmentFactory = fragmentFactory
+                                fragmentFactory.instantiate(ctx.classLoader, PdfNavigatorFragment::class.java.name)
+                            } else {
+                                val factory = EpubNavigatorFactory(pub)
+                                val fragmentFactory = factory.createFragmentFactory(
+                                    initialLocator = savedLocator,
+                                    listener = listener
+                                )
+                                fm?.fragmentFactory = fragmentFactory
+                                fragmentFactory.instantiate(ctx.classLoader, EpubNavigatorFragment::class.java.name)
+                            }
 
-                            // Chapter Content
-                            Text(
-                                text = chapter.content,
-                                fontSize = settings.fontSize.sp,
-                                fontFamily = ibmplexsans,
-                                color = textColor,
-                                lineHeight = settings.fontSize.sp * settings.lineSpacing,
-                                textAlign = TextAlign.Justify
-                            )
+                            // Delay commit sampai view attach ke window
+                            frameLayout.post {
+                                fragment?.let {
+                                    val currentActivity = frameLayout.context as? FragmentActivity
+                                    if (currentActivity != null && !currentActivity.isFinishing && !currentActivity.isDestroyed) {
+                                        fm?.beginTransaction()
+                                            ?.replace(frameLayout.id, it, "navigator")
+                                            ?.commitAllowingStateLoss()
 
-                            Spacer(modifier = Modifier.height(48.dp))
-
-                            // Navigation buttons
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.SpaceBetween
-                            ) {
-                                Button(
-                                    onClick = { viewModel.previousChapter() },
-                                    enabled = currentChapterIndex > 0
-                                ) {
-                                    Text("← Previous", fontFamily = ibmplexsans)
-                                }
-
-                                Button(
-                                    onClick = { viewModel.nextChapter() },
-                                    enabled = currentChapterIndex < content.chapters.size - 1
-                                ) {
-                                    Text("Next →", fontFamily = ibmplexsans)
+                                        (it as? org.readium.r2.navigator.Navigator)?.let { nav ->
+                                            viewModel.observeLocator(nav.currentLocator)
+                                        }
+                                    }
                                 }
                             }
 
-                            Spacer(modifier = Modifier.height(48.dp))
-                        }
-                    }
+                            frameLayout
+                        },
+                        modifier = Modifier
+                            .padding(bottom = 12.dp)
+                            .fillMaxSize()
+                    )
                 }
             }
         }
-    }
-    // Table of Contents Bottom Sheet
-    if (showTableOfContents) {
-        TableOfContentsSheet(
-            chapters = bookContent?.chapters ?: emptyList(),
-            currentChapterIndex = currentChapterIndex,
-            onChapterSelected = { index ->
-                viewModel.goToChapter(index)
-                showTableOfContents = false
-            },
-            onDismiss = { showTableOfContents = false },
-            isDarkMode = settings.isDarkMode
-        )
-    }
-
-    // Settings Bottom Sheet
-    if (showSettings) {
-        ReaderSettingsSheet(
-            fontSize = settings.fontSize,
-            lineSpacing = settings.lineSpacing,
-            onFontSizeChange = { viewModel.updateFontSize(it) },
-            onLineSpacingChange = { viewModel.updateLineSpacing(it) },
-            onDismiss = { showSettings = false },
-            isDarkMode = settings.isDarkMode
-        )
     }
 }

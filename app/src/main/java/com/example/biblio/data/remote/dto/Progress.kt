@@ -23,25 +23,27 @@
 
 package com.example.biblio.data.remote.dto
 
-
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
 
 /**
  * 
  *
- * @param email 
- * @param password 
+ * @param lastPage 
+ * @param book 
  */
 
 @JsonClass(generateAdapter = true)
-data class Login (
+data class Progress (
 
-    @Json(name = "email")
-    val email: String,
+    @Json(name = "last_page")
+    val lastPage: kotlin.Int? = null,
 
-    @Json(name = "password")
-    val password: String
+    @Json(name = "updated_at")
+    val updatedAt: java.time.OffsetDateTime? = null,
+
+    @Json(name = "book")
+    val book: Book? = null
 
 ) {
 

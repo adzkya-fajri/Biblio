@@ -25,6 +25,7 @@ package com.example.biblio.data.remote.dto
 
 
 import com.squareup.moshi.Json
+import com.squareup.moshi.JsonClass
 
 /**
  * 
@@ -33,7 +34,7 @@ import com.squareup.moshi.Json
  * @param displayName
  */
 
-
+@JsonClass(generateAdapter = true)
 data class FirebaseLogin (
 
     @Json(name = "token")

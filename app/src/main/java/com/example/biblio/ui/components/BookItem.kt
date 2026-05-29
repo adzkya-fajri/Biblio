@@ -75,7 +75,7 @@ fun BookItem(
                         .background(Color.Transparent)
                         .fillMaxSize()
                         .sharedElement(
-                            state = rememberSharedContentState(key = "cover-${book.id}"),
+                            sharedContentState = rememberSharedContentState(key = "cover-${book.id}"),
                             animatedVisibilityScope = animatedContentScope,
                             boundsTransform = { _, _ ->
                                 spring(

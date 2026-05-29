@@ -44,54 +44,44 @@ import java.time.OffsetDateTime
  * @param isSubscribed 
  */
 
-
+@JsonClass(generateAdapter = true)
 data class User (
 
     @Json(name = "id")
-    val id: Int? = null,
+    val id: kotlin.Int? = null,
 
     @Json(name = "name")
-    val name: String? = null,
+    val name: kotlin.String? = null,
 
     @Json(name = "email")
-    val email: String? = null,
+    val email: kotlin.String? = null,
 
     @Json(name = "email_verified_at")
-    val emailVerifiedAt: OffsetDateTime? = null,
+    val emailVerifiedAt: java.time.OffsetDateTime? = null,
 
     @Json(name = "created_at")
-    val createdAt: OffsetDateTime? = null,
+    val createdAt: java.time.OffsetDateTime? = null,
 
     @Json(name = "updated_at")
-    val updatedAt: OffsetDateTime? = null,
-
-    @Json(name = "role")
-    val role: Role? = null,
+    val updatedAt: java.time.OffsetDateTime? = null,
 
     @Json(name = "avatar_url")
-    val avatarUrl: String? = null,
+    val avatarUrl: kotlin.String? = null,
 
     @Json(name = "subscribed_until")
-    val subscribedUntil: OffsetDateTime? = null,
+    val subscribedUntil: java.time.OffsetDateTime? = null,
 
     @Json(name = "avatar")
-    val avatar: String? = null,
+    val avatar: kotlin.String? = null,
 
     @Json(name = "is_subscribed")
-    val isSubscribed: Boolean? = null
+    val isSubscribed: kotlin.Boolean? = null,
+
+    @Json(name = "progress")
+    val progress: kotlin.collections.List<Progress>? = null
 
 ) {
 
-    /**
-     * 
-     *
-     * Values: user,admin
-     */
-    @JsonClass(generateAdapter = false)
-    enum class Role(val value: String) {
-        @Json(name = "user") user("user"),
-        @Json(name = "admin") admin("admin");
-    }
 
 }
 

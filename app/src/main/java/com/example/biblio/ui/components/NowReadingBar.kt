@@ -1,6 +1,8 @@
 package com.example.biblio.ui.components
 
+import android.graphics.drawable.BitmapDrawable
 import android.util.Log
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
@@ -51,23 +53,35 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
+import androidx.palette.graphics.Palette
 import coil.compose.AsyncImage
 import com.example.biblio.ibmplexsans
 import kotlinx.coroutines.delay
+
+import coil.request.ImageRequest
+import androidx.compose.ui.platform.LocalContext
+import androidx.core.graphics.drawable.toBitmap
 
 @Composable
 fun NowReadingBar(
     bookTitle: String,
     bookAuthor: String,
     bookCover: String,
-    colorContainer: Color = colorResource(R.color.colorBackgroundVariant),
+    initialColor: Color = colorResource(R.color.colorBackgroundVariant),
     currentPage: Int,
     totalPages: Int,
     onContinueReading: () -> Unit,
     onDismiss: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val contentColor = if (colorContainer.luminance() > 0.5f) Color.Black else Color.White
+    val context = LocalContext.current
+    var dynamicBackgroundColor by remember(bookCover) { mutableStateOf(initialColor) }
+    val animatedBackgroundColor by animateColorAsState(
+        targetValue = dynamicBackgroundColor,
+        animationSpec = tween(500)
+    )
+
+    val contentColor = if (animatedBackgroundColor.luminance() > 0.5f) Color.Black else Color.White
 
     var isClosing by remember { mutableStateOf(false) }
     val scale by animateFloatAsState(
@@ -102,8 +116,9 @@ fun NowReadingBar(
             elevation = CardDefaults.cardElevation(2.dp),
             shape = RoundedCornerShape(8.dp, 8.dp, 8.dp, 8.dp), // rounded top
             colors = CardDefaults.cardColors(
-                containerColor = colorContainer
-            )
+                containerColor = animatedBackgroundColor
+            ),
+            onClick = onContinueReading
         ) {
             Column {
                 Row(
@@ -111,14 +126,36 @@ fun NowReadingBar(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     AsyncImage(
-                        model = bookCover,
+                        model = ImageRequest.Builder(context)
+                            .data(bookCover)
+                            .allowHardware(false) // Penting untuk Palette API
+                            .crossfade(true)
+                            .build(),
                         contentDescription = null,
                         placeholder = painterResource(R.drawable.book_2),
                         contentScale = ContentScale.Crop,
                         modifier = Modifier
                             .width(36.dp)
                             .height(48.dp)
-                            .clip(RoundedCornerShape(4.dp))
+                            .clip(RoundedCornerShape(4.dp)),
+                        onSuccess = { success ->
+                            val bitmap = success.result.drawable.toBitmap()
+                            Palette.from(bitmap).generate { palette ->
+                                // Cari swatch yang paling cocok untuk background
+                                val swatch = palette?.darkMutedSwatch
+                                    ?: palette?.mutedSwatch
+                                    ?: palette?.dominantSwatch
+                                    ?: palette?.vibrantSwatch
+
+                                swatch?.let {
+                                    dynamicBackgroundColor = Color(it.rgb)
+                                    Log.d("NowReadingBar", "Updated color from palette: ${it.rgb}")
+                                }
+                            }
+                        },
+                        onError = { error ->
+                            Log.e("NowReadingBar", "Failed to load cover: ${error.result.throwable.message}")
+                        }
                     )
 
                     Spacer(modifier = Modifier.width(12.dp))
@@ -157,7 +194,10 @@ fun NowReadingBar(
                     }
                 }
                 LinearProgressIndicator(
-                    progress = { currentPage.toFloat() / totalPages.toFloat() },
+                    progress = {
+                        if (totalPages > 0) currentPage.toFloat() / totalPages.toFloat()
+                        else 0f
+                    },
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(3.dp),

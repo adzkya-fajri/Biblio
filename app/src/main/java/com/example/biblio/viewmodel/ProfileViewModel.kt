@@ -10,6 +10,8 @@ import com.example.biblio.di.AppModule
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import java.io.File
 
@@ -43,6 +45,12 @@ class ProfileViewModel(private val repository: ProfileRepository) : ViewModel() 
     val avatarTimestamp: StateFlow<Long> = _avatarTimestamp.asStateFlow()
 
     init {
+        repository.profileFlow.onEach { user ->
+            if (user != null) {
+                _profileState.value = ProfileState.Success(user)
+            }
+        }.launchIn(viewModelScope)
+
         fetchProfile()
     }
 

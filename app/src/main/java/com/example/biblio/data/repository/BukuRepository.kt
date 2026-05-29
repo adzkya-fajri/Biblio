@@ -148,17 +148,37 @@ class BukuRepository(
         }
     }
 
-    private fun Book.toBuku(): Buku {
-        return Buku(
-            id = this.id ?: "",
-            isbn = this.isbn ?: "-",
-            title = this.title ?: "Untitled",
-            description = this.description ?: "Description",
-            page = this.pageCount ?: 0,
-            author = this.author ?: "Unknown Author",
-            cover = (this.coverLg ?: this.coverMd ?: this.coverSm ?: this.coverUrl).toAbsoluteUrl(),
-            price = this.price
-        )
+    suspend fun downloadBook(bookId: String): Result<String> = withContext(Dispatchers.IO) {
+        try {
+            tokenPreferences.token.firstOrNull()?.let {
+                AppModule.setToken(it)
+            }
+            val uuid = UUID.fromString(bookId)
+            val response = booksApi.downloadBook(uuid).execute()
+            if (response.isSuccessful) {
+                val url = response.body()?.url ?: return@withContext Result.failure(Exception("URL download tidak ditemukan"))
+                Result.success(url)
+            } else {
+                Result.failure(Exception("Gagal mendapatkan URL download: ${response.code()}"))
+            }
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    companion object {
+        fun Book.toBuku(): Buku {
+            return Buku(
+                id = this.id ?: "",
+                isbn = this.isbn ?: "-",
+                title = this.title ?: "Untitled",
+                description = this.description ?: "Description",
+                page = this.pageCount ?: 0,
+                author = this.author ?: "Unknown Author",
+                cover = (this.coverLg ?: this.coverMd ?: this.coverSm ?: this.coverUrl).toAbsoluteUrl(),
+                price = this.price
+            )
+        }
     }
 
     fun loadBooksFromAssets(): BukuDatabase {
